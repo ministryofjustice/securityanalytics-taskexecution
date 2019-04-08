@@ -1,0 +1,19 @@
+[
+  {
+    "name": "${task_name}",
+    "image": "${docker_image}:latest",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/${task_name}",
+        "awslogs-region": "${aws_region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "dockerLabels": {
+      "image_hash": "${docker_hash}",
+      "sources_hash": "${sources_hash}",
+      "results_bucket": "${results_bucket}"
+    }
+  }
+]
