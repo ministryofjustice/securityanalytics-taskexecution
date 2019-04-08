@@ -12,9 +12,9 @@ data "template_file" "task" {
     docker_image = "${aws_ecr_repository.repo.repository_url}"
 
     // hash tags make sure we update the task on a change
-    docker_hash = "${var.docker_hash}"
+    docker_hash    = "${var.docker_hash}"
     results_bucket = "${var.results_bucket_arn}"
-    sources_hash = "${var.sources_hash}"
+    sources_hash   = "${var.sources_hash}"
   }
 }
 

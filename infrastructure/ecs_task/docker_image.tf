@@ -11,9 +11,9 @@ resource "aws_ecr_repository" "repo" {
 resource "null_resource" "build_image" {
   triggers {
     // hash tags make sure we redeploy on a change
-    docker_hash = "${var.docker_hash}"
+    docker_hash    = "${var.docker_hash}"
     results_bucket = "${var.results_bucket_arn}"
-    script_hash = "${var.sources_hash}"
+    script_hash    = "${var.sources_hash}"
   }
 
   provisioner "local-exec" {
