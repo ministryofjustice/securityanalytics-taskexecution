@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     actions = [
       "sqs:DeleteMessage",
       "sqs:ReceiveMessage",
-      "sqs:GetQueueAttributes"
+      "sqs:GetQueueAttributes",
     ]
 
     resources = ["${aws_sqs_queue.trigger_queue.arn}"]
