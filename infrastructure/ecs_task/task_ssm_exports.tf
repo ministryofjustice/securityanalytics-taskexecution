@@ -15,7 +15,7 @@ resource "aws_ssm_parameter" "security_group" {
   name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/security_group/id"
   description = "The task's security group"
   type        = "String"
-  value       = "${aws_s.task_trigger_role.arn}"
+  value       = "${aws_security_group.task_group.arn}"
   overwrite   = "true"
 
   tags {
