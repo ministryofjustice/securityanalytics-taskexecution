@@ -50,7 +50,6 @@ resource "aws_ssm_parameter" "task_queue_consumer" {
   }
 }
 
-
 resource "aws_ssm_parameter" "results_processor" {
   name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/results/role/arn"
   description = "The results processor role"
