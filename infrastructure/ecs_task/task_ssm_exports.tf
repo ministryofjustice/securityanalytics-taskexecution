@@ -36,3 +36,30 @@ resource "aws_ssm_parameter" "image_id" {
     workspace = "${terraform.workspace}"
   }
 }
+
+resource "aws_ssm_parameter" "task_queue_consumer" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/queue_consumer/role/arn"
+  description = "The task queue consumer role"
+  type        = "String"
+  value       = "${aws_iam_role.task_trigger_role.arn}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
+
+resource "aws_ssm_parameter" "results_processor" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/results/role/arn"
+  description = "The results processor role"
+  type        = "String"
+  value       = "${aws_iam_role.results_parse_role.arn}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
