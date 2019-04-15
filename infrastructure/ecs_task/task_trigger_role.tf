@@ -43,6 +43,17 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     resources = ["${aws_sqs_queue.trigger_queue.arn}"]
   }
 
+  # So the task trigger can pull task requests off of the task queue
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "ssm:GetParameters",
+    ]
+
+    resources = ["*"]
+  }
+
   # To allow the trigger to pass the execution role to ecs to assume when running the task
   statement {
     effect  = "Allow"
