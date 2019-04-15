@@ -1,0 +1,38 @@
+resource "aws_ssm_parameter" "public_subnets" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/task_trigger/role/arn"
+  description = "The task trigger role for this task"
+  type        = "StringList"
+  value       = "${aws_iam_role.task_trigger_role.arn}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
+resource "aws_ssm_parameter" "security_group" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/security_group/id"
+  description = "The task's security group"
+  type        = "String"
+  value       = "${aws_s.task_trigger_role.arn}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
+resource "aws_ssm_parameter" "image_id" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/image/id"
+  description = "The task images id"
+  type        = "String"
+  value       = "${aws_ecs_task_definition.task.family}:${aws_ecs_task_definition.task.revision}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
