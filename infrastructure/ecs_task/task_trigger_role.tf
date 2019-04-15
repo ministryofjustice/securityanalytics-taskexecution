@@ -30,22 +30,34 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     resources = ["${aws_ecs_task_definition.task.arn}"]
   }
 
+  # So the task trigger can pull task requests off of the task queue
   statement {
     effect = "Allow"
 
     actions = [
       "sqs:DeleteMessage",
       "sqs:ReceiveMessage",
-      "sqs:GetQueueAttributes",
-      "sqs:SendMessage",
+      "sqs:GetQueueAttributes"
     ]
 
     resources = ["${aws_sqs_queue.trigger_queue.arn}"]
   }
 
+  # To allow the trigger to pass the execution role to ecs to assume when running the task
   statement {
     effect  = "Allow"
     actions = ["iam:PassRole"]
+
+    resources = [
+      "${data.aws_iam_role.ecs_exec_role.arn}",
+      "${aws_iam_role.task_role.arn}",
+    ]
+  }
+
+  # To allow the trigger to pass the execution role to ecs to assume when running the task
+  statement {
+    effect  = "Allow"
+    actions = ["s3:"]
 
     resources = [
       "${data.aws_iam_role.ecs_exec_role.arn}",
@@ -66,6 +78,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     resources = ["*"]
   }
 
+  # Only needed when running ecs inside a private vpc
   statement {
     effect = "Allow"
 

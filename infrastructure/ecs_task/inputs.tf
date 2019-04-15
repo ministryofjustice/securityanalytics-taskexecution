@@ -33,3 +33,7 @@ variable "sources_hash" {
 variable "docker_hash" {
   type = "string"
 }
+
+variable "vpc_id" {
+  type = "string"
+}
