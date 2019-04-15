@@ -54,17 +54,6 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     ]
   }
 
-  # To allow the trigger to pass the execution role to ecs to assume when running the task
-  statement {
-    effect  = "Allow"
-    actions = ["s3:"]
-
-    resources = [
-      "${data.aws_iam_role.ecs_exec_role.arn}",
-      "${aws_iam_role.task_role.arn}",
-    ]
-  }
-
   statement {
     effect = "Allow"
 
