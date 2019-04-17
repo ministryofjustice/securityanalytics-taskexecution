@@ -20,6 +20,19 @@ data "aws_iam_policy_document" "output_bucket_access" {
       "${var.results_bucket_arn}/${var.task_name}/*",
     ]
   }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    # TODO reduce this scope
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_role" "task_role" {
