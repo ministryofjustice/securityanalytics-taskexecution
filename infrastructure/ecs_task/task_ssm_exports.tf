@@ -75,3 +75,16 @@ resource "aws_ssm_parameter" "task_queue" {
     workspace = "${terraform.workspace}"
   }
 }
+
+resource "aws_ssm_parameter" "results_notifier" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/results/arn"
+  description = "The results broadcaster"
+  type        = "String"
+  value       = "${aws_sns_topic.task_results.arn}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}

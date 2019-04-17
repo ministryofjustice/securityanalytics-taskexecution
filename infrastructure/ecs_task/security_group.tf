@@ -14,4 +14,9 @@ resource "aws_security_group" "task_group" {
     protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
 }
