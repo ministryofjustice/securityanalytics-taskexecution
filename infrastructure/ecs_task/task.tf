@@ -7,6 +7,8 @@ data "template_file" "task" {
   template = "${file("${path.module}/service.json")}"
 
   vars {
+    stage        = "${terraform.workspace}"
+    app_name     = "${var.app_name}"
     task_name    = "${var.task_name}"
     aws_region   = "${var.aws_region}"
     docker_image = "${aws_ecr_repository.repo.repository_url}"
@@ -16,6 +18,10 @@ data "template_file" "task" {
     results_bucket = "${var.results_bucket_arn}"
     sources_hash   = "${var.sources_hash}"
   }
+}
+
+resource "aws_cloudwatch_log_group" "task_logs" {
+  name = "/aws/ecs/${terraform.workspace}/${var.app_name}/${var.task_name}"
 }
 
 resource "aws_ecs_task_definition" "task" {
