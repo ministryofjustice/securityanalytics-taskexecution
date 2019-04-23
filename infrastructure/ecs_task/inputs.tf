@@ -45,6 +45,6 @@ variable "subscribe_elastic_to_notifier" {
 }
 
 variable "ssm_source_stage" {
-  type = "string"
+  type        = "string"
   description = "When deploying infrastructure for integration tests the source of ssm parameters for e.g. the congnito pool need to come from dev, not from the stage with the same name."
 }
