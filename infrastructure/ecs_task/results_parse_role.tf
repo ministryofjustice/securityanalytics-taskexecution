@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "results_parse_policy" {
     ]
 
     # TODO reduce this scope
-    resources = ["*"]
+    resources = ["arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:/aws/lambda/*:*:*'"]
   }
 
   statement {

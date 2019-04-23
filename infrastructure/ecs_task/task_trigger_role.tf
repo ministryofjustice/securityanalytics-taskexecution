@@ -76,8 +76,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
       "logs:PutLogEvents",
     ]
 
-    # TODO reduce this scope
-    resources = ["*"]
+    resources = ["arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:/aws/lambda/*:*:*'"]
   }
 
   # Only needed when running ecs inside a private vpc
