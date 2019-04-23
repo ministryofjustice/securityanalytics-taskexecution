@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     resources = ["${aws_sqs_queue.trigger_queue.arn}"]
   }
 
-  # So the task trigger can pull task requests off of the task queue
+  # So the task trigger can find the locations of e.g. queues
   statement {
     effect = "Allow"
 
@@ -51,7 +51,9 @@ data "aws_iam_policy_document" "task_trigger_policy" {
       "ssm:GetParameters",
     ]
 
-    resources = ["*"]
+    resources = [
+      "arn:aws:ssm:${var.aws_region}:${var.account_id}:parameter/${var.app_name}/${terraform.workspace}/*"
+    ]
   }
 
   # To allow the trigger to pass the execution role to ecs to assume when running the task

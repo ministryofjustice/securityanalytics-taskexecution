@@ -6,6 +6,8 @@ variable "aws_region" {
   type = "string"
 }
 
+variable "account_id" {}
+
 variable "task_name" {
   type = "string"
 }
@@ -35,5 +37,9 @@ variable "docker_hash" {
 }
 
 variable "vpc_id" {
+  type = "string"
+}
+
+variable "subscribe_elastic_to_notifier" {
   type = "string"
 }

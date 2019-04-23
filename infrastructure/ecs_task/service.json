@@ -5,7 +5,7 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/ecs/${stage}/${app_name}/${task_name}",
+        "awslogs-group": "/aws/ecs/${stage}/${app_name}/${task_name}",
         "awslogs-region": "${aws_region}",
         "awslogs-stream-prefix": "ecs"
       }

@@ -33,6 +33,19 @@ data "aws_iam_policy_document" "results_parse_policy" {
     ]
   }
 
+  # So the task trigger can find the locations of e.g. queues
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "ssm:GetParameters",
+    ]
+
+    resources = [
+      "arn:aws:ssm:${var.aws_region}:${var.account_id}:parameter/${var.app_name}/${terraform.workspace}/*"
+    ]
+  }
+
   statement {
     effect    = "Allow"
     actions   = ["sns:Publish"]
