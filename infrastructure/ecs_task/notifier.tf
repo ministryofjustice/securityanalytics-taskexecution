@@ -3,7 +3,7 @@ resource "aws_sns_topic" "task_results" {
 }
 
 data "aws_ssm_parameter" "elastic_injestion_queue" {
-  name = "/${terraform.workspace}/${var.app_name}/analytics/elastic/injest_queue/arn"
+  name = "/${terraform.workspace}/${var.ssm_source_stage}/analytics/elastic/injest_queue/arn"
 }
 
 resource "aws_sns_topic_subscription" "user_updates_sqs_target" {
