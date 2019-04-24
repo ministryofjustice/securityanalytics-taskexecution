@@ -28,8 +28,8 @@ data "aws_iam_policy_document" "results_parse_policy" {
     actions = ["s3:GetObject"]
 
     resources = [
-      "${var.results_bucket_arn}/${terraform.workspace}/${var.task_name}",
-      "${var.results_bucket_arn}/${terraform.workspace}/${var.task_name}/*",
+      "${var.results_bucket_arn}/${var.ssm_source_stage}/${var.task_name}",
+      "${var.results_bucket_arn}/${var.ssm_source_stage}/${var.task_name}/*",
     ]
   }
 

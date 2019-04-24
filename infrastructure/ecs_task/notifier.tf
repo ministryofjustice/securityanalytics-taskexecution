@@ -3,14 +3,6 @@ resource "aws_sns_topic" "task_results" {
   display_name = "SNS topic to distribute ${var.task_name} task results"
 }
 
-data "aws_ssm_parameter" "elastic_injestion_queue_arn" {
-  name = "/${var.app_name}/${var.ssm_source_stage}/analytics/elastic/injest_queue/arn"
-}
-
-data "aws_ssm_parameter" "elastic_injestion_queue_id" {
-  name = "/${var.app_name}/${var.ssm_source_stage}/analytics/elastic/injest_queue/id"
-}
-
 data "aws_iam_policy_document" "notify_topic_policy" {
   statement {
     actions = [
