@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 eval "$(aws ecr get-login --profile=$5 --no-include-email --region $4)"
 docker build -t $1 $3
