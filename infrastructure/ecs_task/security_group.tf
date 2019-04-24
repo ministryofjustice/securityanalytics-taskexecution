@@ -1,7 +1,3 @@
-data "aws_ssm_parameter" "vpc_id" {
-  name = "/${var.app_name}/${var.ssm_source_stage}/vpc/id"
-}
-
 # TODO - probably want to be able to inject a security group for each task
 resource "aws_security_group" "task_group" {
   name        = "${terraform.workspace}-${var.app_name}-${var.task_name}"
