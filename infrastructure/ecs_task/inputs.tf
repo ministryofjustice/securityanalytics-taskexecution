@@ -32,10 +32,6 @@ variable "docker_hash" {
   type = "string"
 }
 
-variable "vpc_id" {
-  type = "string"
-}
-
 variable "subscribe_elastic_to_notifier" {
   type        = "string"
   description = "If this task produces elastic compatible output, this can be used to connect the task directly to elastic."
