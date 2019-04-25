@@ -44,9 +44,3 @@ module "ecs_cluster" {
   source   = "ecs_cluster"
   app_name = "${var.app_name}"
 }
-
-module "results_bucket" {
-  source              = "results_bucket"
-  app_name            = "${var.app_name}"
-  transient_workspace = "${var.transient_workspace}"
-}

@@ -16,8 +16,8 @@ data "aws_iam_policy_document" "output_bucket_access" {
     actions = ["s3:PutObject"]
 
     resources = [
-      "${var.results_bucket_arn}/${var.ssm_source_stage}/${var.task_name}",
-      "${var.results_bucket_arn}/${var.ssm_source_stage}/${var.task_name}/*",
+      "${aws_s3_bucket.results.arn}",
+      "${aws_s3_bucket.results.arn}/*",
     ]
   }
 
