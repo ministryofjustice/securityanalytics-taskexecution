@@ -16,10 +16,6 @@ variable "docker_dir" {
   type = "string"
 }
 
-variable "results_bucket_arn" {
-  type = "string"
-}
-
 variable "cpu" {
   type = "string"
 }

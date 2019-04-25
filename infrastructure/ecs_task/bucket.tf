@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "results" {
-  bucket = "${terraform.workspace}-${var.app_name}-results"
+  bucket = "${terraform.workspace}-${var.app_name}-${var.task_name}-results"
   acl    = "private"
 
   # only allow terraform to delete a non empty bucket if this is a transient workspace
@@ -21,6 +21,7 @@ resource "aws_s3_bucket" "results" {
     enabled = false
   }
   tags {
+    task_name = "${var.task_name}"
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
