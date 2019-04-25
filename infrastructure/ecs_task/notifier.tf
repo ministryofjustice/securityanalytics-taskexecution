@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "notify_topic_policy" {
   }
 }
 
-resource "aws_sqs_queue_policy" "test" {
+resource "aws_sqs_queue_policy" "queue_policy" {
   queue_url = "${data.aws_ssm_parameter.elastic_injestion_queue_id.value}"
   policy    = "${data.aws_iam_policy_document.notify_topic_policy.json}"
 }
