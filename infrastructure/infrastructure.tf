@@ -30,6 +30,13 @@ variable "transient_workspace" {
   default = false
 }
 
+# default to scanme.nmap.org if you haven't defined a list of hosts elsewhere
+# (we use scan_hosts.auto.tfvars to ensure it isn't checked in to github)
+variable "scan_hosts" {
+  type    = "list"
+  default = ["scanme.nmap.org"]
+}
+
 provider "aws" {
   region              = "${var.aws_region}"
   profile             = "${var.app_name}"
@@ -43,4 +50,10 @@ provider "aws" {
 module "ecs_cluster" {
   source   = "ecs_cluster"
   app_name = "${var.app_name}"
+}
+
+module "scheduler" {
+  source     = "scheduler"
+  app_name   = "${var.app_name}"
+  scan_hosts = "${var.scan_hosts}"
 }
