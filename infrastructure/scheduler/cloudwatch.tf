@@ -1,6 +1,6 @@
 resource "random_integer" "time_delay" {
-  min   = 39
-  max   = 41
+  min   = 0
+  max   = 59
   seed  = "${var.scan_hosts[count.index]}"
   count = "${length(var.scan_hosts)}"
 }
