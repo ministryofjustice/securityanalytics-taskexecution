@@ -51,9 +51,3 @@ module "ecs_cluster" {
   source   = "ecs_cluster"
   app_name = "${var.app_name}"
 }
-
-module "scheduler" {
-  source     = "scheduler"
-  app_name   = "${var.app_name}"
-  scan_hosts = "${var.scan_hosts}"
-}
