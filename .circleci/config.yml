@@ -35,6 +35,7 @@ jobs:
             cd infrastructure
             terraform init
             terraform workspace new $SSM_SOURCE_STAGE || terraform workspace select $SSM_SOURCE_STAGE
+            terraform workspace list
             echo checking formatting
             terraform fmt -check=true
             echo making the plan
