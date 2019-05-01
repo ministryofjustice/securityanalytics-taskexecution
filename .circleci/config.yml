@@ -9,7 +9,7 @@ executors:
   terraform:
     docker:
       - image: duckpodger/python3-node-aws-terraform
-    working_directory: ~/project/infrastructure
+   
 
 jobs:
   setup:
