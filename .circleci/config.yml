@@ -9,7 +9,6 @@ executors:
   terraform:
     docker:
       - image: duckpodger/python3-node-aws-terraform
-   
 
 jobs:
   setup:
@@ -46,10 +45,10 @@ jobs:
             - "*"
 
       - store_artifacts:
-          path: terraform.plan
+          path: infrastructure/terraform.plan
 
       - store_artifacts:
-          path: plan.file
+          path: infrastructure/plan.file
 
       - save_cache:
           key: git-v3-{{ .Branch }}-{{ .Revision }}
@@ -68,7 +67,9 @@ jobs:
           at: .
       - run:
           name: terraform apply
-          command: terraform apply plan.file
+          command: |
+            cd infrastructure
+            terraform apply plan.file
 
 workflows:
   version: 2
