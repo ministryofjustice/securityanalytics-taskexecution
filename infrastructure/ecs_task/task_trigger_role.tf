@@ -93,18 +93,6 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     # TODO reduce this scope
     resources = ["*"]
   }
-
-  # # need this otherwise the Lambda isn't enabled
-  # statement {
-  #   effect = "Allow"
-
-  #   actions = [
-  #     "lambda:InvokeFunction",
-  #   ]
-
-  #   # TODO reduce this scope
-  #   resources = ["*"]
-  # }
 }
 
 resource "aws_iam_policy" "task_trigger_policy" {
