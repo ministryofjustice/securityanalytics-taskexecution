@@ -31,6 +31,8 @@ jobs:
       - run:
           name: terraform
           command: |
+            . .circleci/env.sh
+            cd infrastructure
             terraform init
             terraform workspace new $SSM_SOURCE_STAGE || terraform workspace select $SSM_SOURCE_STAGE
             echo checking formatting
