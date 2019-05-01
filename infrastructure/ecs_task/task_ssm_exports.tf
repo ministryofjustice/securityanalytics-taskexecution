@@ -65,9 +65,22 @@ resource "aws_ssm_parameter" "results_processor" {
 
 resource "aws_ssm_parameter" "task_queue" {
   name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/task_queue/arn"
-  description = "The job queue"
+  description = "The job queue ARN"
   type        = "String"
   value       = "${aws_sqs_queue.trigger_queue.arn}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
+resource "aws_ssm_parameter" "task_queue_url" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/task_queue/url"
+  description = "The job queue URL"
+  type        = "String"
+  value       = "${aws_sqs_queue.trigger_queue.id}"
   overwrite   = "true"
 
   tags {

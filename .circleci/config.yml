@@ -9,7 +9,7 @@ executors:
   terraform:
     docker:
       - image: duckpodger/python3-node-aws-terraform
-    working_directory: ~/project/infrastructure
+   
 
 jobs:
   setup:
@@ -31,12 +31,14 @@ jobs:
       - run:
           name: terraform
           command: |
+            . .circleci/env.sh
+            cd infrastructure
             terraform init
-            terraform workspace new dev || terraform workspace select dev
+            terraform workspace new $SSM_SOURCE_STAGE || terraform workspace select $SSM_SOURCE_STAGE
             echo checking formatting
             terraform fmt -check=true
             echo making the plan
-            terraform plan -var account_id=$ACCOUNT_ID -no-color -out=plan.file > terraform.plan
+            terraform plan -var ssm_source_stage=$SSM_SOURCE_STAGE -var account_id=$ACCOUNT_ID -no-color -out=plan.file > terraform.plan
 
       - persist_to_workspace:
           root: .
