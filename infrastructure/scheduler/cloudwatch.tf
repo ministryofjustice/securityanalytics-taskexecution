@@ -1,5 +1,5 @@
 locals {
-  max_rules     = 80
+  max_rules     = 15
   planned_count = "${min(local.max_rules,length(var.scan_hosts))}"
 }
 
@@ -19,7 +19,7 @@ resource "aws_cloudwatch_event_target" "task_scheduler" {
 
 resource "aws_cloudwatch_event_rule" "task_scheduler_sqs_rule" {
   count       = "${local.planned_count}"
-  name        = "nmap_task_${count.index}"
+  name        = "nmap_task_${terraform.workspace}_${count.index}"
   description = "Add hosts to the queue to run nmap"
 
   # build cron expression manually based on running each hour
