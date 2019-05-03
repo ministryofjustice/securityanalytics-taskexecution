@@ -36,8 +36,14 @@ resource "aws_sqs_queue_policy" "queue_policy" {
   policy    = "${data.aws_iam_policy_document.notify_topic_policy.json}"
 }
 
+locals {
+  #rename to is_integration_test
+
+  is_integration_test = "${terraform.workspace == var.ssm_source_stage ? (var.subscribe_elastic_to_notifier ? 1 : 0) : 0}"
+}
+
 resource "aws_sns_topic_subscription" "user_updates_sqs_target" {
-  count                = "${var.subscribe_elastic_to_notifier}"
+  count                = "${local.is_integration_test}"
   topic_arn            = "${aws_sns_topic.task_results.arn}"
   protocol             = "sqs"
   endpoint             = "${data.aws_ssm_parameter.elastic_ingestion_queue_arn.value}"
