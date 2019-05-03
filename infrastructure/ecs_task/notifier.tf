@@ -37,11 +37,11 @@ resource "aws_sqs_queue_policy" "queue_policy" {
 }
 
 locals {
-  is_integration_test = "${terraform.workspace == var.ssm_source_stage ? (var.subscribe_elastic_to_notifier ? 1 : 0) : 0}"
+  is_not_integration_test = "${terraform.workspace == var.ssm_source_stage ? (var.subscribe_elastic_to_notifier ? 1 : 0) : 0}"
 }
 
 resource "aws_sns_topic_subscription" "user_updates_sqs_target" {
-  count                = "${local.is_integration_test}"
+  count                = "${local.is_not_integration_test}"
   topic_arn            = "${aws_sns_topic.task_results.arn}"
   protocol             = "sqs"
   endpoint             = "${data.aws_ssm_parameter.elastic_ingestion_queue_arn.value}"
