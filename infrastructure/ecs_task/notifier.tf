@@ -37,7 +37,6 @@ resource "aws_sqs_queue_policy" "queue_policy" {
 }
 
 locals {
-  #rename to is_integration_test
 
   is_integration_test = "${terraform.workspace == var.ssm_source_stage ? (var.subscribe_elastic_to_notifier ? 1 : 0) : 0}"
 }
