@@ -10,6 +10,10 @@ output "task_queue_consumer" {
   value = "${aws_iam_role.task_trigger_role.arn}"
 }
 
+output "results_parser" {
+  value = "${aws_iam_role.results_parse_role.arn}"
+}
+
 output "task_queue_url" {
   value = "${aws_sqs_queue.trigger_queue.id}"
 }
