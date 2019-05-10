@@ -10,7 +10,8 @@ resource "aws_sns_topic" "task_results" {
   sqs_success_feedback_role_arn    = "${data.aws_iam_role.sns_logging.arn}"
   sqs_success_feedback_sample_rate = 5
 
-  kms_master_key_id = "aws/sns"
+  # TODO enable sns encryption
+  # kms_master_key_id = "aws/sns"
 }
 
 data "aws_iam_policy_document" "notify_topic_policy" {

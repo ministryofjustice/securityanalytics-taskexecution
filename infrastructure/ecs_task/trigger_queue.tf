@@ -20,6 +20,8 @@ resource "aws_sqs_queue_policy" "trigger_queue_policy" {
 resource "aws_sqs_queue" "trigger_queue" {
   name = "${terraform.workspace}-${var.app_name}-${var.task_name}-trigger"
 
+  # TODO set settings for e.g. dead letter queue, message retention, and kms master key
+
   tags {
     task_name = "${var.task_name}"
     app_name  = "${var.app_name}"
