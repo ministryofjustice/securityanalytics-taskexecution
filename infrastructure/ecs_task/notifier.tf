@@ -1,6 +1,16 @@
+data "aws_iam_role" "sns_logging" {
+  name = "${var.ssm_source_stage}-${var.app_name}-sns-logging"
+}
+
 resource "aws_sns_topic" "task_results" {
   name         = "${terraform.workspace}-${var.app_name}-${var.task_name}-results"
   display_name = "SNS topic to distribute ${var.task_name} task results"
+
+  sqs_failure_feedback_role_arn    = "${data.aws_iam_role.sns_logging.arn}"
+  sqs_success_feedback_role_arn    = "${data.aws_iam_role.sns_logging.arn}"
+  sqs_success_feedback_sample_rate = 5
+
+  kms_master_key_id = "aws/sns"
 }
 
 data "aws_iam_policy_document" "notify_topic_policy" {
