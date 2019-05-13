@@ -43,6 +43,7 @@ data "aws_iam_policy_document" "notify_topic_policy" {
 }
 
 resource "aws_sqs_queue_policy" "queue_policy" {
+  count     = "${local.is_not_integration_test}"
   queue_url = "${data.aws_ssm_parameter.elastic_ingestion_queue_id.value}"
   policy    = "${data.aws_iam_policy_document.notify_topic_policy.json}"
 }
