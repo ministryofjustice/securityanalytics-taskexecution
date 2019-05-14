@@ -1,28 +1,5 @@
 data "aws_caller_identity" "account" {}
 
-data "aws_iam_policy_document" "lambda_trust" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "task_trigger_role" {
-  name               = "${terraform.workspace}-${var.app_name}-${var.task_name}-trigger"
-  assume_role_policy = "${data.aws_iam_policy_document.lambda_trust.json}"
-
-  tags {
-    task_name = "${var.task_name}"
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
-  }
-}
-
 data "aws_iam_policy_document" "task_trigger_policy" {
   statement {
     effect    = "Allow"
@@ -40,7 +17,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
       "sqs:GetQueueAttributes",
     ]
 
-    resources = ["${aws_sqs_queue.trigger_queue.arn}"]
+    resources = ["${var.trigger_queue_arn}"]
   }
 
   # So the task trigger can find the locations of e.g. queues
@@ -101,6 +78,6 @@ resource "aws_iam_policy" "task_trigger_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "task_trigger_policy" {
-  role       = "${aws_iam_role.task_trigger_role.name}"
+  role       = "${var.trigger_role_name}"
   policy_arn = "${aws_iam_policy.task_trigger_policy.arn}"
 }

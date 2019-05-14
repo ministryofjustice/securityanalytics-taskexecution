@@ -15,7 +15,7 @@ data "template_file" "task" {
 
     // hash tags make sure we update the task on a change
     docker_hash    = "${var.docker_hash}"
-    results_bucket = "${aws_s3_bucket.results.arn}"
+    results_bucket = "${var.results_bucket_arn}"
     sources_hash   = "${var.sources_hash}"
   }
 }
