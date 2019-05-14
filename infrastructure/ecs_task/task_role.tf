@@ -10,31 +10,6 @@ data "aws_iam_policy_document" "ecs_trust" {
   }
 }
 
-data "aws_iam_policy_document" "output_bucket_access" {
-  statement {
-    effect  = "Allow"
-    actions = ["s3:PutObject"]
-
-    resources = [
-      "${aws_s3_bucket.results.arn}",
-      "${aws_s3_bucket.results.arn}/*",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-
-    # TODO reduce this scope
-    resources = ["*"]
-  }
-}
-
 resource "aws_iam_role" "task_role" {
   name               = "${terraform.workspace}-${var.app_name}-${var.task_name}"
   assume_role_policy = "${data.aws_iam_policy_document.ecs_trust.json}"
@@ -44,14 +19,4 @@ resource "aws_iam_role" "task_role" {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
-}
-
-resource "aws_iam_policy" "task_policy" {
-  name   = "${terraform.workspace}-${var.app_name}-${var.task_name}"
-  policy = "${data.aws_iam_policy_document.output_bucket_access.json}"
-}
-
-resource "aws_iam_role_policy_attachment" "task_policy" {
-  role       = "${aws_iam_role.task_role.name}"
-  policy_arn = "${aws_iam_policy.task_policy.arn}"
 }
