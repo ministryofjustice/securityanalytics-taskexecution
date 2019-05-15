@@ -9,8 +9,9 @@ output "results_bucket_id" {
 output "task_queue_consumer" {
   value = "${aws_iam_role.task_trigger_role.arn}"
 }
+
 output "trigger_role_name" {
-  value= "${aws_iam_role.task_trigger_role.name}"
+  value = "${aws_iam_role.task_trigger_role.name}"
 }
 
 output "results_parser" {
