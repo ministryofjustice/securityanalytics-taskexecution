@@ -12,26 +12,6 @@ variable "task_name" {
   type = "string"
 }
 
-variable "docker_dir" {
-  type = "string"
-}
-
-variable "cpu" {
-  type = "string"
-}
-
-variable "memory" {
-  type = "string"
-}
-
-variable "sources_hash" {
-  type = "string"
-}
-
-variable "docker_hash" {
-  type = "string"
-}
-
 variable "subscribe_elastic_to_notifier" {
   type        = "string"
   description = "If this task produces elastic compatible output, this can be used to connect the task directly to elastic."
@@ -47,18 +27,6 @@ variable "transient_workspace" {
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
 
-variable "results_bucket_arn" {
-  type = "string"
-}
-
-variable "trigger_queue_arn" {
-  type = "string"
-}
-
-variable "trigger_role_arn" {
-  type = "string"
-}
-
-variable "trigger_role_name" {
+variable "task_role_name" {
   type = "string"
 }
