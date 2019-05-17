@@ -25,3 +25,7 @@ output "task_queue_url" {
 output "task_queue" {
   value = "${aws_sqs_queue.trigger_queue.arn}"
 }
+
+output "task_trigger_policy_arn" {
+  value = "${aws_iam_policy.task_trigger_policy.arn}"
+}

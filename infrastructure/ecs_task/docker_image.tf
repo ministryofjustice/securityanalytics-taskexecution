@@ -13,7 +13,7 @@ resource "null_resource" "build_image" {
   triggers {
     # hash tags make sure we redeploy on a change
     docker_hash    = "${var.docker_hash}"
-    results_bucket = "${var.results_bucket_arn}"
+    results_bucket = "${module.taskmodule.results_bucket_arn}"
     script_hash    = "${var.sources_hash}"
   }
 

@@ -47,18 +47,22 @@ variable "transient_workspace" {
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
 
-variable "results_bucket_arn" {
-  type = "string"
-}
+# variable "results_bucket_arn" {
+#   type = "string"
+# }
 
-variable "trigger_queue_arn" {
-  type = "string"
-}
 
-variable "trigger_role_arn" {
-  type = "string"
-}
+# variable "trigger_queue_arn" {
+#   type = "string"
+# }
 
-variable "trigger_role_name" {
-  type = "string"
-}
+
+# variable "trigger_role_arn" {
+#   type = "string"
+# }
+
+
+# variable "trigger_role_name" {
+#   type = "string"
+# }
+
