@@ -9,7 +9,6 @@ terraform {
     dynamodb_table = "sec-an-terraform-locks"
     key            = "task-exec/terraform.tfstate"
     region         = "eu-west-2"                   # london
-    profile        = "sec-an"
   }
 }
 
