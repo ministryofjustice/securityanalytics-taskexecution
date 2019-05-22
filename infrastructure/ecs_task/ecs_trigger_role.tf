@@ -28,4 +28,3 @@ resource "aws_iam_role_policy_attachment" "ecs_trigger_policy" {
   role       = "${module.taskmodule.trigger_role_name}"
   policy_arn = "${aws_iam_policy.ecs_trigger_policy.arn}"
 }
-
