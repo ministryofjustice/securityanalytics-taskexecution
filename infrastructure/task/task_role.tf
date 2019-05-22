@@ -23,14 +23,9 @@ data "aws_iam_policy_document" "output_bucket_access" {
   }
 }
 
-resource "aws_iam_policy" "task_policy" {
+resource "aws_iam_policy" "s3_bucket_access_policy" {
   name   = "${terraform.workspace}-${var.app_name}-${var.task_name}"
   policy = "${data.aws_iam_policy_document.output_bucket_access.json}"
-}
-
-resource "aws_iam_role_policy_attachment" "task_policy" {
-  role       = "${var.task_role_name}"
-  policy_arn = "${aws_iam_policy.task_policy.arn}"
 }
 
 data "aws_iam_policy_document" "lambda_trust" {

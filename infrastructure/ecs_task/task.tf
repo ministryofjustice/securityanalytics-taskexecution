@@ -50,5 +50,4 @@ module "taskmodule" {
   account_id                    = "${var.account_id}"
   ssm_source_stage              = "${var.ssm_source_stage}"
   transient_workspace           = "${var.transient_workspace}"
-  task_role_name                = "${aws_iam_role.task_role.name}"
 }

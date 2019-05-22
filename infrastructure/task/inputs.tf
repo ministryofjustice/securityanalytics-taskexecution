@@ -26,7 +26,3 @@ variable "transient_workspace" {
   type        = "string"
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
-
-variable "task_role_name" {
-  type = "string"
-}

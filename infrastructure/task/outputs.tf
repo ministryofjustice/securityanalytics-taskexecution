@@ -29,3 +29,7 @@ output "task_queue" {
 output "task_trigger_policy_arn" {
   value = "${aws_iam_policy.task_trigger_policy.arn}"
 }
+
+output "s3_bucket_policy_arn" {
+  value = "${aws_iam_policy.s3_bucket_access_policy.arn}"
+}
