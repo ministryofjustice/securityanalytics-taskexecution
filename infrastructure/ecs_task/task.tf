@@ -15,7 +15,7 @@ data "template_file" "task" {
 
     // hash tags make sure we update the task on a change
     docker_hash    = "${var.docker_hash}"
-    results_bucket = "${aws_s3_bucket.results.arn}"
+    results_bucket = "${module.taskmodule.results_bucket_arn}"
     sources_hash   = "${var.sources_hash}"
   }
 }
@@ -39,4 +39,15 @@ resource "aws_ecs_task_definition" "task" {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
+}
+
+module "taskmodule" {
+  source                        = "../task"
+  app_name                      = "${var.app_name}"
+  aws_region                    = "${var.aws_region}"
+  task_name                     = "${var.task_name}"
+  subscribe_elastic_to_notifier = "${var.subscribe_elastic_to_notifier}"
+  account_id                    = "${var.account_id}"
+  ssm_source_stage              = "${var.ssm_source_stage}"
+  transient_workspace           = "${var.transient_workspace}"
 }

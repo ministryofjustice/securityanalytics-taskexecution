@@ -1,35 +1,6 @@
 data "aws_caller_identity" "account" {}
 
-data "aws_iam_policy_document" "lambda_trust" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "task_trigger_role" {
-  name               = "${terraform.workspace}-${var.app_name}-${var.task_name}-trigger"
-  assume_role_policy = "${data.aws_iam_policy_document.lambda_trust.json}"
-
-  tags {
-    task_name = "${var.task_name}"
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
-  }
-}
-
 data "aws_iam_policy_document" "task_trigger_policy" {
-  statement {
-    effect    = "Allow"
-    actions   = ["ecs:RunTask"]
-    resources = ["${aws_ecs_task_definition.task.arn}"]
-  }
-
   # So the task trigger can pull task requests off of the task queue
   statement {
     effect = "Allow"
@@ -53,17 +24,6 @@ data "aws_iam_policy_document" "task_trigger_policy" {
 
     resources = [
       "arn:aws:ssm:${var.aws_region}:${var.account_id}:parameter/${var.app_name}/${terraform.workspace}/*",
-    ]
-  }
-
-  # To allow the trigger to pass the execution role to ecs to assume when running the task
-  statement {
-    effect  = "Allow"
-    actions = ["iam:PassRole"]
-
-    resources = [
-      "${data.aws_iam_role.ecs_exec_role.arn}",
-      "${aws_iam_role.task_role.arn}",
     ]
   }
 
@@ -96,7 +56,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
 }
 
 resource "aws_iam_policy" "task_trigger_policy" {
-  name   = "${terraform.workspace}-${var.app_name}-${var.task_name}-trigger"
+  name   = "${terraform.workspace}-${var.app_name}-${var.task_name}-task-trigger"
   policy = "${data.aws_iam_policy_document.task_trigger_policy.json}"
 }
 

@@ -1,23 +1,27 @@
-output "results_bucket_arn" {
-  value = "${aws_s3_bucket.results.arn}"
-}
-
-output "results_bucket_id" {
-  value = "${aws_s3_bucket.results.id}"
-}
-
-output "task_queue_consumer" {
-  value = "${aws_iam_role.task_trigger_role.arn}"
-}
-
-output "results_parser" {
-  value = "${aws_iam_role.results_parse_role.arn}"
+output "task_role_name" {
+  value = "${aws_iam_role.task_role.name}"
 }
 
 output "task_queue_url" {
-  value = "${aws_sqs_queue.trigger_queue.id}"
+  value = "${module.taskmodule.task_queue_url}"
 }
 
 output "task_queue" {
-  value = "${aws_sqs_queue.trigger_queue.arn}"
+  value = "${module.taskmodule.task_queue}"
+}
+
+output "results_bucket_arn" {
+  value = "${module.taskmodule.results_bucket_arn}"
+}
+
+output "results_bucket_id" {
+  value = "${module.taskmodule.results_bucket_id}"
+}
+
+output "task_queue_consumer" {
+  value = "${module.taskmodule.task_queue_consumer}"
+}
+
+output "results_parser" {
+  value = "${module.taskmodule.results_parser}"
 }
