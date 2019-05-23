@@ -1,6 +1,7 @@
 import boto3
 import time
 import socket
+from timeit import default_timer as timer
 
 route53_client = boto3.client("route53", region_name="eu-west-2")
 
@@ -48,7 +49,7 @@ class DnsIngestor:
             finished_listing_zones = not bool(list_resp["IsTruncated"])
             if not finished_listing_zones:
                 kwargs["Marker"] = list_resp["NextMarker"]
-        print(f"done {ingested}")
+        print(f"Discovered {ingested} hosted zones")
 
     def _process_hosted_zone(self, zone):
         kwargs = {"MaxItems": "1000"}
@@ -131,9 +132,12 @@ class DnsIngestor:
         return len(record)
 
     def _process_other_record(self, record):
-        # print(f"OTHER {record}")
+        print(f"Unhandled record {record['Type']}: {record}")
         return 0
 
 
+start = timer()
 with open("foo.log", "w") as out:
     DnsIngestor(out).load_all()
+end = timer()
+print(f"Ingested all zones in {end-start}s")

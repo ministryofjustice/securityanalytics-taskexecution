@@ -6,10 +6,15 @@ then
     sleep 30
     exit
 fi
-cd infrastructure
-terraform init -backend-config "bucket=$1-terraform-state"
-terraform workspace new $2 || terraform workspace select $2
-terraform apply -auto-approve -input=true -var app_name=$1
+# update with the latest shared code first:
+git submodule init
+git submodule update --remote
+git submodule sync
+
+export PIPENV_VENV_IN_PROJECT=true
+pipenv install --dev
+
+# since the terraform step uses python code, it requires we run in an activated venv
+pipenv run `pwd`/terraform.sh $1 $2
+
 wait
-# pause in case the user is watching output
-sleep 5
