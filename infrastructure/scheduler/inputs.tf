@@ -1,24 +1,15 @@
+variable "aws_region" {
+  type = "string"
+}
+
 variable "app_name" {
   type = "string"
 }
 
-variable "task_name" {
+variable "ssm_source_stage" {
   type = "string"
 }
 
-variable "queue_url" {
+variable "ingest_schedule" {
   type = "string"
-}
-
-variable "queue_arn" {
-  type = "string"
-}
-
-variable "scan_hosts" {
-  type = "list"
-}
-
-variable "transient_workspace" {
-  type        = "string"
-  description = "Used when doing integration tests to make the results buckets created deleteable."
 }

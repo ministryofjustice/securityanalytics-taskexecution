@@ -1,0 +1,13 @@
+{
+  "base_dirs": [
+    {
+      "dir": "../dns_ingestor",
+      "base_in_zip": "dns_ingestor"
+    }
+  ],
+  "excludes": [
+    "test",
+    "wheel",
+    "more_itertools"
+  ]
+}
