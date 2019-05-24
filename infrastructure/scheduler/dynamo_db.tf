@@ -1,11 +1,12 @@
 resource "aws_dynamodb_table" "planned_scans" {
   name           = "${terraform.workspace}-${var.app_name}-scan-schedule"
+  # TODO could well be cheaper to provision rather than pay per request
   billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "Id"
+  hash_key       = "Address"
   range_key      = "DnsIngestTime"
 
   attribute {
-    name = "Id" # Will be a composite of the address and time
+    name = "Address"
     type = "S"
   }
 
@@ -16,7 +17,7 @@ resource "aws_dynamodb_table" "planned_scans" {
 
   attribute {
     name = "PlannedScanTime"
-    type = "S"
+    type = "N"
   }
 
   local_secondary_index {

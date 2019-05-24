@@ -40,6 +40,11 @@ variable "ingest_schedule" {
   default = "0 0 * * ? *"
 }
 
+variable "route53_role" {
+  type = "string"
+  description = "The role that must be assumed to read route 53 info, needed since the source is likey to be in another account"
+}
+
 provider "aws" {
   region = "${var.aws_region}"
 
@@ -68,7 +73,9 @@ module "ecs_cluster" {
 module "scheduler" {
   source   = "scheduler"
   aws_region = "${var.aws_region}"
+  account_id = "${var.account_id}"
   app_name = "${var.app_name}"
   ssm_source_stage = "${local.ssm_source_stage}"
   ingest_schedule = "${var.ingest_schedule}"
+  route53_role = "${var.route53_role}"
 }

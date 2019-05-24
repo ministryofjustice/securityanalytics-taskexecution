@@ -3,6 +3,10 @@
     {
       "dir": "../dns_ingestor",
       "base_in_zip": "dns_ingestor"
+    },
+    {
+      "dir": "../.venv/Lib/site-packages",
+      "exclude_dev_deps": true
     }
   ],
   "excludes": [

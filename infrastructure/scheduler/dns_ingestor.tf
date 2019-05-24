@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "ingest_dns" {
 
   function_name    = "${terraform.workspace}-${var.app_name}-ingest-dns"
-  handler          = "ingest_dns.ingest_dns.ingest_dns"
+  handler          = "dns_ingestor.ingest_dns.ingest_dns"
   role             = "${aws_iam_role.dns_ingestor.arn}"
   runtime          = "python3.7"
   filename         = "${local.scheduler_zip}"
@@ -29,7 +29,6 @@ resource "aws_lambda_function" "ingest_dns" {
   }
 }
 
-
 data "aws_iam_policy_document" "lambda_trust" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -42,14 +41,70 @@ data "aws_iam_policy_document" "lambda_trust" {
   }
 }
 
+data "aws_iam_policy_document" "dns_ingestor_perms" {
+  # So the task trigger can find the locations of e.g. queues
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "ssm:GetParameters",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    # TODO reduce this scope
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:*"
+    ]
+
+    resources = ["${aws_dynamodb_table.planned_scans.arn}"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "sts:AssumeRole"
+    ]
+
+    resources = ["${var.route53_role}"]
+  }
+}
+
 resource "aws_iam_role" "dns_ingestor" {
   name               = "${terraform.workspace}-${var.app_name}-dns-ingestor"
   assume_role_policy = "${data.aws_iam_policy_document.lambda_trust.json}"
-
-  # TODO needs access to dynamodb, sns, assume role, and route53
 
   tags {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
+}
+
+resource "aws_iam_role_policy_attachment" "dns_ingestor_perms" {
+  role       = "${aws_iam_role.dns_ingestor.name}"
+  policy_arn = "${aws_iam_policy.dns_ingestor_perms.id}"
+}
+
+
+resource "aws_iam_policy" "dns_ingestor_perms" {
+  name   = "${terraform.workspace}-${var.app_name}-dns-ingestor"
+  policy = "${data.aws_iam_policy_document.dns_ingestor_perms.json}"
 }
