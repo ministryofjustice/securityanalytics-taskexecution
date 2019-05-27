@@ -11,7 +11,20 @@ resource "aws_ssm_parameter" "public_subnets" {
   }
 }
 
-resource "aws_ssm_parameter" "task_queue_consumer" {
+resource "aws_ssm_parameter" "task_queue_consumer_role" {
+  name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/queue_consumer/role"
+  description = "The task queue consumer role"
+  type        = "String"
+  value       = "${aws_iam_role.task_trigger_role.name}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
+resource "aws_ssm_parameter" "task_queue_consumer_arn" {
   name        = "/${var.app_name}/${terraform.workspace}/tasks/${var.task_name}/queue_consumer/role/arn"
   description = "The task queue consumer role"
   type        = "String"
