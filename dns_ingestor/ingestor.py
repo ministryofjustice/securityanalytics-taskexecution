@@ -57,9 +57,12 @@ class DnsIngestor:
         ingested = 0
         while not finished_listing_resources:
             details_resp = await self.route53_client.list_resource_record_sets(HostedZoneId=zone["Id"], **kwargs)
-            for record in details_resp["ResourceRecordSets"]:
-                ingested += await self._dispatch_record(record)
 
+            await gather(*[
+                self._dispatch_record(record) for record in details_resp["ResourceRecordSets"]
+            ])
+
+            # this block updates the paging details for the next list_resource_record_sets call
             finished_listing_resources = not bool(details_resp["IsTruncated"])
             if not finished_listing_resources:
                 kwargs["StartRecordName"] = details_resp["NextRecordName"]
@@ -71,7 +74,7 @@ class DnsIngestor:
 
             # there is a 5 requests per second limit on aws for route53 calls
             # conservative here to ensure we finish the scan
-            time.sleep(2.0/5.0)
+            time.sleep(1.0/5.0)
 
         print(f"Ingested zone: {zone['Name']}, {ingested} records")
         return ingested
