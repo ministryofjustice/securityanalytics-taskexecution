@@ -13,11 +13,13 @@ class PlannedScanDbWriter:
         self.update_expr = "SET #Hosts = list_append(if_not_exists(#Hosts, :empty_list), :Host), " \
                            "PlannedScanTime = if_not_exists(#PlannedScanTime, :PlannedScanTime)"
 
-    def write(self, host):
+    async def write(self, host):
         if not isinstance(host, HostToScan):
             raise ValueError(f"Incorrect type {type(host)}, expecting {HostToScan}")
 
         planned_slot = self.scheduler.next_planned_slot()
+
+        # TODO make this async...
         response = self.table.update_item(
             Key={'Address': host.address, 'DnsIngestTime': str(self.ingest_time)},
             UpdateExpression=self.update_expr,
@@ -36,6 +38,7 @@ class PlannedScanDbWriter:
         # when we see that our planned scan time was used, we need to tell the scheduler
         # use the next value, N.B. it seems to return the old value even when not changed
         # because there is a mention in update expression, so need to check values equal as well
+        # TODO is it better to do this on the old value rather than the new?
         resp_attrs = response["Attributes"]
         if "PlannedScanTime" in resp_attrs and planned_slot == resp_attrs["PlannedScanTime"]:
             self.scheduler.use_slot()

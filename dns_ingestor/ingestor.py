@@ -27,10 +27,12 @@ class DnsIngestor:
 
     def load_all(self):
         self._load_hosted_zones()
+        total = 0
         while self.to_ingest:
             name, zone = self.to_ingest.popitem()
             self.ingested.add(name)
-            self._process_hosted_zone(zone)
+            total += self._process_hosted_zone(zone)
+        print(f"Finished ingesting all dns records {total} hosts found")
 
     def _load_hosted_zones(self):
         kwargs = {"MaxItems": "1000"}
@@ -70,6 +72,7 @@ class DnsIngestor:
             time.sleep(2.0/5.0)
 
         print(f"Ingested zone: {zone['Name']}, {ingested} records")
+        return ingested
 
     def _dispatch_record(self, record):
         record_type = record["Type"]
