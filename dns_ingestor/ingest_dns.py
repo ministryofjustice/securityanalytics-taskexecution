@@ -6,6 +6,8 @@ from timeit import default_timer as timer
 from dns_ingestor.scheduler import Scheduler
 from dns_ingestor.scan_plan_writer import PlannedScanDbWriter
 from dns_ingestor.ingestor import DnsIngestor
+from asyncio import get_event_loop
+from collections import namedtuple
 
 region = os.environ["REGION"]
 stage = os.environ["STAGE"]
@@ -25,8 +27,8 @@ PLANNING_BUCKETS = f"{ssm_prefix}/scheduler/config/buckets"
 LOG_UNHANDLED = f"{ssm_prefix}/scheduler/config/log_unhandled"
 
 
-def get_route53_client(role):
-    route53_role = sts_client.assume_role(RoleArn=role, RoleSessionName="ScanPlanSession")
+async def get_route53_client(role):
+    route53_role = await sts_client.assume_role(RoleArn=role, RoleSessionName="ScanPlanSession")
     assumed_creds = route53_role["Credentials"]
     return aioboto3.client(
         "route53",
@@ -61,10 +63,10 @@ async def ingest_dns(event, _):
         ingest_time,
         scheduler
     )
-    route53_client = get_route53_client(params[ROUTE53_ROLE])
+    route53_client = await get_route53_client(params[ROUTE53_ROLE])
     log_unhandled = params[LOG_UNHANDLED].lower() == "true"
 
-    DnsIngestor(
+    await DnsIngestor(
         route53_client,
         writer,
         log_unhandled
@@ -72,3 +74,8 @@ async def ingest_dns(event, _):
 
     end = timer()
     print(f"Ingested all zones in {end-start}s")
+
+if __name__ == "__main__":
+    loop = get_event_loop()
+    task = loop.create_task(ingest_dns({}, namedtuple("context", ["loop"])))
+    loop.run_until_complete(task)

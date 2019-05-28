@@ -19,13 +19,28 @@ jobs:
             - git-v3-{{ .Branch }}-
             - git-v3-
 
-      - checkout:
-          path: ~/project
+      - checkout
+
+      - run:
+          name: update git submodule
+          command: |
+            git submodule init
+            git submodule update --remote
+            git submodule sync
 
       - restore_cache:
           keys:
-            - tf-v3-{{ .Branch }}-
-            - tf-v3-
+            - other-v1-{{ .Branch }}-
+            - other-v1-
+
+      - run:
+          name: install virtual env
+          command: |
+            export PIPENV_VENV_IN_PROJECT=true
+            pipenv install --dev --deploy
+            if [ ! -d "test-reports" ]; then
+              mkdir test-reports
+            fi
 
       - run:
           name: terraform
@@ -56,9 +71,12 @@ jobs:
             - ".git"
 
       - save_cache:
-          key: tf-v3-{{ .Branch }}-{{ .Revision }}
+          key: other-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".terraform"
+            - ".venv"
+            - ".generated"
+            - ".pytest_cache"
 
   deploy:
     executor: terraform
@@ -79,13 +97,28 @@ jobs:
             - git-v3-{{ .Branch }}-
             - git-v3-
 
-      - checkout:
-          path: ~/project
+      - checkout
 
       - restore_cache:
-          keys:
-            - tf-moj-v1-{{ .Branch }}-
-            - tf-moj-v1-
+            keys:
+              - tf-moj-v1-{{ .Branch }}-
+              - tf-moj-v1-
+
+      - run:
+          name: update git submodule
+          command: |
+            git submodule init
+            git submodule update --remote
+            git submodule sync
+
+      - run:
+          name: install virtual env
+          command: |
+            export PIPENV_VENV_IN_PROJECT=true
+            pipenv install --dev --deploy
+            if [ ! -d "test-reports" ]; then
+              mkdir test-reports
+            fi
 
       - run:
           name: terraform apply
@@ -109,6 +142,9 @@ jobs:
           key: tf-moj-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".terraform"
+            - ".venv"
+            - ".generated"
+            - ".pytest_cache"
 
 workflows:
   version: 2

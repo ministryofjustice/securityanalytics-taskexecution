@@ -1,14 +1,16 @@
-import socket
+from asyncio import get_running_loop, gather
 import time
+from socket import gaierror
 from dns_ingestor.host_to_scan import HostToScan
 
 
-def ns_lookup(host):
+async def ns_lookup(host):
     if host.endswith("."):
         host = host[:-1]
     # See https://docs.python.org/3/library/socket.html#socket.getaddrinfo
     # for magic indexes
-    return [address[4][0] for address in socket.getaddrinfo(host, 0, 0, 0, 0)]
+    loop = get_running_loop()
+    return [address[4][0] for address in await loop.getaddrinfo(host, 0)]
 
 
 class DnsIngestor:
@@ -25,21 +27,21 @@ class DnsIngestor:
         self.route53_client = route53_client
         self.log_unhandled = log_unhandled
 
-    def load_all(self):
-        self._load_hosted_zones()
+    async def load_all(self):
+        await self._load_hosted_zones()
         total = 0
         while self.to_ingest:
             name, zone = self.to_ingest.popitem()
             self.ingested.add(name)
-            total += self._process_hosted_zone(zone)
+            total += await self._process_hosted_zone(zone)
         print(f"Finished ingesting all dns records {total} hosts found")
 
-    def _load_hosted_zones(self):
+    async def _load_hosted_zones(self):
         kwargs = {"MaxItems": "1000"}
         finished_listing_zones = False
         ingested = 0
         while not finished_listing_zones:
-            list_resp = self.route53_client.list_hosted_zones(**kwargs)
+            list_resp = await self.route53_client.list_hosted_zones(**kwargs)
             hosted_zones = list_resp["HostedZones"]
             for zone in hosted_zones:
                 self.to_ingest[zone["Name"]] = zone
@@ -49,14 +51,14 @@ class DnsIngestor:
                 kwargs["Marker"] = list_resp["NextMarker"]
         print(f"Discovered {ingested} hosted zones")
 
-    def _process_hosted_zone(self, zone):
+    async def _process_hosted_zone(self, zone):
         kwargs = {"MaxItems": "1000"}
         finished_listing_resources = False
         ingested = 0
         while not finished_listing_resources:
-            details_resp = self.route53_client.list_resource_record_sets(HostedZoneId=zone["Id"], **kwargs)
+            details_resp = await self.route53_client.list_resource_record_sets(HostedZoneId=zone["Id"], **kwargs)
             for record in details_resp["ResourceRecordSets"]:
-                ingested += self._dispatch_record(record)
+                ingested += await self._dispatch_record(record)
 
             finished_listing_resources = not bool(details_resp["IsTruncated"])
             if not finished_listing_resources:
@@ -74,24 +76,30 @@ class DnsIngestor:
         print(f"Ingested zone: {zone['Name']}, {ingested} records")
         return ingested
 
-    def _dispatch_record(self, record):
+    async def _dispatch_record(self, record):
         record_type = record["Type"]
         if record_type in self._record_type_handler.keys():
-            return self._record_type_handler[record_type](record)
+            return await self._record_type_handler[record_type](record)
         else:
             return self._process_other_record(record)
 
-    def _process_a_record(self, record):
+    async def _scan_hosts(self, hosts_to_scan):
+        await gather(*[
+            self.out_writer.write(host_to_scan) for host_to_scan in hosts_to_scan
+        ])
+        return len(hosts_to_scan)
+
+    async def _process_a_record(self, record):
         if "AliasTarget" in record:
-            return self._process_alias_record(record)
+            return await self._process_alias_record(record)
         else:
             print(f"Ingested {record['Type']} record: {record['Name']}")
             records = record["ResourceRecords"]
-            for resource in records:
-                self.out_writer.write(HostToScan(resource["Value"], record["Name"]))
-            return len(record)
+            return await self._scan_hosts([
+                HostToScan(resource["Value"], record["Name"]) for resource in records
+            ])
 
-    def _process_alias_record(self, record):
+    async def _process_alias_record(self, record):
         print(f"Ingested ALIAS record: {record['Name']}")
         target = record["AliasTarget"]
         alias_zone = target["HostedZoneId"]
@@ -101,15 +109,15 @@ class DnsIngestor:
         else:
             redirect_to = target["DNSName"]
             try:
-                for ip in ns_lookup(redirect_to):
-                    record_count += 1
-                    self.out_writer.write(HostToScan(ip, record["Name"]))
+                record_count += await self._scan_hosts([
+                    HostToScan(ip, record["Name"]) for ip in await ns_lookup(redirect_to)
+                ])
                 print(f"Resolved ip addresses of {redirect_to} an ALIAS of {record['Name']}")
-            except socket.gaierror:
+            except (RuntimeError, gaierror):
                 print(f"Failed to resolve {redirect_to} an ALIAS of {record['Name']}")
         return record_count
 
-    def _process_cname_record(self, record):
+    async def _process_cname_record(self, record):
         print(f"Ingested {record['Type']} record: {record['Name']}")
         records = record["ResourceRecords"]
         record_count = 0
@@ -117,14 +125,15 @@ class DnsIngestor:
             # strip the dot
             redirect_to = resource["Value"]
             try:
-                for ip in ns_lookup(redirect_to):
-                    record_count += 1
-                    self.out_writer.write(HostToScan(ip, record["Name"]))
+
+                record_count += await self._scan_hosts([
+                    HostToScan(ip, record["Name"]) for ip in await ns_lookup(redirect_to)
+                ])
                 print(f"Resolved ip addresses of {redirect_to} an {record['Type']} of {record['Name']}")
-            except socket.gaierror:
+            except (RuntimeError, gaierror):
                 print(f"Failed to resolve {redirect_to} a {record['Type']} of {record['Name']}")
 
-        return len(record)
+        return record_count
 
     def _process_other_record(self, record):
         if self.log_unhandled:
