@@ -74,8 +74,3 @@ async def ingest_dns(event, _):
 
     end = timer()
     print(f"Ingested all zones in {end-start}s")
-
-if __name__ == "__main__":
-    loop = get_event_loop()
-    task = loop.create_task(ingest_dns({}, namedtuple("context", ["loop"])))
-    loop.run_until_complete(task)
