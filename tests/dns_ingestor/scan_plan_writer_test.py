@@ -3,6 +3,7 @@ from asyncio import Future, gather
 from unittest.mock import MagicMock
 from dns_ingestor.scan_plan_writer import PlannedScanDbWriter
 from dns_ingestor.host_to_scan import HostToScan
+from test_utils.test_utils import future_of
 
 
 @pytest.mark.unit
@@ -11,8 +12,7 @@ async def test_uses_schedule():
     schedule = MagicMock()
     db_table = MagicMock()
     # set the result of the db call futures in advance
-    db_table.update_item.return_value = Future()
-    db_table.update_item.return_value.set_result(None)
+    db_table.update_item.return_value = future_of(None)
     writer = PlannedScanDbWriter(db_table, 999, schedule)
     # asyncly call write 10 times
     await gather(*[

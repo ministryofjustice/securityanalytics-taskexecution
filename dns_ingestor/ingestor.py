@@ -1,145 +1,101 @@
-from asyncio import get_running_loop, gather
-import time
-from socket import gaierror
-from dns_ingestor.host_to_scan import HostToScan
+from asyncio import sleep
 
 
-async def ns_lookup(host):
-    if host.endswith("."):
-        host = host[:-1]
-    # See https://docs.python.org/3/library/socket.html#socket.getaddrinfo
-    # for magic indexes
-    loop = get_running_loop()
-    return [address[4][0] for address in await loop.getaddrinfo(host, 0)]
-
-
-class DnsIngestor:
-    def __init__(self, route53_client, out_writer, log_unhandled):
-        self.out_writer = out_writer
-        self._record_type_handler = {
-            "A": self._process_a_record,
-            "AAAA": self._process_a_record,
-            "CNAME": self._process_cname_record
-            # TODO any requirements to scan e.g mx records?
-        }
-        self.ingested = set()
-        self.to_ingest = {}
+# This class knows how to query route53 and resolve the IPs for all hosts recorded
+# TODO this class should probably now be split into two, the zone ingestor and the record ingestor
+class DnsZoneIngestor:
+    def __init__(self, route53_client):
+        self.known_zones = {}
+        self.record_count = {}
         self.route53_client = route53_client
-        self.log_unhandled = log_unhandled
+        self.num_zones = 0
+        self.num_records = 0
+        self.ingested_zones = False
 
-    async def load_all(self):
-        await self._load_hosted_zones()
-        total = 0
-        while self.to_ingest:
-            name, zone = self.to_ingest.popitem()
-            self.ingested.add(name)
-            total += await self._process_hosted_zone(zone)
-        print(f"Finished ingesting all dns records {total} hosts found")
+    # Call to load the zone info from route 53
+    # Handles the pagination querying all zones
+    async def ingest_zones(self):
+        if self.ingested_zones:
+            raise RuntimeError("Shouldn't call ingest_zones twice with same object")
 
-    async def _load_hosted_zones(self):
-        kwargs = {"MaxItems": "1000"}
-        finished_listing_zones = False
-        ingested = 0
-        while not finished_listing_zones:
-            list_resp = await self.route53_client.list_hosted_zones(**kwargs)
-            hosted_zones = list_resp["HostedZones"]
-            for zone in hosted_zones:
-                self.to_ingest[zone["Name"]] = zone
-            ingested += len(hosted_zones)
-            finished_listing_zones = not bool(list_resp["IsTruncated"])
-            if not finished_listing_zones:
-                kwargs["Marker"] = list_resp["NextMarker"]
-        print(f"Discovered {ingested} hosted zones")
+        pagination_params = {"MaxItems": "100"}
+        listed_all_zones = False
 
-    async def _process_hosted_zone(self, zone):
-        kwargs = {"MaxItems": "1000"}
+        # reads zones a page at a time
+        while not listed_all_zones:
+            zone_page = await self._ingest_page_of_zones(pagination_params)
+
+            # update pagination query params
+            listed_all_zones = not bool(zone_page["IsTruncated"])
+            if not listed_all_zones:
+                pagination_params["Marker"] = zone_page["NextMarker"]
+
+        self.ingested_zones = True
+
+    # records the name and id of all the zones in a single page
+    async def _ingest_page_of_zones(self, pagination_params):
+        zone_page = await self.route53_client.list_hosted_zones(**pagination_params)
+        zones_in_page = zone_page["HostedZones"]
+
+        # update the records that we need to resolve host for this zone
+        for zone in zones_in_page:
+            zone_id = zone["Id"]
+            self.known_zones[zone_id] = zone["Name"]
+            self.record_count[zone_id] = 0
+
+        self.num_zones += len(zones_in_page)
+
+        print(f"Read page of {len(zones_in_page)} hosted zones")
+        return zone_page
+
+    # Loads all the zones first and then queries each of the zones in turn
+    # Rate limit makes it silly to do them in parallel
+    async def ingest_records(self, record_consumer):
+        if not self.ingested_zones:
+            raise RuntimeError("Need to call ingest_zones prior to ingest_records")
+
+        for zone_id, name in self.known_zones.items():
+            await self._ingest_records_from_zone(zone_id, name, record_consumer)
+        print(f"Finished ingesting from route53 {self.num_records} records found in {self.num_zones} zones")
+
+    # Handles the pagination querying all the records for a given zone
+    async def _ingest_records_from_zone(self, zone_id, name, record_consumer):
+        print(f"Ingesting zone: {name}")
+        pagination_params = {"MaxItems": "100"}
         finished_listing_resources = False
-        db_writes = []
+
+        # reads records a page at a time
         while not finished_listing_resources:
-            details_resp = await self.route53_client.list_resource_record_sets(HostedZoneId=zone["Id"], **kwargs)
+            record_page = await self._ingest_page_of_records(zone_id, record_consumer, pagination_params)
 
-            db_writes += [
-                self._dispatch_record(record) for record in details_resp["ResourceRecordSets"]
-            ]
-
-            # this block updates the paging details for the next list_resource_record_sets call
-            finished_listing_resources = not bool(details_resp["IsTruncated"])
+            # Update the pagination params for the next page
+            finished_listing_resources = not bool(record_page["IsTruncated"])
             if not finished_listing_resources:
-                kwargs["StartRecordName"] = details_resp["NextRecordName"]
-                kwargs["StartRecordType"] = details_resp["NextRecordType"]
-                if "NextRecordIdentifier" in details_resp:
-                    kwargs["StartRecordIdentifier"] = details_resp["NextRecordIdentifier"]
-                elif "StartRecordIdentifier" in kwargs:
-                    del kwargs["StartRecordIdentifier"]
+                pagination_params["StartRecordName"] = record_page["NextRecordName"]
+                pagination_params["StartRecordType"] = record_page["NextRecordType"]
+                if "NextRecordIdentifier" in record_page:
+                    pagination_params["StartRecordIdentifier"] = record_page["NextRecordIdentifier"]
+                elif "StartRecordIdentifier" in pagination_params:
+                    del pagination_params["StartRecordIdentifier"]
 
-            # there is a 5 requests per second limit on aws for route53 calls
-            time.sleep(1.0/5.0)
+        print(f"Ingested zone: {name}, {self.record_count[zone_id]} records")
 
-        print(f"Ingested zone: {zone['Name']}, {len(db_writes)} records")
-        for writes in db_writes:
-            await writes
-        return len(db_writes)
+    async def _ingest_page_of_records(self, zone_id, record_consumer, pagination_params):
+        record_page = await self.route53_client.list_resource_record_sets(HostedZoneId=zone_id, **pagination_params)
+        record_sets = record_page["ResourceRecordSets"]
 
-    async def _dispatch_record(self, record):
-        record_type = record["Type"]
-        if record_type in self._record_type_handler.keys():
-            return await self._record_type_handler[record_type](record)
-        else:
-            return await self._process_other_record(record)
+        # update records processed with length of record set
+        records_in_page = len(record_sets)
+        self.num_records += records_in_page
+        self.record_count[zone_id] += records_in_page
 
-    async def _scan_hosts(self, hosts_to_scan):
-        return gather(*[
-            self.out_writer.write(host_to_scan) for host_to_scan in hosts_to_scan
-        ])
+        # the
+        for record in record_sets:
+            record_consumer(record)
 
-    async def _process_a_record(self, record):
-        if "AliasTarget" in record:
-            return await self._process_alias_record(record)
-        else:
-            print(f"Ingested {record['Type']} record: {record['Name']}")
-            records = record["ResourceRecords"]
-            result = await self._scan_hosts([
-                HostToScan(resource["Value"], record["Name"]) for resource in records
-            ])
-            return result
+        # Since route53 api is rate limited to 5 calls a second
+        # we add another task to our gather operation so we are not done until it elapsed too
+        # Have added a 50% error margin to ensure it will complete
+        await sleep(1.5 / 5.0)
 
-    async def _process_alias_record(self, record):
-        print(f"Ingested ALIAS record: {record['Name']}")
-        target = record["AliasTarget"]
-        alias_zone = target["HostedZoneId"]
-        writes = []
-        if alias_zone in self.to_ingest.keys() or alias_zone in self.ingested:
-            print(f"Ignoring alias to zone already being scanned {alias_zone} referred to by {record['Name']}")
-        else:
-            redirect_to = target["DNSName"]
-            try:
-                writes += await self._scan_hosts([
-                    HostToScan(ip, record["Name"]) for ip in await ns_lookup(redirect_to)
-                ])
-                print(f"Resolved ip addresses of {redirect_to} an ALIAS of {record['Name']}")
-            except (RuntimeError, gaierror):
-                print(f"Failed to resolve {redirect_to} an ALIAS of {record['Name']}")
-        return writes
-
-    async def _process_cname_record(self, record):
-        print(f"Ingested {record['Type']} record: {record['Name']}")
-        records = record["ResourceRecords"]
-        writes = []
-        for resource in records:
-            # strip the dot
-            redirect_to = resource["Value"]
-            try:
-
-                writes += await self._scan_hosts([
-                    HostToScan(ip, record["Name"]) for ip in await ns_lookup(redirect_to)
-                ])
-                print(f"Resolved ip addresses of {redirect_to} an {record['Type']} of {record['Name']}")
-            except (RuntimeError, gaierror):
-                print(f"Failed to resolve {redirect_to} a {record['Type']} of {record['Name']}")
-
-        return writes
-
-    async def _process_other_record(self, record):
-        if self.log_unhandled:
-            print(f"Unhandled record {record['Type']}: {record}")
-        return []
+        return record_page
