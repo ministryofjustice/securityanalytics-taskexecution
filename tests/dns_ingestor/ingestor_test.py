@@ -35,7 +35,11 @@ with patch("asyncio.sleep") as sleeper:
     @pytest.mark.asyncio
     async def test_simple():
         route53_client = MagicMock()
-        record_consumer = MagicMock()
+        record_consumer_mock = MagicMock()
+
+        async def record_consumer(record):
+            return record_consumer_mock(record)
+
         ingestor = DnsZoneIngestor(route53_client)
 
         route53_client.list_hosted_zones.return_value = future_of({
@@ -66,7 +70,7 @@ with patch("asyncio.sleep") as sleeper:
         assert ingestor.num_records == 1
         assert ingestor.num_zones == 1
         route53_client.list_hosted_zones.assert_called_once()
-        record_consumer.assert_called_once_with({
+        record_consumer_mock.assert_called_once_with({
             "Name": "dsd.io.",
             "Type": "A",
             "AliasTarget": {
@@ -80,7 +84,11 @@ with patch("asyncio.sleep") as sleeper:
     @pytest.mark.asyncio
     async def test_paging_zones():
         route53_client = MagicMock()
-        record_consumer = MagicMock()
+        record_consumer_mock = MagicMock()
+
+        async def record_consumer(record):
+            return record_consumer_mock(record)
+
         ingestor = DnsZoneIngestor(route53_client)
 
         route53_client.list_hosted_zones.side_effect = [
@@ -127,7 +135,7 @@ with patch("asyncio.sleep") as sleeper:
             call(MaxItems="100", Marker="Sandy"),
             call(MaxItems="100", Marker="Randy")
         ]
-        assert record_consumer.call_count == 0
+        assert record_consumer_mock.call_count == 0
 
     # N.B. that the next record identifier may or may not be present, so the test tests that is
     # is removed if not present
@@ -135,7 +143,11 @@ with patch("asyncio.sleep") as sleeper:
     @pytest.mark.asyncio
     async def test_paging_records():
         route53_client = MagicMock()
-        record_consumer = MagicMock()
+        record_consumer_mock = MagicMock()
+
+        async def record_consumer(record):
+            return record_consumer_mock(record)
+
         ingestor = DnsZoneIngestor(route53_client)
 
         route53_client.list_hosted_zones.return_value = future_of({
@@ -228,7 +240,7 @@ with patch("asyncio.sleep") as sleeper:
                 StartRecordName="Froolio",
                 StartRecordType="Cantooblek")
         ]
-        assert record_consumer.call_count == 4
+        assert record_consumer_mock.call_count == 4
 
     # N.B. that the next record identifier may or may not be present, so the test tests that is
     # is removed if not present
@@ -236,7 +248,11 @@ with patch("asyncio.sleep") as sleeper:
     @pytest.mark.asyncio
     async def test_sleeps_between_record_pages():
         route53_client = MagicMock()
-        record_consumer = MagicMock()
+        record_consumer_mock = MagicMock()
+
+        async def record_consumer(record):
+            return record_consumer_mock(record)
+
         ingestor = DnsZoneIngestor(route53_client)
 
         route53_client.list_hosted_zones.return_value = future_of({
@@ -298,7 +314,7 @@ with patch("asyncio.sleep") as sleeper:
         assert ingestor.num_zones == 1
         route53_client.list_hosted_zones.assert_called_once()
         route53_client.list_resource_record_sets.assert_called_once()
-        assert record_consumer.call_count == 1
+        assert record_consumer_mock.call_count == 1
 
         # Now resolve the sleep's future and await the completed ingestion process
         sleeper.return_value.set_result(None)
@@ -308,4 +324,4 @@ with patch("asyncio.sleep") as sleeper:
         assert ingestor.num_records == 2
         assert ingestor.num_zones == 1
         assert route53_client.list_resource_record_sets.call_count == 2
-        assert record_consumer.call_count == 2
+        assert record_consumer_mock.call_count == 2

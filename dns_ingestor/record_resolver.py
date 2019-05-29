@@ -37,7 +37,7 @@ class RecordResolver:
         if "AliasTarget" in record:
             return await self._resolve_alias_record(record)
         else:
-            print(f"Ingested {record['Type']} record: {record['Name']}")
+            # print(f"Ingested {record['Type']} record: {record['Name']}")
             return self._ips_resolved([
                 HostToScan(resource["Value"], record["Name"])
                 for resource in (record["ResourceRecords"])
@@ -47,7 +47,7 @@ class RecordResolver:
         target = record["AliasTarget"]
         alias_zone = target["HostedZoneId"]
         if alias_zone in self.known_zones.keys():
-            print(f"Ignoring alias to zone already being scanned {alias_zone} referred to by {record['Name']}")
+            # print(f"Ignoring alias to zone already being scanned {alias_zone} referred to by {record['Name']}")
             return []
         else:
             return await self._resolve_using_ns_lookup(record, [target["DNSName"]], "ALIAS")
@@ -60,20 +60,22 @@ class RecordResolver:
         )
 
     async def _resolve_using_ns_lookup(self, record, redirects, record_type):
-        print(f"Ingested {record_type} record: {record['Name']}")
+        # print(f"Ingested {record_type} record: {record['Name']}")
         to_scan = []
         for redirect_to in redirects:
             try:
                 to_scan += [HostToScan(ip, record["Name"]) for ip in await ns_lookup(redirect_to)]
-                print(f"Resolved ip addresses of {redirect_to} a(n) {record_type} of {record['Name']}")
+                # print(f"Resolved ip addresses of {redirect_to} a(n) {record_type} of {record['Name']}")
             except gaierror:
-                print(f"Unable to resolve {redirect_to} a(n) {record_type} of {record['Name']}")
+                # print(f"Unable to resolve {redirect_to} a(n) {record_type} of {record['Name']}")
+                pass
 
         return self._ips_resolved(to_scan)
 
     async def _resolve_other_record(self, record):
         if self.log_unhandled:
-            print(f"Unhandled record {record['Type']}: {record}")
+            # print(f"Unhandled record {record['Type']}: {record}")
+            pass
         return []
 
     def _ips_resolved(self, hosts_to_scan):

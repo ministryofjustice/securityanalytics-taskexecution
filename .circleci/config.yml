@@ -6,13 +6,13 @@ master-only: &master-only
       only: master
 
 executors:
-  terraform:
+  builder:
     docker:
       - image: duckpodger/python3-node-aws-terraform
 
 jobs:
   setup:
-    executor: terraform
+    executor: builder
     steps:
       - restore_cache:
           keys:
@@ -48,6 +48,7 @@ jobs:
             . .circleci/env.sh
             cd infrastructure
             terraform init -backend-config "bucket=$APP_NAME-terraform-state"
+            terraform get --update
             terraform workspace new $SSM_SOURCE_STAGE || terraform workspace select $SSM_SOURCE_STAGE
             echo checking formatting
             terraform fmt -check=true
@@ -60,10 +61,16 @@ jobs:
             - "*"
 
       - store_artifacts:
-          path: infrastructure/terraform.plan
+          path: .generated
 
       - store_artifacts:
           path: infrastructure/plan.file
+
+      - store_artifacts:
+          path: infrastructure/terraform.plan
+
+      - store_artifacts:
+          path: .generated/*
 
       - save_cache:
           key: git-v3-{{ .Branch }}-{{ .Revision }}
@@ -78,19 +85,35 @@ jobs:
             - ".generated"
             - ".pytest_cache"
 
-  deploy:
-    executor: terraform
+  unit-test:
+    executor: builder
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: terraform apply -var app_name=$APP_NAME
+          name: unit tests
           command: |
+            . .circleci/env.sh
+            pytest --junitxml=test-reports/junit.xml -m unit tests
+      - store_test_results:
+          path: test-reports
+
+  deploy:
+    executor: builder
+    steps:
+      - attach_workspace:
+          at: .
+      # TODO change this when we move on to having multiple environments
+      - run:
+          name: deploy
+          command: |
+            . .circleci/env.sh
             cd infrastructure
+            terraform workspace new dev || terraform workspace select dev
             terraform apply plan.file
 
   deploy-moj:
-    executor: terraform
+    executor: builder
     steps:
       - restore_cache:
           keys:
@@ -100,9 +123,9 @@ jobs:
       - checkout
 
       - restore_cache:
-            keys:
-              - tf-moj-v1-{{ .Branch }}-
-              - tf-moj-v1-
+          keys:
+            - tf-moj-v1-{{ .Branch }}-
+            - tf-moj-v1-
 
       - run:
           name: update git submodule
@@ -151,9 +174,11 @@ workflows:
   terraform-infrastructure:
     jobs:
       - setup
+      - unit-test:
+          requires: [ setup ]
       - approve:
           type: approval
-          requires: [ setup ]
+          requires: [ unit-test ]
           <<: *master-only
       - deploy:
           requires: [ approve ]
@@ -161,7 +186,3 @@ workflows:
       - deploy-moj:
           requires: [ approve ]
           <<: *master-only
-
-
-
-

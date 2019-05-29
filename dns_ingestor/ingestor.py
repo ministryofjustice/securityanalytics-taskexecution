@@ -30,6 +30,9 @@ class DnsZoneIngestor:
             if not listed_all_zones:
                 pagination_params["Marker"] = zone_page["NextMarker"]
 
+        # TODO just for test
+        # self.known_zones = {"/hostedzone/Z31RX3GZS94JZS": "dsd.io."}
+
         self.ingested_zones = True
 
     # records the name and id of all the zones in a single page
@@ -44,8 +47,6 @@ class DnsZoneIngestor:
             self.record_count[zone_id] = 0
 
         self.num_zones += len(zones_in_page)
-
-        print(f"Read page of {len(zones_in_page)} hosted zones")
         return zone_page
 
     # Loads all the zones first and then queries each of the zones in turn
@@ -60,7 +61,6 @@ class DnsZoneIngestor:
 
     # Handles the pagination querying all the records for a given zone
     async def _ingest_records_from_zone(self, zone_id, name, record_consumer):
-        print(f"Ingesting zone: {name}")
         pagination_params = {"MaxItems": "100"}
         finished_listing_resources = False
 
@@ -91,11 +91,10 @@ class DnsZoneIngestor:
 
         # the
         for record in record_sets:
-            record_consumer(record)
+            await record_consumer(record)
 
         # Since route53 api is rate limited to 5 calls a second
         # we add another task to our gather operation so we are not done until it elapsed too
-        # Have added a 50% error margin to ensure it will complete
-        await sleep(1.5 / 5.0)
-
+        # Have added a 10% error margin to ensure it will complete
+        await sleep(1.1 / 5.0)
         return record_page

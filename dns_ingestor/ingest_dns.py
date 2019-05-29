@@ -103,7 +103,7 @@ async def ingest_dns(event, _):
         )
 
     end = timer()
-    print(f"Ingested all zones in {end-start}s, planning to scan {record_resolver.ips_resolved} IPs")
+    print(f"Ingested all zones in {end-start}s, resolved {record_resolver.ips_resolved} IPs (may contain duplicates)")
 
 
 async def _clean_clients():

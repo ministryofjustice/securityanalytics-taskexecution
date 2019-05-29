@@ -12,8 +12,14 @@ resource "aws_lambda_function" "ingest_dns" {
   ]
 
   # We have to rate limit dns requests, so there are sleeps in the code
-  # and this lambda takes quite a lot of time ~2mins (setting over double for safety)
-  timeout = "${5 * 60}"
+  # and this lambda takes quite a lot of time ~9mins with 128MB lambda
+  # (setting to the maximum for safety)
+  timeout = "${15 * 60}"
+
+  # This lambda runs once a day, so allocate full memory (and therefore cpu)
+  # to make it as fast as possible
+  # TODO do experiments to determine best cost/speed benefit
+  memory_size = "3008"
 
   environment {
     variables = {
