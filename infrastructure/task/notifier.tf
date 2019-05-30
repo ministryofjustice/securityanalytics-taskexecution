@@ -14,7 +14,6 @@ resource "aws_sns_topic" "task_results" {
   # kms_master_key_id = "aws/sns"
 }
 
-
 locals {
   is_not_integration_test = "${terraform.workspace == var.ssm_source_stage ? (var.subscribe_elastic_to_notifier ? 1 : 0) : 0}"
 }
