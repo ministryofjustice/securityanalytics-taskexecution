@@ -19,7 +19,7 @@ output "results_bucket_id" {
 }
 
 output "task_queue_consumer" {
-  value = "${module.taskmodule.task_queue_consumer}"
+  value = "${module.taskmodule.task_queue_consumer_arn}"
 }
 
 output "results_parser" {

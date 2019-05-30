@@ -6,8 +6,12 @@ output "results_bucket_id" {
   value = "${aws_s3_bucket.results.id}"
 }
 
-output "task_queue_consumer" {
+output "task_queue_consumer_arn" {
   value = "${aws_iam_role.task_trigger_role.arn}"
+}
+
+output "task_queue_consumer_role" {
+  value = "${aws_iam_role.task_trigger_role.name}"
 }
 
 output "trigger_role_name" {
@@ -32,4 +36,8 @@ output "task_trigger_policy_arn" {
 
 output "s3_bucket_policy_arn" {
   value = "${aws_iam_policy.s3_bucket_access_policy.arn}"
+}
+
+output "s3_bucket_policy_doc" {
+  value = "${aws_iam_policy.s3_bucket_access_policy.policy}"
 }

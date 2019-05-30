@@ -14,40 +14,6 @@ resource "aws_sns_topic" "task_results" {
   # kms_master_key_id = "aws/sns"
 }
 
-data "aws_iam_policy_document" "notify_topic_policy" {
-  statement {
-    actions = [
-      "sqs:SendMessage",
-    ]
-
-    condition {
-      test     = "ArnEquals"
-      variable = "aws:SourceArn"
-
-      values = [
-        "${aws_sns_topic.task_results.arn}",
-      ]
-    }
-
-    effect = "Allow"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-
-    resources = [
-      "${data.aws_ssm_parameter.elastic_ingestion_queue_arn.value}",
-    ]
-  }
-}
-
-resource "aws_sqs_queue_policy" "queue_policy" {
-  count     = "${local.is_not_integration_test}"
-  queue_url = "${data.aws_ssm_parameter.elastic_ingestion_queue_id.value}"
-  policy    = "${data.aws_iam_policy_document.notify_topic_policy.json}"
-}
-
 locals {
   is_not_integration_test = "${terraform.workspace == var.ssm_source_stage ? (var.subscribe_elastic_to_notifier ? 1 : 0) : 0}"
 }
