@@ -34,12 +34,6 @@ variable "known_deployment_stages" {
   default = ["dev", "qa", "prod"]
 }
 
-variable "ingest_schedule" {
-  type = "string"
-  # This is cron(ish) syntax every day at midnight
-  default = "0 0 * * ? *"
-}
-
 variable "route53_role" {
   type = "string"
   description = "The role that must be assumed to read route 53 info, needed since the source is likey to be in another account"
@@ -76,6 +70,5 @@ module "scheduler" {
   account_id = "${var.account_id}"
   app_name = "${var.app_name}"
   ssm_source_stage = "${local.ssm_source_stage}"
-  ingest_schedule = "${var.ingest_schedule}"
   route53_role = "${var.route53_role}"
 }

@@ -5,6 +5,10 @@
       "base_in_zip": "dns_ingestor"
     },
     {
+      "dir": "../scan_initiator",
+      "base_in_zip": "scan_initiator"
+    },
+    {
       "dir": "../.venv/Lib/site-packages",
       "exclude_dev_deps": true
     }

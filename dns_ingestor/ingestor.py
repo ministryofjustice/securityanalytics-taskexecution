@@ -95,6 +95,6 @@ class DnsZoneIngestor:
 
         # Since route53 api is rate limited to 5 calls a second
         # we add another task to our gather operation so we are not done until it elapsed too
-        # Have added a 10% error margin to ensure it will complete
-        await sleep(1.1 / 5.0)
+        # Have added a 30% error margin to ensure it will complete
+        await sleep(1.3 / 5.0)
         return record_page

@@ -11,7 +11,8 @@ class PlannedScanDbWriter:
         self.ingest_time_string = datetime.datetime.fromtimestamp(int(ingest_time), pytz.utc).isoformat()
         self.schedule = schedule
         self.update_expr = "SET #Hosts = list_append(if_not_exists(#Hosts, :empty_list), :Host), " \
-                           "PlannedScanTime = if_not_exists(#PlannedScanTime, :PlannedScanTime)"
+                           "PlannedScanTime = if_not_exists(#PlannedScanTime, :PlannedScanTime), " \
+                           "DnsIngestTime = :DnsIngestTime"
 
     async def write(self, host):
         if not isinstance(host, HostToScan):
@@ -22,7 +23,7 @@ class PlannedScanDbWriter:
         planned_slot = next(self.schedule)
 
         await self.table.update_item(
-            Key={"Address": host.address, "DnsIngestTime": str(self.ingest_time)},
+            Key={"Address": host.address},
             UpdateExpression=self.update_expr,
             ExpressionAttributeNames={
                 "#Hosts": "HostsResolvingToAddress",
@@ -30,8 +31,9 @@ class PlannedScanDbWriter:
             },
             ExpressionAttributeValues={
                 ":Host": [host.host],
-                ":PlannedScanTime": planned_slot,
-                ":empty_list": []
+                ":PlannedScanTime": int(planned_slot),
+                ":empty_list": [],
+                ":DnsIngestTime": int(self.ingest_time)
             },
             ReturnValues="UPDATED_NEW"
         )

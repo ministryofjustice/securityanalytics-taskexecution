@@ -16,6 +16,14 @@ variable "ssm_source_stage" {
 
 variable "ingest_schedule" {
   type = "string"
+  # This is cron(ish) syntax every day at midnight
+  default = "0 0 * * ? *"
+}
+
+variable "scan_schedule" {
+  type = "string"
+  # This is cron(ish) syntax every 15 mins
+  default = "0/15 * * * ? *"
 }
 
 variable "route53_role" {
@@ -32,7 +40,7 @@ variable "planning_period_seconds" {
 variable "planning_buckets" {
   type = "string"
   description = "The number of buckets the period is split into"
-  default = "24" # 24 hours
+  default = "96" # 24 hours * 4 subdivisions into 15 min buckets
 }
 
 variable "log_unhandled" {

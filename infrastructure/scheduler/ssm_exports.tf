@@ -24,6 +24,19 @@ resource "aws_ssm_parameter" "plan_db_arn" {
   }
 }
 
+resource "aws_ssm_parameter" "plan_index" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/plan_index"
+  description = "Name of the index we query by"
+  type        = "String"
+  value       = "${local.plan_index}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
 resource "aws_ssm_parameter" "route53_ingest_role" {
   name        = "/${var.app_name}/${terraform.workspace}/scheduler/route53/role/arn"
   description = "Arn of the role assumed when ingesting route 53 zones"
@@ -68,6 +81,32 @@ resource "aws_ssm_parameter" "config_log_unhandled" {
   description = "Arn of the role assumed when ingesting route 53 zones"
   type        = "String"
   value       = "${var.log_unhandled ? "True" : "False"}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
+resource "aws_ssm_parameter" "scan_delay_queue" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/scan_delay_queue"
+  description = "The URL of the queue used to delay scan initiation"
+  type        = "String"
+  value       = "${aws_sqs_queue.scan_delay_queue.id}"
+  overwrite   = "true"
+
+  tags {
+    app_name  = "${var.app_name}"
+    workspace = "${terraform.workspace}"
+  }
+}
+
+resource "aws_ssm_parameter" "scan_initiator_topic" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/scan_initiator_topic"
+  description = "The topic used for the scheduler to notify primary scanners to perform their scans"
+  type        = "String"
+  value       = "${aws_sns_topic.scan_initiator.id}"
   overwrite   = "true"
 
   tags {

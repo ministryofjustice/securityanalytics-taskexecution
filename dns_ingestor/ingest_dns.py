@@ -106,14 +106,15 @@ async def ingest_dns(event, _):
     print(f"Ingested all zones in {end-start}s, resolved {record_resolver.ips_resolved} IPs (may contain duplicates)")
 
 
-async def _clean_clients():
-    return await gather(
-        ssm_client.close(),
-        sts_client.close(),
-        dynamo_resource.close()
-    )
-
 # For developer test use only
 if __name__ == "__main__":
-    ingest_dns({}, namedtuple("context", ["loop"]))
-    run(_clean_clients())
+    async def _clean_clients():
+        return await gather(
+            ssm_client.close(),
+            sts_client.close(),
+            dynamo_resource.close()
+        )
+    try:
+        ingest_dns({}, namedtuple("context", ["loop"]))
+    finally:
+        run(_clean_clients())

@@ -54,9 +54,10 @@ async def test_dynamo_db_call_params():
     await writer.write(HostToScan("123.4.5.6", "foo.bar"))
 
     db_table.update_item.assert_called_once_with(
-        Key={"Address": "123.4.5.6", "DnsIngestTime": "999"},
+        Key={"Address": "123.4.5.6"},
         UpdateExpression="SET #Hosts = list_append(if_not_exists(#Hosts, :empty_list), :Host), "
-                         "PlannedScanTime = if_not_exists(#PlannedScanTime, :PlannedScanTime)",
+                         "PlannedScanTime = if_not_exists(#PlannedScanTime, :PlannedScanTime), "
+                         "DnsIngestTime = : DnsIngestTime",
         ExpressionAttributeNames={
             "#Hosts": "HostsResolvingToAddress",
             "#PlannedScanTime": "PlannedScanTime"
@@ -64,7 +65,8 @@ async def test_dynamo_db_call_params():
         ExpressionAttributeValues={
             ":Host": ["foo.bar"],
             ":PlannedScanTime": 1050,
-            ":empty_list": []
+            ":empty_list": [],
+            "DnsIngestTime": 999
         },
         ReturnValues="UPDATED_NEW"
     )
