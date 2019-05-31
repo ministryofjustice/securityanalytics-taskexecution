@@ -146,6 +146,5 @@ async def test_alias_cname_record_resolves():
             ]
         }
     )
-    assert len(results) > 2
-    assert HostToScan("::1", "a.dsd.io.") in results
+    assert len(results) > 1
     assert HostToScan("127.0.0.1", "a.dsd.io.") in results

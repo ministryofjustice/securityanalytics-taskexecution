@@ -2,7 +2,7 @@ import pytest
 import os
 import itertools
 from unittest.mock import patch, MagicMock, call
-from test_utils.test_utils import AsyncContextManagerMock, coroutine_of
+from test_utils.test_utils import AsyncContextManagerMock, coroutine_of, resetting_mocks
 from boto3.dynamodb.conditions import Key
 from decimal import Decimal
 
@@ -24,6 +24,9 @@ def scan_initiator():
         from scan_initiator import scan_initiator
 
         yield scan_initiator
+
+        scan_initiator.dynamo_resource.reset_mock()
+        scan_initiator.sqs_client.reset_mock()
 
         scan_initiator.clean_clients()
 
@@ -176,7 +179,7 @@ def test_replace_punctuation_in_address_ids(uniform, time, scan_initiator):
 
     # pretend the sqs and dynamo deletes are all ok
     scan_initiator.sqs_client.send_message_batch.side_effect = [coroutine_of(None)]
-    _mock_delete_responses(mock_plan_table, [coroutine_of(None)])
+    _mock_delete_responses(mock_plan_table, [coroutine_of(None), coroutine_of(None)])
 
     # actually do the test
     scan_initiator.initiate_scans({}, MagicMock())
@@ -188,12 +191,12 @@ def test_replace_punctuation_in_address_ids(uniform, time, scan_initiator):
             {
                 "Id": "123-456-123-456",
                 "DelaySeconds": 4,
-                "MessageBody": "{\"CloudWatchEventHosts\":[{\"123.456.123.456\"}]}"
+                "MessageBody": "{\"CloudWatchEventHosts\":[\"123.456.123.456\"]}"
             },
             {
-                "Id": "123-456-123-456",
+                "Id": "2001-0db8-85a3-0000-0000-8a2e-0370-7334",
                 "DelaySeconds": 4,
-                "MessageBody": "{\"CloudWatchEventHosts\":[{\"2001-0db8-85a3-0000-0000-8a2e-0370-7334\"}]}"
+                "MessageBody": "{\"CloudWatchEventHosts\":[\"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"]}"
             }
         ]
     )
@@ -271,12 +274,13 @@ def test_no_deletes_until_all_sqs_success(uniform, time, scan_initiator):
     # pretend the sqs and dynamo deletes are all ok, there are 4 calls to sqs
     # and
     scan_initiator.sqs_client.send_message_batch.side_effect = [
-        RuntimeError("test error")
+        Exception("test error")
     ]
     writer = _mock_delete_responses(mock_plan_table, [])
 
     # actually do the test
-    scan_initiator.initiate_scans({}, MagicMock())
+    with pytest.raises(Exception):
+        scan_initiator.initiate_scans({}, MagicMock())
 
     # There will be 1 call to sqs
     assert scan_initiator.sqs_client.send_message_batch.call_count == 1
