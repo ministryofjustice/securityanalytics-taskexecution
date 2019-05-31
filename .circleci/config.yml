@@ -94,7 +94,7 @@ jobs:
           name: unit tests
           command: |
             . .circleci/env.sh
-            pytest --junitxml=test-reports/junit.xml -m unit tests
+            pytest --junitxml=test-reports/junit.xml -s -vv -m unit tests
       - store_test_results:
           path: test-reports
 
