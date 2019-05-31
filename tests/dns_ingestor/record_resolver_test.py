@@ -101,6 +101,7 @@ async def test_alias_a_record_resolves():
             }
         }
     )
+    print(results)
     assert len(results) <= 2
     assert HostToScan("127.0.0.1", "a.dsd.io.") in results
     if len(results) == 2:
