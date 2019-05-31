@@ -1,9 +1,5 @@
 import pytest
 from dns_ingestor.host_to_scan import HostToScan
-from unittest.mock import patch, MagicMock
-from test_utils.test_utils import future_exception
-from socket import gaierror
-from asyncio import Future
 from dns_ingestor.record_resolver import RecordResolver
 
 

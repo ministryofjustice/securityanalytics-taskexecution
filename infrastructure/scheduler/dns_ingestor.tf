@@ -5,7 +5,7 @@ resource "aws_lambda_function" "ingest_dns" {
   role             = "${aws_iam_role.dns_ingestor.arn}"
   runtime          = "python3.7"
   filename         = "${local.scheduler_zip}"
-  source_code_hash = "${data.external.nmap_zip.result.hash}"
+  source_code_hash = "${data.external.scheduler_zip.result.hash}"
 
   layers = [
     "${data.aws_ssm_parameter.utils_layer.value}",

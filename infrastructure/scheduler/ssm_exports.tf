@@ -102,11 +102,11 @@ resource "aws_ssm_parameter" "scan_delay_queue" {
   }
 }
 
-resource "aws_ssm_parameter" "scan_initiator_topic" {
-  name        = "/${var.app_name}/${terraform.workspace}/scheduler/scan_initiator_topic"
-  description = "The topic used for the scheduler to notify primary scanners to perform their scans"
+resource "aws_ssm_parameter" "scan_initiator_topic_arn" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/scan_initiator_topic/arn"
+  description = "The topic ARN used for the scheduler to notify primary scanners to perform their scans"
   type        = "String"
-  value       = "${aws_sns_topic.scan_initiator.id}"
+  value       = "${aws_sns_topic.scan_initiator.arn}"
   overwrite   = "true"
 
   tags {

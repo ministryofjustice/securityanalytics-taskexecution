@@ -5,7 +5,7 @@ resource "aws_lambda_function" "scan_initiator" {
   role             = "${aws_iam_role.scan_initiator.arn}"
   runtime          = "python3.7"
   filename         = "${local.scheduler_zip}"
-  source_code_hash = "${data.external.nmap_zip.result.hash}"
+  source_code_hash = "${data.external.scheduler_zip.result.hash}"
 
   layers = [
     "${data.aws_ssm_parameter.utils_layer.value}",
@@ -67,7 +67,8 @@ data "aws_iam_policy_document" "scan_initiator_perms" {
     effect = "Allow"
 
     actions = [
-      "dynamodb:scan"
+      "dynamodb:Scan",
+      "dynamodb:BatchWriteItem"
     ]
 
     resources = ["${aws_dynamodb_table.planned_scans.arn}"]
@@ -84,13 +85,12 @@ resource "aws_iam_role" "scan_initiator" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "scan_initiator_perms" {
-  role       = "${aws_iam_role.scan_initiator.name}"
-  policy_arn = "${aws_iam_policy.scan_initiator_perms.id}"
-}
-
-
 resource "aws_iam_policy" "scan_initiator_perms" {
   name   = "${terraform.workspace}-${var.app_name}-scan-initiator"
   policy = "${data.aws_iam_policy_document.scan_initiator_perms.json}"
+}
+
+resource "aws_iam_role_policy_attachment" "scan_initiator_perms" {
+  role       = "${aws_iam_role.scan_initiator.name}"
+  policy_arn = "${aws_iam_policy.scan_initiator_perms.id}"
 }

@@ -1,11 +1,21 @@
 data "aws_iam_policy_document" "scan_delay_queue_policy" {
   statement {
-    actions = ["SQS:SendMessage"]
+    actions = ["sqs:SendMessage"]
     effect  = "Allow"
 
     principals {
-      type        = "Service"
-      identifiers = ["events.amazonaws.com"]
+      type        = "AWS"
+      identifiers = ["${var.account_id}"]
+    }
+
+    # Allow the lambda to send messages
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+
+      values = [
+        "${aws_lambda_function.scan_initiator.arn}",
+      ]
     }
 
     resources = ["${aws_sqs_queue.scan_delay_queue.arn}"]

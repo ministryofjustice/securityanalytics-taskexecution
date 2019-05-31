@@ -62,7 +62,7 @@ async def remove_plan_entries(batch, table):
 @async_handler
 async def initiate_scans(event, _):
     params = event['ssm_params']
-    start_time = time.time() + 60*20
+    start_time = time.time()
     print(f"Querying all of the scans planned with a PlannedScanTime < {start_time}")
     scan_plan_table = dynamo_resource.Table(params[SCAN_PLAN_TABLE])
 
@@ -105,18 +105,21 @@ async def initiate_scans(event, _):
 
     print(f"Completed queuing {scans_initiated} scan initiation messages")
 
+
+# Test cases can use this to clean up the clients
+async def clean_clients():
+    return await gather(
+        ssm_client.close(),
+        sqs_client.close(),
+        dynamo_resource.close()
+    )
+
 # For developer test use only
 if __name__ == "__main__":
-    async def _clean_clients():
-        return await gather(
-            ssm_client.close(),
-            sqs_client.close(),
-            dynamo_resource.close()
-        )
     try:
         initiate_scans({}, namedtuple("context", ["loop"]))
     finally:
-        run(_clean_clients())
+        run(clean_clients())
 
 
 
