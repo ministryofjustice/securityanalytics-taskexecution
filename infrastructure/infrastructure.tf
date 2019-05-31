@@ -25,15 +25,18 @@ variable "app_name" {}
 
 variable "account_id" {}
 
-variable "transient_workspace" {
-  default = false
+variable "ssm_source_stage" {
+  default = "DEFAULT"
 }
 
-# default to scanme.nmap.org if you haven't defined a list of hosts elsewhere
-# (we use scan_hosts.auto.tfvars to ensure it isn't checked in to github)
-variable "scan_hosts" {
+variable "known_deployment_stages" {
   type    = "list"
-  default = ["scanme.nmap.org"]
+  default = ["dev", "qa", "prod"]
+}
+
+variable "route53_role" {
+  type        = "string"
+  description = "The role that must be assumed to read route 53 info, needed since the source is likey to be in another account"
 }
 
 provider "aws" {
@@ -47,7 +50,26 @@ provider "aws" {
 # Resources
 #############################################
 
+locals {
+  # When a build is done as a user locally, or when building a stage e.g. dev/qa/prod we use
+  # the workspace name e.g. progers or dev
+  # When the circle ci build is run we override the var.ssm_source_stage to explicitly tell it
+  # to use the resources in dev. Change
+  ssm_source_stage = "${var.ssm_source_stage == "DEFAULT" ? terraform.workspace : var.ssm_source_stage}"
+
+  transient_workspace = "${!contains(var.known_deployment_stages, terraform.workspace)}"
+}
+
 module "ecs_cluster" {
   source   = "ecs_cluster"
   app_name = "${var.app_name}"
+}
+
+module "scheduler" {
+  source           = "scheduler"
+  aws_region       = "${var.aws_region}"
+  account_id       = "${var.account_id}"
+  app_name         = "${var.app_name}"
+  ssm_source_stage = "${local.ssm_source_stage}"
+  route53_role     = "${var.route53_role}"
 }

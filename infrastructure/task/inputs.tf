@@ -6,7 +6,9 @@ variable "aws_region" {
   type = "string"
 }
 
-variable "account_id" {}
+variable "account_id" {
+  type = "string"
+}
 
 variable "task_name" {
   type = "string"

@@ -6,26 +6,41 @@ master-only: &master-only
       only: master
 
 executors:
-  terraform:
+  builder:
     docker:
       - image: duckpodger/python3-node-aws-terraform
 
 jobs:
   setup:
-    executor: terraform
+    executor: builder
     steps:
       - restore_cache:
           keys:
             - git-v3-{{ .Branch }}-
             - git-v3-
 
-      - checkout:
-          path: ~/project
+      - checkout
+
+      - run:
+          name: update git submodule
+          command: |
+            git submodule init
+            git submodule update --remote
+            git submodule sync
 
       - restore_cache:
           keys:
-            - tf-v3-{{ .Branch }}-
-            - tf-v3-
+            - other-v1-{{ .Branch }}-
+            - other-v1-
+
+      - run:
+          name: install virtual env
+          command: |
+            export PIPENV_VENV_IN_PROJECT=true
+            pipenv install --dev --deploy
+            if [ ! -d "test-reports" ]; then
+              mkdir test-reports
+            fi
 
       - run:
           name: terraform
@@ -33,11 +48,12 @@ jobs:
             . .circleci/env.sh
             cd infrastructure
             terraform init -backend-config "bucket=$APP_NAME-terraform-state"
+            terraform get --update
             terraform workspace new $SSM_SOURCE_STAGE || terraform workspace select $SSM_SOURCE_STAGE
             echo checking formatting
             terraform fmt -check=true
             echo making the plan
-            terraform plan -var ssm_source_stage=$SSM_SOURCE_STAGE -var account_id=$ACCOUNT_ID -var app_name=$APP_NAME -no-color -out=plan.file > terraform.plan
+            terraform plan -var ssm_source_stage=$SSM_SOURCE_STAGE -var account_id=$ACCOUNT_ID -var app_name=$APP_NAME -var route53_role=$ROUTE53_ROLE -no-color -out=plan.file > terraform.plan
 
       - persist_to_workspace:
           root: .
@@ -45,10 +61,16 @@ jobs:
             - "*"
 
       - store_artifacts:
-          path: infrastructure/terraform.plan
+          path: .generated
 
       - store_artifacts:
           path: infrastructure/plan.file
+
+      - store_artifacts:
+          path: infrastructure/terraform.plan
+
+      - store_artifacts:
+          path: .generated/*
 
       - save_cache:
           key: git-v3-{{ .Branch }}-{{ .Revision }}
@@ -56,36 +78,70 @@ jobs:
             - ".git"
 
       - save_cache:
-          key: tf-v3-{{ .Branch }}-{{ .Revision }}
+          key: other-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".terraform"
+            - ".venv"
+            - ".generated"
+            - ".pytest_cache"
 
-  deploy:
-    executor: terraform
+  unit-test:
+    executor: builder
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: terraform apply -var app_name=$APP_NAME
+          name: unit tests
           command: |
+            . .circleci/env.sh
+            pytest --junitxml=test-reports/junit.xml -s -vv -m unit tests
+      - store_test_results:
+          path: test-reports
+
+  deploy:
+    executor: builder
+    steps:
+      - attach_workspace:
+          at: .
+      # TODO change this when we move on to having multiple environments
+      - run:
+          name: deploy
+          command: |
+            . .circleci/env.sh
             cd infrastructure
+            terraform workspace new dev || terraform workspace select dev
             terraform apply plan.file
 
   deploy-moj:
-    executor: terraform
+    executor: builder
     steps:
       - restore_cache:
           keys:
             - git-v3-{{ .Branch }}-
             - git-v3-
 
-      - checkout:
-          path: ~/project
+      - checkout
 
       - restore_cache:
           keys:
             - tf-moj-v1-{{ .Branch }}-
             - tf-moj-v1-
+
+      - run:
+          name: update git submodule
+          command: |
+            git submodule init
+            git submodule update --remote
+            git submodule sync
+
+      - run:
+          name: install virtual env
+          command: |
+            export PIPENV_VENV_IN_PROJECT=true
+            pipenv install --dev --deploy
+            if [ ! -d "test-reports" ]; then
+              mkdir test-reports
+            fi
 
       - run:
           name: terraform apply
@@ -109,15 +165,20 @@ jobs:
           key: tf-moj-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".terraform"
+            - ".venv"
+            - ".generated"
+            - ".pytest_cache"
 
 workflows:
   version: 2
   terraform-infrastructure:
     jobs:
       - setup
+      - unit-test:
+          requires: [ setup ]
       - approve:
           type: approval
-          requires: [ setup ]
+          requires: [ unit-test ]
           <<: *master-only
       - deploy:
           requires: [ approve ]
@@ -125,7 +186,3 @@ workflows:
       - deploy-moj:
           requires: [ approve ]
           <<: *master-only
-
-
-
-
