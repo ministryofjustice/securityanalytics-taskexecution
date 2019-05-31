@@ -10,7 +10,9 @@ async def ns_lookup(host):
     # See https://docs.python.org/3/library/socket.html#socket.getaddrinfo
     # for magic indexes
     loop = get_event_loop()
-    return [address[4][0] for address in await loop.getaddrinfo(host, 0)]
+    addresses = await loop.getaddrinfo(host, 0)
+    print(addresses)
+    return [address[4][0] for address in addresses]
 
 
 class RecordResolver:
@@ -40,7 +42,7 @@ class RecordResolver:
             # print(f"Ingested {record['Type']} record: {record['Name']}")
             return self._ips_resolved([
                 HostToScan(resource["Value"], record["Name"])
-                for resource in (record["ResourceRecords"])
+                for resource in record["ResourceRecords"]
             ])
 
     async def _resolve_alias_record(self, record):
