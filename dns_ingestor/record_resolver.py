@@ -12,7 +12,10 @@ async def ns_lookup(host):
     loop = get_event_loop()
     addresses = await loop.getaddrinfo(host, 0)
     print(addresses)
-    return [address[4][0] for address in addresses]
+    short_addresses = [address[4][0] for address in addresses]
+    dedupped = list(dict.fromkeys(short_addresses))
+    print(dedupped)
+    return dedupped
 
 
 class RecordResolver:
