@@ -10,12 +10,13 @@ async def ns_lookup(host):
     # See https://docs.python.org/3/library/socket.html#socket.getaddrinfo
     # for magic indexes
     loop = get_event_loop()
-    addresses = await loop.getaddrinfo(host, 0)
-    print(addresses)
-    short_addresses = [address[4][0] for address in addresses]
-    dedupped = list(dict.fromkeys(short_addresses))
-    print(dedupped)
-    return dedupped
+    addresses = [address[4][0] for address in await loop.getaddrinfo(host, 0)]
+    # This de-duplication stage is used because there are many different types of socket e.g.
+    # SocketKind.SOCK_STREAM & SocketKind.SOCK_DGRAM
+    # TODO I am not sure that using the socket api is the correct way to do this
+    # e.g. it doesn't go out of its way to get authoritative answers to DNS and an address
+    # and a socket are not 1:1, look at http://www.dnspython.org/ ?
+    return list(dict.fromkeys(addresses))
 
 
 class RecordResolver:
