@@ -1,5 +1,4 @@
 resource "aws_lambda_function" "ingest_dns" {
-
   function_name    = "${terraform.workspace}-${var.app_name}-ingest-dns"
   handler          = "dns_ingestor.ingest_dns.ingest_dns"
   role             = "${aws_iam_role.dns_ingestor.arn}"
@@ -23,9 +22,9 @@ resource "aws_lambda_function" "ingest_dns" {
 
   environment {
     variables = {
-      REGION    = "${var.aws_region}"
-      STAGE     = "${terraform.workspace}"
-      APP_NAME  = "${var.app_name}"
+      REGION   = "${var.aws_region}"
+      STAGE    = "${terraform.workspace}"
+      APP_NAME = "${var.app_name}"
     }
   }
 
@@ -78,7 +77,7 @@ data "aws_iam_policy_document" "dns_ingestor_perms" {
     effect = "Allow"
 
     actions = [
-      "dynamodb:*"
+      "dynamodb:*",
     ]
 
     resources = ["${aws_dynamodb_table.planned_scans.arn}"]
@@ -86,8 +85,9 @@ data "aws_iam_policy_document" "dns_ingestor_perms" {
 
   statement {
     effect = "Allow"
+
     actions = [
-      "sts:AssumeRole"
+      "sts:AssumeRole",
     ]
 
     resources = ["${var.route53_role}"]
@@ -108,7 +108,6 @@ resource "aws_iam_role_policy_attachment" "dns_ingestor_perms" {
   role       = "${aws_iam_role.dns_ingestor.name}"
   policy_arn = "${aws_iam_policy.dns_ingestor_perms.id}"
 }
-
 
 resource "aws_iam_policy" "dns_ingestor_perms" {
   name   = "${terraform.workspace}-${var.app_name}-dns-ingestor"

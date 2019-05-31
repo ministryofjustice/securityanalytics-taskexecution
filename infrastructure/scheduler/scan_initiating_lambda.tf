@@ -1,5 +1,4 @@
 resource "aws_lambda_function" "scan_initiator" {
-
   function_name    = "${terraform.workspace}-${var.app_name}-scan-initiator"
   handler          = "scan_initiator.scan_initiator.initiate_scans"
   role             = "${aws_iam_role.scan_initiator.arn}"
@@ -13,9 +12,9 @@ resource "aws_lambda_function" "scan_initiator" {
 
   environment {
     variables = {
-      REGION    = "${var.aws_region}"
-      STAGE     = "${terraform.workspace}"
-      APP_NAME  = "${var.app_name}"
+      REGION   = "${var.aws_region}"
+      STAGE    = "${terraform.workspace}"
+      APP_NAME = "${var.app_name}"
     }
   }
 
@@ -68,7 +67,7 @@ data "aws_iam_policy_document" "scan_initiator_perms" {
 
     actions = [
       "dynamodb:Scan",
-      "dynamodb:BatchWriteItem"
+      "dynamodb:BatchWriteItem",
     ]
 
     resources = ["${aws_dynamodb_table.planned_scans.arn}"]

@@ -15,12 +15,12 @@ resource "aws_sns_topic" "scan_initiator" {
 }
 
 module "delay_queue_notifier_glue" {
-  source = "../../../securityanalytics-sharedcode/infrastructure/sqs_sns_glue"
-  aws_region = "${var.aws_region}"
-  account_id = "${var.account_id}"
-  app_name = "${var.app_name}"
+  source           = "../../../securityanalytics-sharedcode/infrastructure/sqs_sns_glue"
+  aws_region       = "${var.aws_region}"
+  account_id       = "${var.account_id}"
+  app_name         = "${var.app_name}"
   ssm_source_stage = "${var.ssm_source_stage}"
-  glue_name = "delay-notify-glue"
-  sns_topic_arn = "${aws_sns_topic.scan_initiator.arn}"
-  sqs_queue_arn = "${aws_sqs_queue.scan_delay_queue.arn}"
+  glue_name        = "delay-notify-glue"
+  sns_topic_arn    = "${aws_sns_topic.scan_initiator.arn}"
+  sqs_queue_arn    = "${aws_sqs_queue.scan_delay_queue.arn}"
 }

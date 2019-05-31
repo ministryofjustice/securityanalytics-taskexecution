@@ -35,7 +35,7 @@ variable "known_deployment_stages" {
 }
 
 variable "route53_role" {
-  type = "string"
+  type        = "string"
   description = "The role that must be assumed to read route 53 info, needed since the source is likey to be in another account"
 }
 
@@ -56,6 +56,7 @@ locals {
   # When the circle ci build is run we override the var.ssm_source_stage to explicitly tell it
   # to use the resources in dev. Change
   ssm_source_stage = "${var.ssm_source_stage == "DEFAULT" ? terraform.workspace : var.ssm_source_stage}"
+
   transient_workspace = "${!contains(var.known_deployment_stages, terraform.workspace)}"
 }
 
@@ -65,10 +66,10 @@ module "ecs_cluster" {
 }
 
 module "scheduler" {
-  source   = "scheduler"
-  aws_region = "${var.aws_region}"
-  account_id = "${var.account_id}"
-  app_name = "${var.app_name}"
+  source           = "scheduler"
+  aws_region       = "${var.aws_region}"
+  account_id       = "${var.account_id}"
+  app_name         = "${var.app_name}"
   ssm_source_stage = "${local.ssm_source_stage}"
-  route53_role = "${var.route53_role}"
+  route53_role     = "${var.route53_role}"
 }

@@ -3,10 +3,11 @@ locals {
 }
 
 resource "aws_dynamodb_table" "planned_scans" {
-  name           = "${terraform.workspace}-${var.app_name}-scan-schedule"
+  name = "${terraform.workspace}-${var.app_name}-scan-schedule"
+
   # TODO could well be cheaper to provision rather than pay per request
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "Address"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "Address"
 
   attribute {
     name = "Address"
