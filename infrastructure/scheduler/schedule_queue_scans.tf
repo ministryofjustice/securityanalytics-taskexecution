@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_event_target" "schedule_scan_initiator" {
   rule  = "${aws_cloudwatch_event_rule.schedule_scan_initiator.name}"
-  arn   = "${aws_lambda_function.ingest_dns.arn}"
+  arn   = "${aws_lambda_function.scan_initiator.arn}"
   input = "{}"                                                        # no info needed, just do the scan!
 }
 
