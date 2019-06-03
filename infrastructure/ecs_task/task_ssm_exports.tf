@@ -5,7 +5,7 @@ resource "aws_ssm_parameter" "security_group" {
   value       = "${aws_security_group.task_group.id}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -18,7 +18,7 @@ resource "aws_ssm_parameter" "image_id" {
   value       = "${aws_ecs_task_definition.task.family}:${aws_ecs_task_definition.task.revision}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }

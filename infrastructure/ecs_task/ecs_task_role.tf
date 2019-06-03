@@ -14,7 +14,7 @@ resource "aws_iam_role" "task_role" {
   name               = "${terraform.workspace}-${var.app_name}-${var.task_name}"
   assume_role_policy = "${data.aws_iam_policy_document.ecs_trust.json}"
 
-  tags {
+  tags = {
     task_name = "${var.task_name}"
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"

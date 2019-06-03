@@ -1,11 +1,11 @@
 resource "aws_iam_role" "results_parse_role" {
   name               = "${terraform.workspace}-${var.app_name}-${var.task_name}-parse"
-  assume_role_policy = "${data.aws_iam_policy_document.lambda_trust.json}"
+  assume_role_policy = data.aws_iam_policy_document.lambda_trust.json
 
-  tags {
-    task_name = "${var.task_name}"
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
+  tags = {
+    task_name = var.task_name
+    app_name  = var.app_name
+    workspace = terraform.workspace
   }
 }
 
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "results_parse_policy" {
     actions = ["s3:GetObject"]
 
     resources = [
-      "${aws_s3_bucket.results.arn}",
+      aws_s3_bucket.results.arn,
       "${aws_s3_bucket.results.arn}/*",
     ]
   }
@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "results_parse_policy" {
   statement {
     effect    = "Allow"
     actions   = ["sns:Publish"]
-    resources = ["${aws_sns_topic.task_results.id}"]
+    resources = [aws_sns_topic.task_results.id]
   }
 
   statement {
@@ -68,10 +68,11 @@ data "aws_iam_policy_document" "results_parse_policy" {
 
 resource "aws_iam_policy" "results_parse_policy" {
   name   = "${terraform.workspace}-${var.app_name}-${var.task_name}-parse"
-  policy = "${data.aws_iam_policy_document.results_parse_policy.json}"
+  policy = data.aws_iam_policy_document.results_parse_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "results_parse_policy" {
-  role       = "${aws_iam_role.results_parse_role.name}"
-  policy_arn = "${aws_iam_policy.results_parse_policy.arn}"
+  role       = aws_iam_role.results_parse_role.name
+  policy_arn = aws_iam_policy.results_parse_policy.arn
 }
+

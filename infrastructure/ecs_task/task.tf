@@ -34,7 +34,7 @@ resource "aws_ecs_task_definition" "task" {
   cpu                      = "${var.cpu}"
   memory                   = "${var.memory}"
 
-  tags {
+  tags = {
     task_name = "${var.task_name}"
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"

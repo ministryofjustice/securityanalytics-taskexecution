@@ -78,7 +78,7 @@ resource "aws_iam_role" "scan_initiator" {
   name               = "${terraform.workspace}-${var.app_name}-scan-initiator"
   assume_role_policy = "${data.aws_iam_policy_document.lambda_trust.json}"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
