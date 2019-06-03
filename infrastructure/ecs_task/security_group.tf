@@ -11,7 +11,7 @@ resource "aws_security_group" "task_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name      = "${terraform.workspace}-${var.app_name}-${var.task_name}"
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"

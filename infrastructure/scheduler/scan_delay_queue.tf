@@ -32,7 +32,7 @@ resource "aws_sqs_queue" "scan_delay_queue" {
 
   # TODO set settings for e.g. dead letter queue, message retention, and kms master key
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }

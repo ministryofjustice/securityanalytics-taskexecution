@@ -1,4 +1,5 @@
-data "aws_caller_identity" "account" {}
+data "aws_caller_identity" "account" {
+}
 
 data "aws_iam_policy_document" "task_trigger_policy" {
   # So the task trigger can pull task requests off of the task queue
@@ -11,7 +12,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
       "sqs:GetQueueAttributes",
     ]
 
-    resources = ["${aws_sqs_queue.trigger_queue.arn}"]
+    resources = [aws_sqs_queue.trigger_queue.arn]
   }
 
   # So the task trigger can find the locations of e.g. queues
@@ -57,10 +58,11 @@ data "aws_iam_policy_document" "task_trigger_policy" {
 
 resource "aws_iam_policy" "task_trigger_policy" {
   name   = "${terraform.workspace}-${var.app_name}-${var.task_name}-task-trigger"
-  policy = "${data.aws_iam_policy_document.task_trigger_policy.json}"
+  policy = data.aws_iam_policy_document.task_trigger_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "task_trigger_policy" {
-  role       = "${aws_iam_role.task_trigger_role.name}"
-  policy_arn = "${aws_iam_policy.task_trigger_policy.arn}"
+  role       = aws_iam_role.task_trigger_role.name
+  policy_arn = aws_iam_policy.task_trigger_policy.arn
 }
+

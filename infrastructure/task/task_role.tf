@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "output_bucket_access" {
     actions = ["s3:PutObject"]
 
     resources = [
-      "${aws_s3_bucket.results.arn}",
+      aws_s3_bucket.results.arn,
       "${aws_s3_bucket.results.arn}/*",
     ]
   }
@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "output_bucket_access" {
 
 resource "aws_iam_policy" "s3_bucket_access_policy" {
   name   = "${terraform.workspace}-${var.app_name}-${var.task_name}"
-  policy = "${data.aws_iam_policy_document.output_bucket_access.json}"
+  policy = data.aws_iam_policy_document.output_bucket_access.json
 }
 
 data "aws_iam_policy_document" "lambda_trust" {
@@ -42,11 +42,12 @@ data "aws_iam_policy_document" "lambda_trust" {
 
 resource "aws_iam_role" "task_trigger_role" {
   name               = "${terraform.workspace}-${var.app_name}-${var.task_name}-trigger"
-  assume_role_policy = "${data.aws_iam_policy_document.lambda_trust.json}"
+  assume_role_policy = data.aws_iam_policy_document.lambda_trust.json
 
-  tags {
-    task_name = "${var.task_name}"
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
+  tags = {
+    task_name = var.task_name
+    app_name  = var.app_name
+    workspace = terraform.workspace
   }
 }
+

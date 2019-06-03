@@ -8,13 +8,13 @@ data "aws_iam_policy_document" "trigger_queue_policy_iam" {
       identifiers = ["events.amazonaws.com"]
     }
 
-    resources = ["${aws_sqs_queue.trigger_queue.arn}"]
+    resources = [aws_sqs_queue.trigger_queue.arn]
   }
 }
 
 resource "aws_sqs_queue_policy" "trigger_queue_policy" {
-  queue_url = "${aws_sqs_queue.trigger_queue.id}"
-  policy    = "${data.aws_iam_policy_document.trigger_queue_policy_iam.json}"
+  queue_url = aws_sqs_queue.trigger_queue.id
+  policy    = data.aws_iam_policy_document.trigger_queue_policy_iam.json
 }
 
 resource "aws_sqs_queue" "trigger_queue" {
@@ -22,9 +22,10 @@ resource "aws_sqs_queue" "trigger_queue" {
 
   # TODO set settings for e.g. dead letter queue, message retention, and kms master key
 
-  tags {
-    task_name = "${var.task_name}"
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
+  tags = {
+    task_name = var.task_name
+    app_name  = var.app_name
+    workspace = terraform.workspace
   }
 }
+

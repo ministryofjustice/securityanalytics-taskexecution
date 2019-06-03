@@ -5,7 +5,7 @@ resource "aws_ssm_parameter" "plan_db_id" {
   value       = "${aws_dynamodb_table.planned_scans.id}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -18,7 +18,7 @@ resource "aws_ssm_parameter" "plan_db_arn" {
   value       = "${aws_dynamodb_table.planned_scans.arn}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -31,7 +31,7 @@ resource "aws_ssm_parameter" "plan_index" {
   value       = "${local.plan_index}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -44,7 +44,7 @@ resource "aws_ssm_parameter" "route53_ingest_role" {
   value       = "${var.route53_role}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -57,7 +57,7 @@ resource "aws_ssm_parameter" "config_period" {
   value       = "${var.planning_period_seconds}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -70,7 +70,7 @@ resource "aws_ssm_parameter" "config_buckets" {
   value       = "${var.planning_buckets}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -83,7 +83,7 @@ resource "aws_ssm_parameter" "config_log_unhandled" {
   value       = "${var.log_unhandled ? "True" : "False"}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -96,7 +96,7 @@ resource "aws_ssm_parameter" "scan_delay_queue" {
   value       = "${aws_sqs_queue.scan_delay_queue.id}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }
@@ -109,7 +109,7 @@ resource "aws_ssm_parameter" "scan_initiator_topic_arn" {
   value       = "${aws_sns_topic.scan_initiator.arn}"
   overwrite   = "true"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }

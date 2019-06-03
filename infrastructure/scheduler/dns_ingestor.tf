@@ -98,7 +98,7 @@ resource "aws_iam_role" "dns_ingestor" {
   name               = "${terraform.workspace}-${var.app_name}-dns-ingestor"
   assume_role_policy = "${data.aws_iam_policy_document.lambda_trust.json}"
 
-  tags {
+  tags = {
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
   }

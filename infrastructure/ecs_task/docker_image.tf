@@ -1,7 +1,7 @@
 resource "aws_ecr_repository" "repo" {
   name = "${terraform.workspace}-${var.app_name}-${var.task_name}-repo"
 
-  tags {
+  tags = {
     task_name = "${var.task_name}"
     app_name  = "${var.app_name}"
     workspace = "${terraform.workspace}"
@@ -10,7 +10,7 @@ resource "aws_ecr_repository" "repo" {
 
 resource "null_resource" "build_image" {
   # TODO, triggers not working properly, always creating new image
-  triggers {
+  triggers = {
     # hash tags make sure we redeploy on a change
     docker_hash    = "${var.docker_hash}"
     results_bucket = "${module.taskmodule.results_bucket_arn}"
