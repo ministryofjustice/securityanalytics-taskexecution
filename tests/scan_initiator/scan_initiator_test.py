@@ -2,7 +2,7 @@ import pytest
 import os
 import itertools
 from unittest.mock import patch, MagicMock, call
-from test_utils.test_utils import AsyncContextManagerMock, coroutine_of, resetting_mocks
+from test_utils.test_utils import AsyncContextManagerMock, coroutine_of
 from boto3.dynamodb.conditions import Key
 from decimal import Decimal
 
