@@ -9,3 +9,11 @@ resource "aws_cloudwatch_event_rule" "schedule_dns_ingest" {
   description         = "Ingest dns data to plan scanning"
   schedule_expression = "cron(${var.ingest_schedule})"
 }
+
+resource "aws_lambda_permission" "dns_ingest_allow_cloudwatch" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.ingest_dns.function_name}"
+  principal     = "events.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_event_rule.schedule_dns_ingest.arn}"
+}
