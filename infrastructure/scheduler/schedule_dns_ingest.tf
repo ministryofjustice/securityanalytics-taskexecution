@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_event_target" "schedule_dns_ingest" {
   rule  = "${aws_cloudwatch_event_rule.schedule_dns_ingest.name}"
   arn   = "${aws_lambda_function.ingest_dns.arn}"
-  input = "{}" # no info needed, just do the scan!
+  input = "{}"                                                    # no info needed, just do the scan!
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_dns_ingest" {
