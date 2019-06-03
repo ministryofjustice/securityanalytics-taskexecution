@@ -10,7 +10,7 @@ resource "aws_ecr_repository" "repo" {
 
 resource "null_resource" "build_image" {
   # TODO, triggers not working properly, always creating new image
-  triggers {
+  triggers = {
     # hash tags make sure we redeploy on a change
     docker_hash    = "${var.docker_hash}"
     results_bucket = "${module.taskmodule.results_bucket_arn}"

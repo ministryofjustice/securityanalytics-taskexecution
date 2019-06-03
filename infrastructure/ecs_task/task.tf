@@ -6,7 +6,7 @@ data "aws_iam_role" "ecs_exec_role" {
 data "template_file" "task" {
   template = "${file("${path.module}/service.json")}"
 
-  vars {
+  vars = {
     stage        = "${terraform.workspace}"
     app_name     = "${var.app_name}"
     task_name    = "${var.task_name}"
