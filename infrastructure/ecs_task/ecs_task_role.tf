@@ -12,16 +12,17 @@ data "aws_iam_policy_document" "ecs_trust" {
 
 resource "aws_iam_role" "task_role" {
   name               = "${terraform.workspace}-${var.app_name}-${var.task_name}"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs_trust.json}"
+  assume_role_policy = data.aws_iam_policy_document.ecs_trust.json
 
   tags = {
-    task_name = "${var.task_name}"
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
+    task_name = var.task_name
+    app_name  = var.app_name
+    workspace = terraform.workspace
   }
 }
 
 resource "aws_iam_role_policy_attachment" "task_policy" {
-  role       = "${aws_iam_role.task_role.name}"
-  policy_arn = "${module.taskmodule.s3_bucket_policy_arn}"
+  role       = aws_iam_role.task_role.name
+  policy_arn = module.taskmodule.s3_bucket_policy_arn
 }
+

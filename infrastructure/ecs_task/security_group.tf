@@ -2,7 +2,7 @@
 resource "aws_security_group" "task_group" {
   name        = "${terraform.workspace}-${var.app_name}-${var.task_name}"
   description = "Allow all outbound, but no inbound"
-  vpc_id      = "${data.aws_ssm_parameter.vpc_id.value}"
+  vpc_id      = data.aws_ssm_parameter.vpc_id.value
 
   egress {
     from_port   = 0
@@ -13,7 +13,8 @@ resource "aws_security_group" "task_group" {
 
   tags = {
     Name      = "${terraform.workspace}-${var.app_name}-${var.task_name}"
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
+    app_name  = var.app_name
+    workspace = terraform.workspace
   }
 }
+
