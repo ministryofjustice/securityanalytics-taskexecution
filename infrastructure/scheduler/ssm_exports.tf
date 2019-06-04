@@ -58,6 +58,7 @@ resource "aws_ssm_parameter" "config_period" {
   overwrite   = "true"
 
   tags = {
+
     app_name  = var.app_name
     workspace = terraform.workspace
   }
