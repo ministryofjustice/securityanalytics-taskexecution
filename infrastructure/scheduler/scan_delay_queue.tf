@@ -5,7 +5,7 @@ data "aws_iam_policy_document" "scan_delay_queue_policy" {
 
     principals {
       type        = "AWS"
-      identifiers = ["${var.account_id}"]
+      identifiers = [var.account_id]
     }
 
     # Allow the lambda to send messages
@@ -14,17 +14,17 @@ data "aws_iam_policy_document" "scan_delay_queue_policy" {
       variable = "aws:SourceArn"
 
       values = [
-        "${aws_lambda_function.scan_initiator.arn}",
+        aws_lambda_function.scan_initiator.arn,
       ]
     }
 
-    resources = ["${aws_sqs_queue.scan_delay_queue.arn}"]
+    resources = [aws_sqs_queue.scan_delay_queue.arn]
   }
 }
 
 resource "aws_sqs_queue_policy" "scan_delay_queue_policy" {
-  queue_url = "${aws_sqs_queue.scan_delay_queue.id}"
-  policy    = "${data.aws_iam_policy_document.scan_delay_queue_policy.json}"
+  queue_url = aws_sqs_queue.scan_delay_queue.id
+  policy    = data.aws_iam_policy_document.scan_delay_queue_policy.json
 }
 
 resource "aws_sqs_queue" "scan_delay_queue" {
@@ -33,7 +33,8 @@ resource "aws_sqs_queue" "scan_delay_queue" {
   # TODO set settings for e.g. dead letter queue, message retention, and kms master key
 
   tags = {
-    app_name  = "${var.app_name}"
-    workspace = "${terraform.workspace}"
+    app_name  = var.app_name
+    workspace = terraform.workspace
   }
 }
+

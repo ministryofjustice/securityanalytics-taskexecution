@@ -20,7 +20,7 @@ resource "aws_dynamodb_table" "planned_scans" {
   }
 
   global_secondary_index {
-    name               = "${local.plan_index}"
+    name               = local.plan_index
     hash_key           = "Address"
     range_key          = "PlannedScanTime"
     projection_type    = "INCLUDE"
@@ -30,7 +30,8 @@ resource "aws_dynamodb_table" "planned_scans" {
   # TODO add server side encryption
 
   tags = {
-    workspace = "${terraform.workspace}"
-    app_name  = "${var.app_name}"
+    workspace = terraform.workspace
+    app_name  = var.app_name
   }
 }
+
