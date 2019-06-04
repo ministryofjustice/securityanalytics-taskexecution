@@ -5,8 +5,6 @@ data "aws_iam_role" "ecs_exec_role" {
 
 data "template_file" "task" {
   template = file("${path.module}/service.json")
-=======
-  template = "${file("${path.module}/service.json")}"
 
   vars = {
     stage        = terraform.workspace
