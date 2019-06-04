@@ -18,6 +18,7 @@ resource "null_resource" "build_image" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/update_docker_image.sh ${var.task_name} ${aws_ecr_repository.repo.repository_url} ${var.docker_dir} ${var.aws_region} ${var.app_name}"
+    command     = "update_docker_image.sh ${var.task_name} ${aws_ecr_repository.repo.repository_url} ${var.docker_dir} ${var.aws_region} ${var.app_name}"
+    working_dir = "${path.module}"
   }
 }
