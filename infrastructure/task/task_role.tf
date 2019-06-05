@@ -21,6 +21,24 @@ data "aws_iam_policy_document" "output_bucket_access" {
     # TODO reduce this scope
     resources = ["*"]
   }
+
+  # To enable XRAY trace
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "xray:PutTraceSegments",
+      "xray:PutTelemetryRecords",
+      "xray:GetSamplingRules",
+      "xray:GetSamplingTargets",
+      "xray:GetSamplingStatisticSummaries"
+    ]
+
+    # TODO make a better bound here
+    resources = [
+      "*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "s3_bucket_access_policy" {
