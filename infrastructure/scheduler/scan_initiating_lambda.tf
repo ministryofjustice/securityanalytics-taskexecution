@@ -6,6 +6,10 @@ resource "aws_lambda_function" "scan_initiator" {
   filename         = local.scheduler_zip
   source_code_hash = data.external.scheduler_zip.result.hash
 
+  # If this fell a long way back we might need to schedule a lot of scans so set the timeout
+  # to max
+  timeout = 15 * 60
+
   layers = [
     data.aws_ssm_parameter.utils_layer.value,
   ]
