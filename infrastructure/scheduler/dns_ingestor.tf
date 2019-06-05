@@ -65,6 +65,24 @@ data "aws_iam_policy_document" "dns_ingestor_perms" {
     ]
   }
 
+  # To enable XRAY trace
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "xray:PutTraceSegments",
+      "xray:PutTelemetryRecords",
+      "xray:GetSamplingRules",
+      "xray:GetSamplingTargets",
+      "xray:GetSamplingStatisticSummaries"
+    ]
+
+    # TODO make a better bound here
+    resources = [
+      "*",
+    ]
+  }
+
   statement {
     effect = "Allow"
 
