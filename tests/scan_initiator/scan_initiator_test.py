@@ -7,17 +7,18 @@ from boto3.dynamodb.conditions import Key
 from decimal import Decimal
 
 TEST_ENV = {
-    'REGION': 'eu-west-wood',
-    'STAGE': 'door',
-    'APP_NAME': 'me-once',
+    "REGION": "eu-west-wood",
+    "STAGE": "door",
+    "APP_NAME": "me-once",
+    "USE_XRAY": "0"
 }
 
 
 @pytest.fixture
 def scan_initiator():
     with patch.dict(os.environ, TEST_ENV), \
-         patch('aioboto3.client') as boto_client, \
-            patch('aioboto3.resource') as boto_resource:
+         patch("aioboto3.client") as boto_client, \
+            patch("aioboto3.resource") as boto_resource:
         # ensure each client is a different mock
         boto_client.side_effect = (MagicMock() for _ in itertools.count())
         boto_resource.side_effect = (MagicMock() for _ in itertools.count())
@@ -38,7 +39,7 @@ def set_ssm_return_vals(ssm_client, period, buckets):
     ssm_prefix = f"/{app_name}/{stage}"
 
     ssm_client.get_parameters.return_value = coroutine_of({
-            'Parameters': [
+            "Parameters": [
                 {"Name": f"{ssm_prefix}/scheduler/dynamodb/id", "Value": "MyTableId"},
                 {"Name": f"{ssm_prefix}/scheduler/dynamodb/plan_index", "Value": "MyIndexName"},
                 {"Name": f"{ssm_prefix}/scheduler/config/period", "Value": str(period)},
@@ -59,7 +60,7 @@ def _mock_delete_responses(mock_plan_table, side_effects):
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
 def test_paginates_scan_results(uniform, time, scan_initiator):
-    # ssm params don't matter much in this test
+    # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 40, 10)
 
     # access mock for dynamodb table
@@ -107,7 +108,7 @@ def test_paginates_scan_results(uniform, time, scan_initiator):
         )
     ]
 
-    # Doesn't batch across pages
+    # Doesn"t batch across pages
     assert scan_initiator.sqs_client.send_message_batch.call_count == 2
     assert writer.delete_item.call_count == 2
 
@@ -155,7 +156,7 @@ def test_creates_delays_uniformly_for_range(time, uniform, scan_initiator):
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
 def test_replace_punctuation_in_address_ids(uniform, time, scan_initiator):
-    # ssm params don't matter much in this test
+    # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
     # access mock for dynamodb table
@@ -206,7 +207,7 @@ def test_replace_punctuation_in_address_ids(uniform, time, scan_initiator):
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
 def test_batches_sqs_writes(uniform, time, scan_initiator):
-    # ssm params don't matter much in this test
+    # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
     # access mock for dynamodb table
@@ -253,7 +254,7 @@ def test_batches_sqs_writes(uniform, time, scan_initiator):
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
 def test_no_deletes_until_all_sqs_success(uniform, time, scan_initiator):
-    # ssm params don't matter much in this test
+    # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
     # access mock for dynamodb table

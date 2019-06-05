@@ -11,7 +11,7 @@ import random
 region = os.environ["REGION"]
 stage = os.environ["STAGE"]
 app_name = os.environ["APP_NAME"]
-use_xray = bool(os.environ["USE_XRAY"])
+use_xray = bool(int(os.environ["USE_XRAY"]))
 
 ssm_client = aioboto3.client("ssm", region_name=region)
 sqs_client = aioboto3.client("sqs", region_name=region)
@@ -60,7 +60,7 @@ async def remove_plan_entries(batch, table):
     PLANNING_BUCKETS,
     SCAN_DELAY_QUEUE
 )
-@async_handler(xray=use_xray)
+@async_handler()
 async def initiate_scans(event, _):
     params = event['ssm_params']
     start_time = time.time()
