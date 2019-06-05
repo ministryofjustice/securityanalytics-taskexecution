@@ -11,7 +11,6 @@ import random
 region = os.environ["REGION"]
 stage = os.environ["STAGE"]
 app_name = os.environ["APP_NAME"]
-use_xray = bool(int(os.environ["USE_XRAY"]))
 
 ssm_client = aioboto3.client("ssm", region_name=region)
 sqs_client = aioboto3.client("sqs", region_name=region)

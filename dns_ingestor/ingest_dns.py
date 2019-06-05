@@ -47,7 +47,7 @@ async def _get_route53_client(role):
     PLANNING_BUCKETS,
     LOG_UNHANDLED
 )
-@async_handler
+@async_handler()
 async def ingest_dns(event, _):
     params = event['ssm_params']
     start = timer()

@@ -10,6 +10,10 @@ resource "aws_lambda_function" "ingest_dns" {
     data.aws_ssm_parameter.utils_layer.value,
   ]
 
+  tracing_config {
+    mode = var.use_xray ? "Active" : "PassThrough"
+  }
+
   # We have to rate limit dns requests, so there are sleeps in the code
   # and this lambda takes quite a lot of time ~9mins with 128MB lambda
   # (setting to the maximum for safety)
@@ -25,6 +29,7 @@ resource "aws_lambda_function" "ingest_dns" {
       REGION   = var.aws_region
       STAGE    = terraform.workspace
       APP_NAME = var.app_name
+      USE_XRAY = var.use_xray
     }
   }
 
