@@ -1,10 +1,12 @@
 [dev-packages]
 pytest = "*"
 pytest-asyncio = "*"
+v = {editable = true,version = "*"}
 
 [packages]
 pytz = "*"
 aioboto3 = "*"
+aws-xray-sdk = "*"
 
 [requires]
 python_version = "3.7"

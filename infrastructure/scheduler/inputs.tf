@@ -51,3 +51,9 @@ variable "log_unhandled" {
   default     = false
 }
 
+variable "use_xray" {
+  type = string
+  description = "Whether to instrument lambdas"
+  default = true
+}
+
