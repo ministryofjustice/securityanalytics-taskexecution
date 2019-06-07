@@ -48,3 +48,12 @@ variable "transient_workspace" {
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
 
+variable "use_xray" {
+  type = string
+  description = "Whether to instrument lambdas"
+}
+
+variable "results_parser_arn" {
+  type = string
+}
+

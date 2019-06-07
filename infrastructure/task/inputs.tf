@@ -10,6 +10,11 @@ variable "account_id" {
   type = string
 }
 
+variable "use_xray" {
+  type = string
+  description = "Whether to instrument lambdas"
+}
+
 variable "task_name" {
   type = string
 }
@@ -29,3 +34,6 @@ variable "transient_workspace" {
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
 
+variable "results_parser_arn" {
+  type = string
+}

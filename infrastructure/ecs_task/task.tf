@@ -49,5 +49,7 @@ module "taskmodule" {
   account_id                    = var.account_id
   ssm_source_stage              = var.ssm_source_stage
   transient_workspace           = var.transient_workspace
+  use_xray = var.use_xray
+  results_parser_arn = var.results_parser_arn
 }
 

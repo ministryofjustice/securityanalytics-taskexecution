@@ -7,6 +7,8 @@ from dns_ingestor.scheduler import Scheduler
 from dns_ingestor.scan_plan_writer import PlannedScanDbWriter
 from dns_ingestor.record_resolver import RecordResolver
 from dns_ingestor.ingestor import DnsZoneIngestor
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core.lambda_launcher import LambdaContext
 from collections import namedtuple
 from asyncio import gather, run
 
@@ -115,6 +117,7 @@ if __name__ == "__main__":
             dynamo_resource.close()
         )
     try:
+        xray_recorder.configure(context=LambdaContext())
         ingest_dns({}, namedtuple("context", ["loop"]))
     finally:
         run(_clean_clients())

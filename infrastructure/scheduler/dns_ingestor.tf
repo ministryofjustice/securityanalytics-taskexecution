@@ -1,3 +1,18 @@
+module "dns_ingestor_dead_letters" {
+  source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
+  //source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
+  aws_region = var.aws_region
+  app_name = var.app_name
+  account_id = var.account_id
+  ssm_source_stage = var.ssm_source_stage
+  use_xray = var.use_xray
+  recorder_name = "ingest-dns-DLQ"
+  s3_bucket = data.aws_ssm_parameter.dead_letter_bucket_name.value
+  s3_bucket_arn = data.aws_ssm_parameter.dead_letter_bucket_arn.value
+  s3_key_prefix = "task_execution/ingest-dns"
+  source_arn = aws_lambda_function.scan_initiator.arn
+}
+
 resource "aws_lambda_function" "ingest_dns" {
   function_name    = "${terraform.workspace}-${var.app_name}-ingest-dns"
   handler          = "dns_ingestor.ingest_dns.ingest_dns"
@@ -5,6 +20,10 @@ resource "aws_lambda_function" "ingest_dns" {
   runtime          = "python3.7"
   filename         = local.scheduler_zip
   source_code_hash = data.external.scheduler_zip.result.hash
+
+  dead_letter_config {
+    target_arn = module.dns_ingestor_dead_letters.arn
+  }
 
   layers = [
     data.aws_ssm_parameter.utils_layer.value,
@@ -114,6 +133,18 @@ data "aws_iam_policy_document" "dns_ingestor_perms" {
     ]
 
     resources = [var.route53_role]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sqs:Send*",
+    ]
+
+    resources = [
+      module.dns_ingestor_dead_letters.arn
+    ]
   }
 }
 

@@ -7,6 +7,8 @@ from asyncio import gather, run
 from collections import namedtuple
 from decimal import Decimal
 import random
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core.lambda_launcher import LambdaContext
 
 region = os.environ["REGION"]
 stage = os.environ["STAGE"]
@@ -117,9 +119,7 @@ async def clean_clients():
 # For developer test use only
 if __name__ == "__main__":
     try:
+        xray_recorder.configure(context=LambdaContext())
         initiate_scans({}, namedtuple("context", ["loop"]))
     finally:
         run(clean_clients())
-
-
-
