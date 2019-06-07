@@ -1,6 +1,6 @@
 module "scan_initiator_dead_letters" {
-  // source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
-  source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
+  source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
+  // source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
   aws_region = var.aws_region
   app_name = var.app_name
   account_id = var.account_id
@@ -9,7 +9,7 @@ module "scan_initiator_dead_letters" {
   recorder_name = "scan-initiator-DLQ"
   s3_bucket = data.aws_ssm_parameter.dead_letter_bucket_name.value
   s3_bucket_arn = data.aws_ssm_parameter.dead_letter_bucket_arn.value
-  s3_key_prefix = "task_execution/${aws_lambda_function.scan_initiator.function_name}"
+  s3_key_prefix = "task_execution/scan-initiator"
   source_arn = aws_lambda_function.scan_initiator.arn
 }
 
@@ -104,8 +104,10 @@ data "aws_iam_policy_document" "scan_initiator_perms" {
       "sqs:Send*",
     ]
 
-    # TODO need access to the actual queue when not using the test queue
-    resources = [aws_sqs_queue.scan_delay_queue.arn]
+    resources = [
+      aws_sqs_queue.scan_delay_queue.arn,
+      module.scan_initiator_dead_letters.arn
+    ]
   }
 
   statement {

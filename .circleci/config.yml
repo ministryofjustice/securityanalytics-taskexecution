@@ -48,7 +48,7 @@ jobs:
           command: |
             . .circleci/env.sh
             cd infrastructure
-            terraform init -backend-config "bucket=$APP_NAME-terraform-state"
+            terraform init -reconfigure -backend-config "bucket=$APP_NAME-terraform-state"
             terraform get --update
             terraform workspace new $SSM_SOURCE_STAGE || terraform workspace select $SSM_SOURCE_STAGE
             echo checking formatting
@@ -81,7 +81,7 @@ jobs:
       - save_cache:
           key: other-v1-{{ .Branch }}-{{ .Revision }}
           paths:
-            - ".terraform"
+            - "infrastructure/.terraform"
             - ".venv"
             - ".generated"
             - ".pytest_cache"
@@ -165,7 +165,7 @@ jobs:
       - save_cache:
           key: tf-moj-v1-{{ .Branch }}-{{ .Revision }}
           paths:
-            - ".terraform"
+            - "infrastructure/.terraform"
             - ".venv"
             - ".generated"
             - ".pytest_cache"

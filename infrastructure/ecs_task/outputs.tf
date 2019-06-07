@@ -26,6 +26,10 @@ output "results_parser" {
   value = module.taskmodule.results_parser
 }
 
-output "dead_letter_queue" {
-  value = module.taskmodule.dead_letter_queue
+output "trigger_dead_letter_queue" {
+  value = module.taskmodule.trigger_dead_letter_queue
+}
+
+output "results_dead_letter_queue" {
+  value = module.taskmodule.results_dead_letter_queue
 }

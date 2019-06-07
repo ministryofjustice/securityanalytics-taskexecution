@@ -34,3 +34,6 @@ variable "transient_workspace" {
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
 
+variable "results_parser_arn" {
+  type = string
+}
