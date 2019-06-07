@@ -42,9 +42,9 @@ variable "route53_role" {
 }
 
 variable "use_xray" {
-  type = string
+  type        = string
   description = "Whether to instrument lambdas"
-  default = false
+  default     = false
 }
 
 provider "aws" {
