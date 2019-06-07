@@ -42,3 +42,7 @@ output "s3_bucket_policy_doc" {
   value = aws_iam_policy.s3_bucket_access_policy.policy
 }
 
+output "dead_letter_queue" {
+  value = module.dead_letters.arn
+}
+

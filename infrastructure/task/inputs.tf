@@ -10,6 +10,11 @@ variable "account_id" {
   type = string
 }
 
+variable "use_xray" {
+  type = string
+  description = "Whether to instrument lambdas"
+}
+
 variable "task_name" {
   type = string
 }

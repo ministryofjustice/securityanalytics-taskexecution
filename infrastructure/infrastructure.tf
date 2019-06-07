@@ -41,6 +41,12 @@ variable "route53_role" {
   description = "The role that must be assumed to read route 53 info, needed since the source is likey to be in another account"
 }
 
+variable "use_xray" {
+  type = string
+  description = "Whether to instrument lambdas"
+  default = false
+}
+
 provider "aws" {
   version = "~> 2.13"
   region  = var.aws_region
@@ -89,5 +95,6 @@ module "scheduler" {
   app_name         = var.app_name
   ssm_source_stage = local.ssm_source_stage
   route53_role     = var.route53_role
+  use_xray         = var.use_xray
 }
 

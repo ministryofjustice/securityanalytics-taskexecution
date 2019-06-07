@@ -1,3 +1,18 @@
+module "scan_initiator_dead_letters" {
+  // source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
+  source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
+  aws_region = var.aws_region
+  app_name = var.app_name
+  account_id = var.account_id
+  ssm_source_stage = var.ssm_source_stage
+  use_xray = var.use_xray
+  recorder_name = "scan-initiator-DLQ"
+  s3_bucket = data.aws_ssm_parameter.dead_letter_bucket_name.value
+  s3_bucket_arn = data.aws_ssm_parameter.dead_letter_bucket_arn.value
+  s3_key_prefix = "task_execution/${aws_lambda_function.scan_initiator.function_name}"
+  source_arn = aws_lambda_function.scan_initiator.arn
+}
+
 resource "aws_lambda_function" "scan_initiator" {
   function_name    = "${terraform.workspace}-${var.app_name}-scan-initiator"
   handler          = "scan_initiator.scan_initiator.initiate_scans"
@@ -9,6 +24,10 @@ resource "aws_lambda_function" "scan_initiator" {
   # If this fell a long way back we might need to schedule a lot of scans so set the timeout
   # to max
   timeout = 15 * 60
+
+  dead_letter_config {
+    target_arn = module.scan_initiator_dead_letters.arn
+  }
 
   layers = [
     data.aws_ssm_parameter.utils_layer.value,
