@@ -6,8 +6,7 @@ master-only: &master-only
       only: master
 
 executors:
-  builder:tf
-
+  builder:
     docker:
       - image: duckpodger/python3-node-aws-terraform
 
