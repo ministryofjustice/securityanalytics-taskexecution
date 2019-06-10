@@ -1,5 +1,5 @@
 import pytest
-from asyncio import Future, gather
+from asyncio import gather
 from unittest.mock import MagicMock
 from dns_ingestor.scan_plan_writer import PlannedScanDbWriter
 from dns_ingestor.host_to_scan import HostToScan
@@ -15,7 +15,7 @@ def mock_table():
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_uses_schedule():
-    schedule = mock_table()
+    schedule = MagicMock()
     scan_plan_table = mock_table()
     host_table = mock_table()
     address_table = mock_table()
@@ -31,7 +31,7 @@ async def test_uses_schedule():
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_is_async():
-    schedule = mock_table()
+    schedule = MagicMock()
     scan_plan_table = mock_table()
     host_table = mock_table()
     address_table = mock_table()
@@ -64,17 +64,13 @@ async def test_dynamo_db_call_params():
 
     scan_plan_table.update_item.assert_called_once_with(
         Key={"Address": "123.4.5.6"},
-        UpdateExpression="SET #Hosts = list_append(if_not_exists(#Hosts, :empty_list), :Host), "
-                         "PlannedScanTime = if_not_exists(#PlannedScanTime, :PlannedScanTime), "
-                         "DnsIngestTime = :DnsIngestTime",
+        UpdateExpression="ADD #Hosts :Host SET PlannedScanTime = :PlannedScanTime, DnsIngestTime = :DnsIngestTime",
         ExpressionAttributeNames={
-            "#Hosts": "HostsResolvingToAddress",
-            "#PlannedScanTime": "PlannedScanTime"
+            "#Hosts": "HostsResolvingToAddress"
         },
         ExpressionAttributeValues={
-            ":Host": ["foo.bar"],
+            ":Host": set(["foo.bar"]),
             ":PlannedScanTime": 1050,
-            ":empty_list": [],
             ":DnsIngestTime": 999
         }
     )
