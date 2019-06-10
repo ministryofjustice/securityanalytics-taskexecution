@@ -1,4 +1,5 @@
 import decimal
+import random
 
 
 # This class is used to distribute the hosts to scan across the time available
@@ -14,7 +15,9 @@ class Scheduler:
         return self
 
     def __next__(self):
+        # We round robin scans around the buckets and distribute uniformly over the bucket
+        planned_scan_time = decimal.Decimal(self.next_slot) + int(random.uniform(0, self.increment))
         self.next_slot += self.increment
-        if self.next_slot > self.end_time:
-            self.next_slot = self.start_time + self.increment
-        return decimal.Decimal(self.next_slot)
+        if self.next_slot >= self.end_time:
+            self.next_slot = self.start_time
+        return planned_scan_time

@@ -1,6 +1,6 @@
 resource "aws_ssm_parameter" "plan_db_id" {
-  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/id"
-  description = "Id of the dynamo db used for the scheduler"
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/scans_planned/id"
+  description = "Id of the dynamo db used for the scheduler plan"
   type        = "String"
   value       = aws_dynamodb_table.planned_scans.id
   overwrite   = "true"
@@ -12,8 +12,8 @@ resource "aws_ssm_parameter" "plan_db_id" {
 }
 
 resource "aws_ssm_parameter" "plan_db_arn" {
-  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/arn"
-  description = "Arn of the dynamo db used for the scheduler"
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/scans_planned/arn"
+  description = "Arn of the dynamo db used for the scheduler plan"
   type        = "String"
   value       = aws_dynamodb_table.planned_scans.arn
   overwrite   = "true"
@@ -25,10 +25,88 @@ resource "aws_ssm_parameter" "plan_db_arn" {
 }
 
 resource "aws_ssm_parameter" "plan_index" {
-  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/plan_index"
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/scans_planned/plan_index"
   description = "Name of the index we query by"
   type        = "String"
   value       = local.plan_index
+  overwrite   = "true"
+
+  tags = {
+    app_name  = var.app_name
+    workspace = terraform.workspace
+  }
+}
+
+resource "aws_ssm_parameter" "host_db_id" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/resolved_hosts/id"
+  description = "Id of the dynamo db used to record hosts we resolved"
+  type        = "String"
+  value       = aws_dynamodb_table.resolved_hosts.id
+  overwrite   = "true"
+
+  tags = {
+    app_name  = var.app_name
+    workspace = terraform.workspace
+  }
+}
+
+resource "aws_ssm_parameter" "host_db_arn" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/resolved_hosts/arn"
+  description = "Arn of the dynamo db used to record hosts we resolved"
+  type        = "String"
+  value       = aws_dynamodb_table.resolved_hosts.arn
+  overwrite   = "true"
+
+  tags = {
+    app_name  = var.app_name
+    workspace = terraform.workspace
+  }
+}
+
+resource "aws_ssm_parameter" "address_db_id" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/resolved_addresses/id"
+  description = "Id of the dynamo db used to record addresses we resolved"
+  type        = "String"
+  value       = aws_dynamodb_table.resolved_addressses.id
+  overwrite   = "true"
+
+  tags = {
+    app_name  = var.app_name
+    workspace = terraform.workspace
+  }
+}
+
+resource "aws_ssm_parameter" "address_db_arn" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/resolved_addresses/arn"
+  description = "Arn of the dynamo db used to record addresses we resolved"
+  type        = "String"
+  value       = aws_dynamodb_table.resolved_addressses.arn
+  overwrite   = "true"
+
+  tags = {
+    app_name  = var.app_name
+    workspace = terraform.workspace
+  }
+}
+
+resource "aws_ssm_parameter" "address_info_db_id" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/address_info/id"
+  description = "Id of the dynamo db used to store status info about scans"
+  type        = "String"
+  value       = aws_dynamodb_table.address_info.id
+  overwrite   = "true"
+
+  tags = {
+    app_name  = var.app_name
+    workspace = terraform.workspace
+  }
+}
+
+resource "aws_ssm_parameter" "address_info_db_arn" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/address_info/arn"
+  description = "Arn of the dynamo db used to store status info about scans"
+  type        = "String"
+  value       = aws_dynamodb_table.address_info.arn
   overwrite   = "true"
 
   tags = {

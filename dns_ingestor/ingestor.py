@@ -31,7 +31,7 @@ class DnsZoneIngestor:
                 pagination_params["Marker"] = zone_page["NextMarker"]
 
         # TODO just for test
-        # self.known_zones = {"/hostedzone/Z31RX3GZS94JZS": "dsd.io."}
+        self.known_zones = {"/hostedzone/Z31RX3GZS94JZS": "dsd.io."}
 
         self.ingested_zones = True
 

@@ -40,8 +40,8 @@ def set_ssm_return_vals(ssm_client, period, buckets):
 
     ssm_client.get_parameters.return_value = coroutine_of({
             "Parameters": [
-                {"Name": f"{ssm_prefix}/scheduler/dynamodb/id", "Value": "MyTableId"},
-                {"Name": f"{ssm_prefix}/scheduler/dynamodb/plan_index", "Value": "MyIndexName"},
+                {"Name": f"{ssm_prefix}/scheduler/dynamodb/scans_planned/id", "Value": "MyTableId"},
+                {"Name": f"{ssm_prefix}/scheduler/dynamodb/scans_planned/plan_index", "Value": "MyIndexName"},
                 {"Name": f"{ssm_prefix}/scheduler/config/period", "Value": str(period)},
                 {"Name": f"{ssm_prefix}/scheduler/config/buckets", "Value": str(buckets)},
                 {"Name": f"{ssm_prefix}/scheduler/scan_delay_queue", "Value": "MyDelayQueue"}
@@ -56,10 +56,9 @@ def _mock_delete_responses(mock_plan_table, side_effects):
     return mock_batch_writer.aenter
 
 
-@patch("random.uniform", return_value=9)
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
-def test_paginates_scan_results(uniform, time, scan_initiator):
+def test_paginates_scan_results(_, scan_initiator):
     # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 40, 10)
 
@@ -72,14 +71,16 @@ def test_paginates_scan_results(uniform, time, scan_initiator):
         coroutine_of({
             "Items": [{
                 "Address": "123.456.123.456",
-                "DnsIngestTime": 12345
+                "DnsIngestTime": 12345,
+                "PlannedScanTime": 67890
             }],
             "LastEvaluatedKey": "SomeKey"
         }),
         coroutine_of({
             "Items": [{
                 "Address": "456.345.123.123",
-                "DnsIngestTime": 123456
+                "DnsIngestTime": 123456,
+                "PlannedScanTime": 67890
             }]
         }),
     ]
@@ -95,15 +96,15 @@ def test_paginates_scan_results(uniform, time, scan_initiator):
     # actually do the test
     scan_initiator.initiate_scans({}, MagicMock())
 
-    # check the scan happens twice
+    # check the scan happens twice, searching for planned scans earlier than 1984 + 40/10 i.e. now + bucket_length
     assert mock_plan_table.scan.call_args_list == [
         call(
             IndexName="MyIndexName",
-            FilterExpression=Key("PlannedScanTime").lte(Decimal(1984))
+            FilterExpression=Key("PlannedScanTime").lte(Decimal(1988))
         ),
         call(
             IndexName="MyIndexName",
-            FilterExpression=Key("PlannedScanTime").lte(Decimal(1984)),
+            FilterExpression=Key("PlannedScanTime").lte(Decimal(1988)),
             ExclusiveStartKey="SomeKey"
         )
     ]
@@ -113,49 +114,9 @@ def test_paginates_scan_results(uniform, time, scan_initiator):
     assert writer.delete_item.call_count == 2
 
 
-@patch("random.uniform", return_value=4)
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
-def test_creates_delays_uniformly_for_range(time, uniform, scan_initiator):
-    # We have a period of 100 and 4 buckets, so the range should be 0-25
-    set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
-
-    # access mock for dynamodb table
-    scan_initiator.dynamo_resource.Table.return_value = mock_plan_table = MagicMock()
-
-    # return a single result
-    mock_plan_table.scan.side_effect = [
-        coroutine_of({
-            "Items": [{
-                "Address": "123.456.123.456",
-                "DnsIngestTime": 12345
-            }]
-        })
-    ]
-
-    # pretend the sqs and dynamo deletes are all ok
-    scan_initiator.sqs_client.send_message_batch.side_effect = [coroutine_of(None)]
-    _mock_delete_responses(mock_plan_table, [coroutine_of(None)])
-
-    # actually do the test
-    scan_initiator.initiate_scans({}, MagicMock())
-
-    # check that the call to uniform has the correct args and that the supplied mock value is used
-    uniform.assert_called_once_with(0, 25)
-    scan_initiator.sqs_client.send_message_batch.assert_called_once_with(
-        QueueUrl="MyDelayQueue",
-        Entries=[{
-            "Id": "123-456-123-456",
-            "DelaySeconds": 4,
-            "MessageBody": "{\"CloudWatchEventHosts\":[\"123.456.123.456\"]}"
-        }]
-    )
-
-
-@patch("random.uniform", return_value=4)
-@patch("time.time", return_value=1984)
-@pytest.mark.unit
-def test_replace_punctuation_in_address_ids(uniform, time, scan_initiator):
+def test_replace_punctuation_in_address_ids(_, scan_initiator):
     # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
@@ -168,11 +129,13 @@ def test_replace_punctuation_in_address_ids(uniform, time, scan_initiator):
             "Items": [
                 {
                     "Address": "123.456.123.456",
-                    "DnsIngestTime": 12345
+                    "DnsIngestTime": 12345,
+                    "PlannedScanTime": 67890
                 },
                 {
                     "Address": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
-                    "DnsIngestTime": 12345
+                    "DnsIngestTime": 12345,
+                    "PlannedScanTime": 67890
                 }
             ]
         })
@@ -191,22 +154,21 @@ def test_replace_punctuation_in_address_ids(uniform, time, scan_initiator):
         Entries=[
             {
                 "Id": "123-456-123-456",
-                "DelaySeconds": 4,
+                "DelaySeconds": 67890-1984,  # planned scan time minus now time
                 "MessageBody": "{\"CloudWatchEventHosts\":[\"123.456.123.456\"]}"
             },
             {
                 "Id": "2001-0db8-85a3-0000-0000-8a2e-0370-7334",
-                "DelaySeconds": 4,
+                "DelaySeconds": 67890-1984,  # planned scan time minus now time
                 "MessageBody": "{\"CloudWatchEventHosts\":[\"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"]}"
             }
         ]
     )
 
 
-@patch("random.uniform", return_value=4)
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
-def test_batches_sqs_writes(uniform, time, scan_initiator):
+def test_batches_sqs_writes(_, scan_initiator):
     # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
@@ -220,7 +182,8 @@ def test_batches_sqs_writes(uniform, time, scan_initiator):
             "Items": [
                 {
                     "Address": f"123.456.123.{item_num}",
-                    "DnsIngestTime": 12345
+                    "DnsIngestTime": 12345,
+                    "PlannedScanTime": 67890
                 }
                 for item_num in range(0, 32)
             ]
@@ -250,10 +213,9 @@ def test_batches_sqs_writes(uniform, time, scan_initiator):
     assert writer.delete_item.call_count == 32
 
 
-@patch("random.uniform", return_value=4)
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
-def test_no_deletes_until_all_sqs_success(uniform, time, scan_initiator):
+def test_no_deletes_until_all_sqs_success(_, scan_initiator):
     # ssm params don"t matter much in this test
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
@@ -266,7 +228,8 @@ def test_no_deletes_until_all_sqs_success(uniform, time, scan_initiator):
             "Items": [
                 {
                     "Address": f"123.456.123.5",
-                    "DnsIngestTime": 12345
+                    "DnsIngestTime": 12345,
+                    "PlannedScanTime": 67890
                 }
             ]
         })
@@ -288,6 +251,3 @@ def test_no_deletes_until_all_sqs_success(uniform, time, scan_initiator):
 
     # and none to dynamo
     assert writer.delete_item.call_count == 0
-
-
-
