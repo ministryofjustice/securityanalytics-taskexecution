@@ -65,6 +65,18 @@ data "aws_iam_policy_document" "results_parse_policy" {
   }
 
   statement {
+    effect = "Allow"
+
+    actions = [
+      "sqs:Send*",
+    ]
+
+    resources = [
+      module.results_parser_dead_letters.arn
+    ]
+  }
+
+  statement {
     effect    = "Allow"
     actions   = ["sns:Publish"]
     resources = [aws_sns_topic.task_results.id]

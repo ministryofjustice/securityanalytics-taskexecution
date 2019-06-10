@@ -59,6 +59,18 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     ]
   }
 
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sqs:Send*",
+    ]
+
+    resources = [
+      module.task_trigger_dead_letters.arn
+    ]
+  }
+
   # Only needed when running ecs inside a private vpc
   statement {
     effect = "Allow"
