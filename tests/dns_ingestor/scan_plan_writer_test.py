@@ -76,6 +76,7 @@ async def test_dynamo_db_call_params():
             ":PlannedScanTime": 1050,
             ":empty_list": [],
             ":DnsIngestTime": 999
-        },
-        ReturnValues="UPDATED_NEW"
+        }
     )
+
+# TODO Add tests for the other 4 tables that are now written to
