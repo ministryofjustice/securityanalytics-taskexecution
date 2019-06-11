@@ -14,6 +14,11 @@ variable "ssm_source_stage" {
   type = string
 }
 
+variable "use_xray" {
+  type = string
+  description = "Whether to instrument lambdas"
+}
+
 variable "ingest_schedule" {
   type = string
 
@@ -50,9 +55,3 @@ variable "log_unhandled" {
   description = "Whether to log unhandled dns records when ingesting"
   default     = false
 }
-
-variable "use_xray" {
-  type = string
-  description = "Whether to instrument lambdas"
-}
-

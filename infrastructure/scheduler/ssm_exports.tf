@@ -67,7 +67,7 @@ resource "aws_ssm_parameter" "address_db_id" {
   name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/resolved_addresses/id"
   description = "Id of the dynamo db used to record addresses we resolved"
   type        = "String"
-  value       = aws_dynamodb_table.resolved_addressses.id
+  value       = aws_dynamodb_table.resolved_addresses.id
   overwrite   = "true"
 
   tags = {
@@ -80,7 +80,7 @@ resource "aws_ssm_parameter" "address_db_arn" {
   name        = "/${var.app_name}/${terraform.workspace}/scheduler/dynamodb/resolved_addresses/arn"
   description = "Arn of the dynamo db used to record addresses we resolved"
   type        = "String"
-  value       = aws_dynamodb_table.resolved_addressses.arn
+  value       = aws_dynamodb_table.resolved_addresses.arn
   overwrite   = "true"
 
   tags = {

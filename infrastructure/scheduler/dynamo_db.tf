@@ -58,7 +58,7 @@ resource "aws_dynamodb_table" "resolved_hosts" {
   }
 
   stream_enabled = true
-  stream_view_type = "NEW_IMAGE"
+  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   # TODO add server side encryption
 
@@ -68,7 +68,7 @@ resource "aws_dynamodb_table" "resolved_hosts" {
   }
 }
 
-resource "aws_dynamodb_table" "resolved_addressses" {
+resource "aws_dynamodb_table" "resolved_addresses" {
   name = "${terraform.workspace}-${var.app_name}-resolved-addresses"
 
   # TODO could well be cheaper to provision rather than pay per request
@@ -87,7 +87,7 @@ resource "aws_dynamodb_table" "resolved_addressses" {
   }
 
   stream_enabled = true
-  stream_view_type = "NEW_IMAGE"
+  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   # TODO add server side encryption
 
@@ -110,7 +110,7 @@ resource "aws_dynamodb_table" "address_info" {
   }
 
   stream_enabled = true
-  stream_view_type = "NEW_IMAGE"
+  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   # TODO add server side encryption
 

@@ -28,7 +28,7 @@ module "delay_queue_notifier_glue" {
   account_id       = var.account_id
   app_name         = var.app_name
   ssm_source_stage = var.ssm_source_stage
-  glue_name        = "delay-notify-glue"
+  glue_name        = "scan-initiator-delay-glue"
   sns_topic_arn    = aws_sns_topic.scan_initiator.arn
   sqs_queue_arn    = aws_sqs_queue.scan_delay_queue.arn
 }

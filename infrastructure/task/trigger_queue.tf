@@ -58,6 +58,6 @@ module "task_trigger_dead_letters" {
   recorder_name = "${var.task_name}-trigger-DLQ"
   s3_bucket = data.aws_ssm_parameter.dead_letter_bucket_name.value
   s3_bucket_arn = data.aws_ssm_parameter.dead_letter_bucket_arn.value
-  s3_key_prefix = "${var.task_name}/${aws_sqs_queue.trigger_queue.id}"
+  s3_key_prefix = "${var.task_name}/${aws_sqs_queue.trigger_queue.name}"
   source_arn = aws_sqs_queue.trigger_queue.arn
 }
