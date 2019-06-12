@@ -13,6 +13,7 @@ class PlannedScanDbWriter:
         self.address_info_table = address_info_table
         self.ingest_time = ingest_time
         self.ingest_time_string = datetime.datetime.fromtimestamp(int(ingest_time), pytz.utc).isoformat()
+        self.ingest_time_string = self.ingest_time_string.replace('+00:00', 'Z')
         self.schedule = schedule
         self.update_scan_plan = "ADD #Hosts :Host " \
                                 "SET PlannedScanTime = :PlannedScanTime, " \

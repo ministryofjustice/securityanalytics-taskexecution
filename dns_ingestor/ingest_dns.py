@@ -7,10 +7,7 @@ from dns_ingestor.scheduler import Scheduler
 from dns_ingestor.scan_plan_writer import PlannedScanDbWriter
 from dns_ingestor.record_resolver import RecordResolver
 from dns_ingestor.ingestor import DnsZoneIngestor
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core.lambda_launcher import LambdaContext
-from collections import namedtuple
-from asyncio import gather, run
+from asyncio import gather
 
 region = os.environ["REGION"]
 stage = os.environ["STAGE"]
@@ -119,6 +116,10 @@ async def ingest_dns(event, _):
 
 # For developer test use only
 if __name__ == "__main__":
+    from asyncio import run
+    from aws_xray_sdk.core import xray_recorder
+    from aws_xray_sdk.core.lambda_launcher import LambdaContext
+
     async def _clean_clients():
         return await gather(
             ssm_client.close(),
@@ -127,6 +128,6 @@ if __name__ == "__main__":
         )
     try:
         xray_recorder.configure(context=LambdaContext())
-        ingest_dns({}, namedtuple("context", ["loop"]))
+        ingest_dns({}, type("Context", (), {"loop": None})())
     finally:
         run(_clean_clients())

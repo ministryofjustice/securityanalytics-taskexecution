@@ -3,11 +3,8 @@ import aioboto3
 import time
 from utils.lambda_decorators import ssm_parameters, async_handler
 from boto3.dynamodb.conditions import Key
-from asyncio import gather, run
-from collections import namedtuple
 from decimal import Decimal
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core.lambda_launcher import LambdaContext
+from asyncio import gather
 
 region = os.environ["REGION"]
 stage = os.environ["STAGE"]
@@ -20,6 +17,7 @@ dynamo_resource = aioboto3.resource("dynamodb", region_name=region)
 # ssm params
 ssm_prefix = f"/{app_name}/{stage}"
 SCAN_PLAN_TABLE = f"{ssm_prefix}/scheduler/dynamodb/scans_planned/id"
+SCAN_INFO_TABLE = f"{ssm_prefix}/scheduler/dynamodb/address_info/id"
 INDEX_NAME = f"{ssm_prefix}/scheduler/dynamodb/scans_planned/plan_index"
 PLANNING_PERIOD_SECONDS = f"{ssm_prefix}/scheduler/config/period"
 PLANNING_BUCKETS = f"{ssm_prefix}/scheduler/config/buckets"
@@ -28,8 +26,9 @@ SCAN_DELAY_QUEUE = f"{ssm_prefix}/scheduler/scan_delay_queue"
 
 # This will pick a random delay across the period of the bucket this
 # lambda fired to plan
-async def queue_scans(batch, initiation_queue):
+async def queue_scans(batch, initiation_queue, scan_info_table):
     print(f"Initiating batch of scans {batch}")
+    queue_time = time.time()
     await sqs_client.send_message_batch(
         QueueUrl=initiation_queue,
         Entries=[
@@ -43,18 +42,27 @@ async def queue_scans(batch, initiation_queue):
         ]
     )
 
+    for address, ingested_time, _ in batch:
+        print(f":LastPlannedScanQueued: {int(queue_time)}")
+        await scan_info_table.update_item(
+            Key={"Address": address},
+            UpdateExpression="SET LastPlannedScanQueued = :LastPlannedScanQueued",
+            ExpressionAttributeValues={
+                ":LastPlannedScanQueued": int(queue_time)
+            }
+        )
+
 
 async def remove_plan_entries(batch, table):
     async with table.batch_writer() as writer:
         for address, ingested_time, _ in batch:
-            await writer.delete_item(Key={
-                "Address": address
-            })
+            await writer.delete_item(Key={"Address": address})
 
 
 @ssm_parameters(
     ssm_client,
     SCAN_PLAN_TABLE,
+    SCAN_INFO_TABLE,
     INDEX_NAME,
     PLANNING_PERIOD_SECONDS,
     PLANNING_BUCKETS,
@@ -73,6 +81,8 @@ async def initiate_scans(event, _):
     last_task_time_to_queue = now + bucket_length
     print(f"Querying all of the scans planned with a PlannedScanTime < {last_task_time_to_queue}")
     scan_plan_table = dynamo_resource.Table(params[SCAN_PLAN_TABLE])
+    scan_info_table = dynamo_resource.Table(params[SCAN_INFO_TABLE])
+    scan_delay_queue = params[SCAN_DELAY_QUEUE]
 
     pagination_params = {}
     scans_initiated = 0
@@ -85,7 +95,7 @@ async def initiate_scans(event, _):
 
         plan_keys_and_delays = [
             # calc the delay between now and the time to scan, can't have negative delay
-            (scan["Address"], scan["DnsIngestTime"], max(0, scan["PlannedScanTime"] - now))
+            (scan["Address"], scan["DnsIngestTime"], int(max(0, float(scan["PlannedScanTime"]) - now)))
             for scan in scan_result["Items"]
         ]
 
@@ -99,7 +109,7 @@ async def initiate_scans(event, _):
         # because it is more complex. Because of chains of scans, and indexing in elastic, there is
         # not really a good notion of a scan being finished
         for batch in batches:
-            await queue_scans(batch, params[SCAN_DELAY_QUEUE])
+            await queue_scans(batch, scan_delay_queue, scan_info_table)
             scans_initiated += len(batch)
             await remove_plan_entries(batch, scan_plan_table)
 
@@ -121,8 +131,11 @@ async def clean_clients():
 
 # For developer test use only
 if __name__ == "__main__":
+    from asyncio import run
+    from aws_xray_sdk.core import xray_recorder
+    from aws_xray_sdk.core.lambda_launcher import LambdaContext
     try:
         xray_recorder.configure(context=LambdaContext())
-        initiate_scans({}, namedtuple("context", ["loop"]))
+        initiate_scans({}, type("Context", (), {"loop": None})())
     finally:
         run(clean_clients())

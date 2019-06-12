@@ -118,11 +118,17 @@ data "aws_iam_policy_document" "dns_ingestor_perms" {
   statement {
     effect = "Allow"
 
+    # TODO reduce this scope
     actions = [
       "dynamodb:*",
     ]
 
-    resources = [aws_dynamodb_table.planned_scans.arn]
+    resources = [
+      aws_dynamodb_table.planned_scans.arn,
+      aws_dynamodb_table.resolved_hosts.arn,
+      aws_dynamodb_table.resolved_addresses.arn,
+      aws_dynamodb_table.address_info.arn
+    ]
   }
 
   statement {

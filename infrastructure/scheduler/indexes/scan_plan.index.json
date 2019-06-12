@@ -1,0 +1,23 @@
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "LastDnsIngestTime": {
+          "type": "date"
+        },
+        "NextPlannedScanTime": {
+          "type": "date"
+        },
+        "LastPlannedScanQueued": {
+          "type": "date"
+        },
+        "LastNmapJobSentToEcs": {
+          "type": "date"
+        },
+        "LastNmapResultsParsed": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}
