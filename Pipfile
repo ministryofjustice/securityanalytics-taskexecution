@@ -2,6 +2,7 @@
 pytest = "*"
 pytest-asyncio = "*"
 aws-xray-sdk = "*"
+v = {editable = true,version = "*"}
 
 [packages]
 pytz = "*"
