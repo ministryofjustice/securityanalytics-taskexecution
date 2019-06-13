@@ -52,6 +52,15 @@ resource "aws_lambda_function" "ingest_dns" {
     }
   }
 
+  # This provisioner will invoke the lambda as soon as the function is added
+  # TODO I am hoping that since the lambda will depend on all of its dependencies, it will be
+  # deployed after all of its runtime dependencies. If it is not, this initial invocation may fail
+  # Since we use async invocation it wont hold up the deployment, but it also wont be checked for
+  # success. We may need to add additional depends_on entries if we see failures.
+  provisioner "local-exec" {
+    command = "aws lambda invoke --region=${var.aws_region} --function-name=${self.function_name} --invocation-type=Event /dev/null"
+  }
+
   tags = {
     workspace = terraform.workspace
     app_name  = var.app_name
