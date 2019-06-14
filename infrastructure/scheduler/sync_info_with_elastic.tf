@@ -13,7 +13,9 @@ module "sync_address_info" {
 }
 
 module "sync_resolved_addresses" {
-  source = "../../../securityanalytics-analyticsplatform/infrastructure/dynamo_elastic_sync"
+  source = "github.com/ministryofjustice/securityanalytics-analyticsplatform//infrastructure/dynamo_elastic_sync"
+
+  #source = "../../../securityanalytics-analyticsplatform/infrastructure/dynamo_elastic_sync"
   account_id = var.account_id
   app_name = var.app_name
   aws_region = var.aws_region
@@ -26,7 +28,9 @@ module "sync_resolved_addresses" {
 }
 
 module "sync_resolved_hosts" {
-  source = "../../../securityanalytics-analyticsplatform/infrastructure/dynamo_elastic_sync"
+  source = "github.com/ministryofjustice/securityanalytics-analyticsplatform//infrastructure/dynamo_elastic_sync"
+
+  #source = "../../../securityanalytics-analyticsplatform/infrastructure/dynamo_elastic_sync"
   account_id = var.account_id
   app_name = var.app_name
   aws_region = var.aws_region
