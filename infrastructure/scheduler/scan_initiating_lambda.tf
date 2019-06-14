@@ -1,6 +1,6 @@
 module "scan_initiator_dead_letters" {
   source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
-  // source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
+  # source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
   aws_region = var.aws_region
   app_name = var.app_name
   account_id = var.account_id

@@ -14,15 +14,15 @@ resource "aws_sns_topic" "scan_initiator" {
 }
 
 module "delay_queue_notifier_glue" {
-  // two slashes are intentional: https://www.terraform.io/docs/modules/sources.html#modules-in-package-sub-directories
+  # two slashes are intentional: https://www.terraform.io/docs/modules/sources.html#modules-in-package-sub-directories
   source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/sqs_sns_glue"
 
-  // It is sometimes useful for the developers of the project to use a local version of the task
-  // execution project. This enables them to develop the task execution project and the nmap scanner
-  // (or other future tasks), at the same time, without requiring the task execution changes to be
-  // pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
-  // devs will have to comment in/out this line as and when they need
-  //  source = "../../../securityanalytics-sharedcode/infrastructure/sqs_sns_glue"
+  # It is sometimes useful for the developers of the project to use a local version of the task
+  # execution project. This enables them to develop the task execution project and the nmap scanner
+  # (or other future tasks), at the same time, without requiring the task execution changes to be
+  # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
+  # devs will have to comment in/out this line as and when they need
+  #  source = "../../../securityanalytics-sharedcode/infrastructure/sqs_sns_glue"
 
   aws_region       = var.aws_region
   account_id       = var.account_id
