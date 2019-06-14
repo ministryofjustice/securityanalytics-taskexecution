@@ -43,7 +43,7 @@ output "s3_bucket_policy_doc" {
 }
 
 output "trigger_dead_letter_queue" {
-  value = module.task_trigger_dead_letters.arn
+  value = module.task_queue_dead_letters.arn
 }
 
 output "results_dead_letter_queue" {

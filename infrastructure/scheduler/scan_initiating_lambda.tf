@@ -1,6 +1,6 @@
 module "scan_initiator_dead_letters" {
   source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
-  // source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
+  # source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
   aws_region = var.aws_region
   app_name = var.app_name
   account_id = var.account_id
@@ -23,6 +23,7 @@ resource "aws_lambda_function" "scan_initiator" {
 
   # If this fell a long way back we might need to schedule a lot of scans so set the timeout
   # to max
+  # TODO reduce this when we have more data about worst case times
   timeout = 15 * 60
 
   dead_letter_config {
@@ -119,6 +120,18 @@ data "aws_iam_policy_document" "scan_initiator_perms" {
     ]
 
     resources = [aws_dynamodb_table.planned_scans.arn]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+
+    resources = [
+      aws_dynamodb_table.address_info.arn
+    ]
   }
 }
 
