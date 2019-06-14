@@ -15,7 +15,7 @@ TEST_ENV = {
 
 
 @pytest.fixture
-def scan_initiator():
+async def scan_initiator():
     with patch.dict(os.environ, TEST_ENV), \
          patch("aioboto3.client") as boto_client, \
             patch("aioboto3.resource") as boto_resource:
@@ -29,7 +29,7 @@ def scan_initiator():
         scan_initiator.dynamo_resource.reset_mock()
         scan_initiator.sqs_client.reset_mock()
 
-        scan_initiator.clean_clients()
+        await scan_initiator.clean_clients()
 
 
 @patch.dict(os.environ, TEST_ENV)
@@ -42,6 +42,7 @@ def set_ssm_return_vals(ssm_client, period, buckets):
             "Parameters": [
                 {"Name": f"{ssm_prefix}/scheduler/dynamodb/scans_planned/id", "Value": "MyTableId"},
                 {"Name": f"{ssm_prefix}/scheduler/dynamodb/scans_planned/plan_index", "Value": "MyIndexName"},
+                {"Name": f"{ssm_prefix}/scheduler/dynamodb/address_info/id", "Value": "MyIndexName"},
                 {"Name": f"{ssm_prefix}/scheduler/config/period", "Value": str(period)},
                 {"Name": f"{ssm_prefix}/scheduler/config/buckets", "Value": str(buckets)},
                 {"Name": f"{ssm_prefix}/scheduler/scan_delay_queue", "Value": "MyDelayQueue"}
@@ -63,11 +64,11 @@ def test_paginates_scan_results(_, scan_initiator):
     set_ssm_return_vals(scan_initiator.ssm_client, 40, 10)
 
     # access mock for dynamodb table
-    scan_initiator.dynamo_resource.Table.return_value = mock_plan_table = MagicMock()
+    mock_info_table, mock_plan_table = _mock_resources(scan_initiator)
 
     # return a single result but with a last evaluated key present, second result wont have
     # that key
-    mock_plan_table.scan.side_effect = [
+    mock_plan_table.scan.side_effect = iter([
         coroutine_of({
             "Items": [{
                 "Address": "123.456.123.456",
@@ -83,7 +84,8 @@ def test_paginates_scan_results(_, scan_initiator):
                 "PlannedScanTime": 67890
             }]
         }),
-    ]
+    ])
+    mock_info_table.update_item.side_effect = iter([coroutine_of(None), coroutine_of(None)])
 
     # pretend the sqs messages are all successfully dispatched
     scan_initiator.sqs_client.send_message_batch.side_effect = [
@@ -114,6 +116,15 @@ def test_paginates_scan_results(_, scan_initiator):
     assert writer.delete_item.call_count == 2
 
 
+def _mock_resources(scan_initiator):
+    mock_plan_table, mock_info_table = (MagicMock(), MagicMock())
+    scan_initiator.dynamo_resource.Table.side_effect = iter([mock_plan_table, mock_info_table])
+    scan_initiator.dynamo_resource.close.return_value = coroutine_of(None)
+    scan_initiator.ssm_client.close.return_value = coroutine_of(None)
+    scan_initiator.sqs_client.close.return_value = coroutine_of(None)
+    return mock_info_table, mock_plan_table
+
+
 @patch("time.time", return_value=1984)
 @pytest.mark.unit
 def test_replace_punctuation_in_address_ids(_, scan_initiator):
@@ -121,10 +132,10 @@ def test_replace_punctuation_in_address_ids(_, scan_initiator):
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
     # access mock for dynamodb table
-    scan_initiator.dynamo_resource.Table.return_value = mock_plan_table = MagicMock()
+    mock_info_table, mock_plan_table = _mock_resources(scan_initiator)
 
     # return a single result with ip4 and another with ip6
-    mock_plan_table.scan.side_effect = [
+    mock_plan_table.scan.side_effect = iter([
         coroutine_of({
             "Items": [
                 {
@@ -139,7 +150,8 @@ def test_replace_punctuation_in_address_ids(_, scan_initiator):
                 }
             ]
         })
-    ]
+    ])
+    mock_info_table.update_item.side_effect = iter([coroutine_of(None), coroutine_of(None)])
 
     # pretend the sqs and dynamo deletes are all ok
     scan_initiator.sqs_client.send_message_batch.side_effect = [coroutine_of(None)]
@@ -173,11 +185,11 @@ def test_batches_sqs_writes(_, scan_initiator):
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
     # access mock for dynamodb table
-    scan_initiator.dynamo_resource.Table.return_value = mock_plan_table = MagicMock()
+    mock_info_table, mock_plan_table = _mock_resources(scan_initiator)
 
     # send 32 responses in a single scan result, will be batched into groups of 10 for
     # sqs
-    mock_plan_table.scan.side_effect = [
+    mock_plan_table.scan.side_effect = iter([
         coroutine_of({
             "Items": [
                 {
@@ -188,7 +200,8 @@ def test_batches_sqs_writes(_, scan_initiator):
                 for item_num in range(0, 32)
             ]
         })
-    ]
+    ])
+    mock_info_table.update_item.side_effect = iter([coroutine_of(None) for _ in range(0, 32)])
 
     # pretend the sqs and dynamo deletes are all ok, there are 4 calls to sqs
     # and
@@ -220,7 +233,7 @@ def test_no_deletes_until_all_sqs_success(_, scan_initiator):
     set_ssm_return_vals(scan_initiator.ssm_client, 100, 4)
 
     # access mock for dynamodb table
-    scan_initiator.dynamo_resource.Table.return_value = mock_plan_table = MagicMock()
+    mock_info_table, mock_plan_table = _mock_resources(scan_initiator)
 
     # send a single response
     mock_plan_table.scan.side_effect = [

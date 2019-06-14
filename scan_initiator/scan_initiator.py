@@ -43,7 +43,6 @@ async def queue_scans(batch, initiation_queue, scan_info_table):
     )
 
     for address, ingested_time, _ in batch:
-        print(f":LastPlannedScanQueued: {int(queue_time)}")
         await scan_info_table.update_item(
             Key={"Address": address},
             UpdateExpression="SET LastPlannedScanQueued = :LastPlannedScanQueued",
