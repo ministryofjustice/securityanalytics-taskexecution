@@ -1,4 +1,4 @@
-module "scan_plan_index" {
+module "address_info_index" {
    # two slashes are intentional: https://www.terraform.io/docs/modules/sources.html#modules-in-package-sub-directories
  source = "github.com/ministryofjustice/securityanalytics-analyticsplatform//infrastructure/elastic_index"
 
@@ -11,14 +11,14 @@ module "scan_plan_index" {
   app_name = var.app_name
   aws_region       = var.aws_region
   ssm_source_stage = var.ssm_source_stage
-  index_file       = "${path.module}/indexes/scan_plan.index.json"
+  index_file       = "${path.module}/indexes/address_info.index.json"
   index_name       = "data"
-  task_name        = "scan_plan"
+  task_name        = "address_info"
  snapshot_and_history = false
   es_domain = data.aws_ssm_parameter.es_domain.value
 }
 
-module "scan_plan_index_pattern" {
+module "address_info_index_pattern" {
   # two slashes are intentional: https://www.terraform.io/docs/modules/sources.html#modules-in-package-sub-directories
   source = "github.com/ministryofjustice/securityanalytics-analyticsplatform//infrastructure/kibana_saved_object"
 
@@ -31,12 +31,12 @@ module "scan_plan_index_pattern" {
   app_name = var.app_name
   aws_region           = var.aws_region
   ssm_source_stage     = var.ssm_source_stage
-  task_name            = "scan_plan"
-  object_template      = "${path.module}/indexes/scan_plan.pattern.json"
+  task_name            = "address_info"
+  object_template      = "${path.module}/indexes/address_info.pattern.json"
   object_substitutions = {}
 
   object_type  = "index-pattern"
-  object_title = "scan_plan:data:read*"
+  object_title = "address_info:data:read*"
   es_domain = data.aws_ssm_parameter.es_domain.value
 }
 
