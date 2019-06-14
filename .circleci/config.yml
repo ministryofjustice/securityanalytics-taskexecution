@@ -155,7 +155,7 @@ jobs:
             cd infrastructure
             terraform init -backend-config "bucket=$MOJ_APP_NAME-terraform-state" -reconfigure
             terraform workspace new dev || terraform workspace select dev
-            terraform apply -auto-approve -var account_id=$MOJ_ACCOUNT_ID -var app_name=$MOJ_APP_NAME
+            terraform apply -auto-approve -var account_id=$MOJ_ACCOUNT_ID -var app_name=$MOJ_APP_NAME -var route53_role=$ROUTE53_ROLE 
 
       - save_cache:
           key: git-v3-{{ .Branch }}-{{ .Revision }}
