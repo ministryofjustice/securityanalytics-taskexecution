@@ -17,3 +17,7 @@ data "aws_ssm_parameter" "dead_letter_bucket_arn" {
 data "aws_ssm_parameter" "elastic_ingestion_queue_arn" {
   name = "/${var.app_name}/${var.ssm_source_stage}/analytics/elastic/ingest_queue/arn"
 }
+
+data "aws_ssm_parameter" "es_domain" {
+  name = "/${var.app_name}/${var.ssm_source_stage}/analytics/elastic/es_endpoint/url"
+}
