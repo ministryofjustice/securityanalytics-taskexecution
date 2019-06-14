@@ -94,6 +94,18 @@ data "aws_iam_policy_document" "results_parse_policy" {
     # TODO reduce this scope
     resources = ["*"]
   }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+
+    resources = [
+      data.aws_ssm_parameter.scan_info_table.value
+    ]
+  }
 }
 
 resource "aws_iam_policy" "results_parse_policy" {

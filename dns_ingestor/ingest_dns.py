@@ -7,10 +7,7 @@ from dns_ingestor.scheduler import Scheduler
 from dns_ingestor.scan_plan_writer import PlannedScanDbWriter
 from dns_ingestor.record_resolver import RecordResolver
 from dns_ingestor.ingestor import DnsZoneIngestor
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core.lambda_launcher import LambdaContext
-from collections import namedtuple
-from asyncio import gather, run
+from asyncio import gather
 
 region = os.environ["REGION"]
 stage = os.environ["STAGE"]
@@ -24,7 +21,10 @@ dynamo_resource = aioboto3.resource("dynamodb", region_name=region)
 # ssm params
 ssm_prefix = f"/{app_name}/{stage}"
 ROUTE53_ROLE = f"{ssm_prefix}/scheduler/route53/role/arn"
-SCAN_PLAN_TABLE = f"{ssm_prefix}/scheduler/dynamodb/id"
+SCAN_PLAN_TABLE = f"{ssm_prefix}/scheduler/dynamodb/scans_planned/id"
+HOST_TABLE = f"{ssm_prefix}/scheduler/dynamodb/resolved_hosts/id"
+ADDRESS_TABLE = f"{ssm_prefix}/scheduler/dynamodb/resolved_addresses/id"
+ADDRESS_INFO_TABLE = f"{ssm_prefix}/scheduler/dynamodb/address_info/id"
 PLANNING_PERIOD_SECONDS = f"{ssm_prefix}/scheduler/config/period"
 PLANNING_BUCKETS = f"{ssm_prefix}/scheduler/config/buckets"
 LOG_UNHANDLED = f"{ssm_prefix}/scheduler/config/log_unhandled"
@@ -45,6 +45,9 @@ async def _get_route53_client(role):
     ssm_client,
     ROUTE53_ROLE,
     SCAN_PLAN_TABLE,
+    HOST_TABLE,
+    ADDRESS_TABLE,
+    ADDRESS_INFO_TABLE,
     PLANNING_PERIOD_SECONDS,
     PLANNING_BUCKETS,
     LOG_UNHANDLED
@@ -82,6 +85,9 @@ async def ingest_dns(event, _):
         # writes the planned scans to the dynamodb
         scan_plan_writer = PlannedScanDbWriter(
             dynamo_resource.Table(params[SCAN_PLAN_TABLE]),
+            dynamo_resource.Table(params[HOST_TABLE]),
+            dynamo_resource.Table(params[ADDRESS_TABLE]),
+            dynamo_resource.Table(params[ADDRESS_INFO_TABLE]),
             ingest_time,
             schedule
         )
@@ -110,6 +116,10 @@ async def ingest_dns(event, _):
 
 # For developer test use only
 if __name__ == "__main__":
+    from asyncio import run
+    from aws_xray_sdk.core import xray_recorder
+    from aws_xray_sdk.core.lambda_launcher import LambdaContext
+
     async def _clean_clients():
         return await gather(
             ssm_client.close(),
@@ -118,6 +128,6 @@ if __name__ == "__main__":
         )
     try:
         xray_recorder.configure(context=LambdaContext())
-        ingest_dns({}, namedtuple("context", ["loop"]))
+        ingest_dns({}, type("Context", (), {"loop": None})())
     finally:
         run(_clean_clients())

@@ -30,9 +30,6 @@ class DnsZoneIngestor:
             if not listed_all_zones:
                 pagination_params["Marker"] = zone_page["NextMarker"]
 
-        # TODO just for test
-        # self.known_zones = {"/hostedzone/Z31RX3GZS94JZS": "dsd.io."}
-
         self.ingested_zones = True
 
     # records the name and id of all the zones in a single page

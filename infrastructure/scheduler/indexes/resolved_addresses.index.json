@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "Address": {
+          "type": "keyword"
+        },
+        "DnsIngestTime": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}

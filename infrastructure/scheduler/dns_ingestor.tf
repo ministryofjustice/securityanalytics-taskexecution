@@ -1,6 +1,6 @@
 module "dns_ingestor_dead_letters" {
   source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
-  //source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
+  # source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
   aws_region = var.aws_region
   app_name = var.app_name
   account_id = var.account_id
@@ -50,6 +50,15 @@ resource "aws_lambda_function" "ingest_dns" {
       APP_NAME = var.app_name
       USE_XRAY = var.use_xray
     }
+  }
+
+  # This provisioner will invoke the lambda as soon as the function is added
+  # TODO I am hoping that since the lambda will depend on all of its dependencies, it will be
+  # deployed after all of its runtime dependencies. If it is not, this initial invocation may fail
+  # Since we use async invocation it wont hold up the deployment, but it also wont be checked for
+  # success. We may need to add additional depends_on entries if we see failures.
+  provisioner "local-exec" {
+    command = "aws lambda invoke --region=${var.aws_region} --function-name=${self.function_name} --invocation-type=Event /dev/null"
   }
 
   tags = {
@@ -118,11 +127,17 @@ data "aws_iam_policy_document" "dns_ingestor_perms" {
   statement {
     effect = "Allow"
 
+    # TODO reduce this scope
     actions = [
       "dynamodb:*",
     ]
 
-    resources = [aws_dynamodb_table.planned_scans.arn]
+    resources = [
+      aws_dynamodb_table.planned_scans.arn,
+      aws_dynamodb_table.resolved_hosts.arn,
+      aws_dynamodb_table.resolved_addresses.arn,
+      aws_dynamodb_table.address_info.arn
+    ]
   }
 
   statement {

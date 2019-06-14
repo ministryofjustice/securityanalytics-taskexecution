@@ -67,7 +67,7 @@ data "aws_iam_policy_document" "task_trigger_policy" {
     ]
 
     resources = [
-      module.task_trigger_dead_letters.arn
+      module.task_queue_dead_letters.arn
     ]
   }
 
@@ -83,6 +83,18 @@ data "aws_iam_policy_document" "task_trigger_policy" {
 
     # TODO reduce this scope
     resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+
+    resources = [
+      data.aws_ssm_parameter.scan_info_table.value
+    ]
   }
 }
 
