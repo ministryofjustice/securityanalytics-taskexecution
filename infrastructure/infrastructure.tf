@@ -66,7 +66,9 @@ locals {
   # to use the resources in dev. Change
   ssm_source_stage = var.ssm_source_stage == "DEFAULT" ? terraform.workspace : var.ssm_source_stage
 
-  transient_workspace = false == contains(var.known_deployment_stages, terraform.workspace)
+  transient_workspace  = false == contains(var.known_deployment_stages, terraform.workspace)
+  shared_task_code_zip = "../.generated/${var.app_name}_shared_task_code.zip"
+
 }
 
 module "ecs_cluster" {
@@ -84,3 +86,14 @@ module "scheduler" {
   use_xray         = var.use_xray
 }
 
+data "external" "shared_task_code_zip" {
+  program = ["python", "../shared_task_code/package_lambda.py", local.shared_task_code_zip, "shared_task_code.packaging.config.json", "../Pipfile.lock"]
+}
+
+
+resource "aws_lambda_layer_version" "shared_task_code_layer" {
+  description         = "Shared Task Code layer with hash ${data.external.shared_task_code_zip.result.hash}"
+  filename            = local.shared_task_code_zip
+  layer_name          = "${terraform.workspace}-${var.app_name}-shared-task-code"
+  compatible_runtimes = ["python3.7"]
+}
