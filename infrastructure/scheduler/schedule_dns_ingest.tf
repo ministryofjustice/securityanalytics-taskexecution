@@ -8,6 +8,7 @@ data "external" "current_minute" {
   program = [
     "python",
     "-c",
+    # external datasource expects json, simple script to include now's minutes as the value in json
     "import datetime; print(f\"{{\\\"min\\\":\\\"{datetime.datetime.now().minute}\\\"}}\")"
   ]
 }
@@ -15,8 +16,10 @@ data "external" "current_minute" {
 locals {
   # Originally this was always midnight, but we had multiple environments all trying to ingest
   # at once which stops any from succeeding, this hack reduces the chances of that happening.
+  # tell it to kick off 5 mins after now to give things time to deploy
   # TODO https://dsdmoj.atlassian.net/browse/SA-123 Share the ingest logic to avoid the duplication
-  ingest_schedule = "${data.external.current_minute.result.min} 0 * * ? *"
+  ingest_minute = tonumber((data.external.current_minute.result.min + 5) % 60)
+  ingest_schedule = "${local.ingest_minute} 0 * * ? *"
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_dns_ingest" {
