@@ -19,13 +19,6 @@ variable "use_xray" {
   description = "Whether to instrument lambdas"
 }
 
-variable "ingest_schedule" {
-  type = string
-
-  # This is cron(ish) syntax every day at midnight
-  default = "0 0 * * ? *"
-}
-
 variable "scan_schedule" {
   type = string
 

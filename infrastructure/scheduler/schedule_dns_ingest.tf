@@ -4,10 +4,25 @@ resource "aws_cloudwatch_event_target" "schedule_dns_ingest" {
   input = "{}" # no info needed, just do the scan!
 }
 
+data "external" "current_minute" {
+  program = [
+    "python",
+    "-c",
+    "import datetime; print(f\"{{\\\"min\\\":\\\"{datetime.datetime.now().minute}\\\"}}\")"
+  ]
+}
+
+locals {
+  # Originally this was always midnight, but we had multiple environments all trying to ingest
+  # at once which stops any from succeeding, this hack reduces the chances of that happening.
+  # TODO https://dsdmoj.atlassian.net/browse/SA-123 Share the ingest logic to avoid the duplication
+  ingest_schedule = "${data.external.current_minute.result.min} 0 * * ? *"
+}
+
 resource "aws_cloudwatch_event_rule" "schedule_dns_ingest" {
   name                = "${terraform.workspace}-${var.app_name}-ingest-dns"
   description         = "Ingest dns data to plan scanning"
-  schedule_expression = "cron(${var.ingest_schedule})"
+  schedule_expression = "cron(${local.ingest_schedule})"
 }
 
 resource "aws_lambda_permission" "dns_ingest_allow_cloudwatch" {
