@@ -75,9 +75,17 @@ resource "null_resource" "initial_dns_ingest" {
     aws_ssm_parameter.config_period,
     aws_ssm_parameter.config_buckets,
     aws_ssm_parameter.config_log_unhandled,
+    # Need the sync lambdas in place or else we will miss the data in kibana
     module.sync_address_info,
     module.sync_resolved_hosts,
     module.sync_resolved_addresses,
+    # Similarly, the indexes and aliases need creating before we can run the ingest lambda
+    module.resolved_hosts_index,
+    module.resolved_hosts_index_pattern,
+    module.resolved_addresses_index,
+    module.resolved_addresses_index_pattern,
+    module.address_info_index,
+    module.address_info_index_pattern,
   ]
 
   triggers = {
