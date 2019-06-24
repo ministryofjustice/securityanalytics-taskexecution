@@ -80,6 +80,10 @@ resource "null_resource" "initial_dns_ingest" {
     module.sync_resolved_addresses,
   ]
 
+  triggers = {
+    always = timestamp()
+  }
+
   # This provisioner will invoke the lambda as soon as the function is added
   # TODO I am hoping that since the lambda will depend on all of its dependencies, it will be
   # deployed after all of its runtime dependencies. If it is not, this initial invocation may fail

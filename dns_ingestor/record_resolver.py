@@ -32,6 +32,7 @@ class RecordResolver:
         self.ips_resolved = 0
 
     async def resolve(self, record):
+        # print(f"Resolving record {record}")
         record_type = record["Type"]
         if record_type in self._record_type_handler.keys():
             result = await self._record_type_handler[record_type](record)
@@ -59,11 +60,14 @@ class RecordResolver:
             return await self._resolve_using_ns_lookup(record, [target["DNSName"]], "ALIAS")
 
     async def _resolve_cname_record(self, record):
-        return await self._resolve_using_ns_lookup(
-            record,
-            [resource["Value"] for resource in record["ResourceRecords"]],
-            record["Type"]
-        )
+        if "AliasTarget" in record:
+            return await self._resolve_alias_record(record)
+        else:
+            return await self._resolve_using_ns_lookup(
+                record,
+                [resource["Value"] for resource in record["ResourceRecords"]],
+                record["Type"]
+            )
 
     async def _resolve_using_ns_lookup(self, record, redirects, record_type):
         # print(f"Ingested {record_type} record: {record['Name']}")
