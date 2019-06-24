@@ -33,3 +33,18 @@ output "trigger_dead_letter_queue" {
 output "results_dead_letter_queue" {
   value = module.taskmodule.results_dead_letter_queue
 }
+
+output "task_queue_consumer_arn" {
+  value = module.taskmodule.task_queue_consumer_arn
+}
+
+output "task_queue_consumer_role" {
+  value = module.taskmodule.task_queue_consumer_role
+}
+
+output "s3_bucket_policy_arn" {
+  value = module.taskmodule.s3_bucket_policy_arn
+}
+output "s3_bucket_policy_doc" {
+  value = module.taskmodule.s3_bucket_policy_doc
+}

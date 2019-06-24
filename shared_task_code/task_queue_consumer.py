@@ -56,8 +56,12 @@ class TaskQueueConsumer:
             scan = loads(record["body"])
             message_id = f"{record['messageId']}"
             if self.func_validatedata != None:
-                valid = self.func_validatedata(self.event, scan, message_id)
+                (valid, scan) = self.func_validatedata(self.event, scan, message_id)
             else:
                 valid = True
             if valid:
-                self.run_scan(scan, message_id)
+                if isinstance(scan, list):
+                    for scanitem in scan:
+                        self.run_scan(scanitem, message_id)
+                else:
+                    self.run_scan(scan, message_id)
