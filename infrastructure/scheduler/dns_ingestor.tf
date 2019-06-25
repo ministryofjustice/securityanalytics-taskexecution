@@ -52,18 +52,53 @@ resource "aws_lambda_function" "ingest_dns" {
     }
   }
 
+  tags = {
+    workspace = terraform.workspace
+    app_name  = var.app_name
+  }
+}
+
+resource "null_resource" "initial_dns_ingest" {
+  # Can't do the invocation until everything is in place
+  depends_on = [
+    aws_dynamodb_table.address_info,
+    aws_dynamodb_table.planned_scans,
+    aws_dynamodb_table.resolved_addresses,
+    aws_dynamodb_table.resolved_hosts,
+    aws_lambda_function.ingest_dns,
+    aws_iam_role_policy_attachment.dns_ingestor_perms,
+    aws_ssm_parameter.route53_ingest_role,
+    aws_ssm_parameter.address_db_id,
+    aws_ssm_parameter.address_info_db_id,
+    aws_ssm_parameter.host_db_id,
+    aws_ssm_parameter.address_db_id,
+    aws_ssm_parameter.config_period,
+    aws_ssm_parameter.config_buckets,
+    aws_ssm_parameter.config_log_unhandled,
+    # Need the sync lambdas in place or else we will miss the data in kibana
+    module.sync_address_info,
+    module.sync_resolved_hosts,
+    module.sync_resolved_addresses,
+    # Similarly, the indexes and aliases need creating before we can run the ingest lambda
+    module.resolved_hosts_index,
+    module.resolved_hosts_index_pattern,
+    module.resolved_addresses_index,
+    module.resolved_addresses_index_pattern,
+    module.address_info_index,
+    module.address_info_index_pattern,
+  ]
+
+  triggers = {
+    always = timestamp()
+  }
+
   # This provisioner will invoke the lambda as soon as the function is added
   # TODO I am hoping that since the lambda will depend on all of its dependencies, it will be
   # deployed after all of its runtime dependencies. If it is not, this initial invocation may fail
   # Since we use async invocation it wont hold up the deployment, but it also wont be checked for
   # success. We may need to add additional depends_on entries if we see failures.
   provisioner "local-exec" {
-    command = "aws lambda invoke --region=${var.aws_region} --function-name=${self.function_name} --invocation-type=Event /dev/null"
-  }
-
-  tags = {
-    workspace = terraform.workspace
-    app_name  = var.app_name
+    command = "aws lambda invoke --region=${var.aws_region} --function-name=${aws_lambda_function.ingest_dns.function_name} --invocation-type=Event /dev/null"
   }
 }
 
