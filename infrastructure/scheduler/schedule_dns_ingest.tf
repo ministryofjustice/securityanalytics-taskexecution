@@ -4,21 +4,23 @@ resource "aws_cloudwatch_event_target" "schedule_dns_ingest" {
   input = "{}" # no info needed, just do the scan!
 }
 
-data "external" "current_minute" {
+data "external" "current_time" {
   program = [
     "python",
     "-c",
     # external datasource expects json, simple script to include now's minutes as the value in json
-    "import datetime; print(f\"{{\\\"min\\\":\\\"{datetime.datetime.now().minute}\\\"}}\")"
+    "import datetime; now = datetime.datetime.now(); print(f\"{{\\\"min\\\":\\\"{now.minute}\\\",\\\"hour\\\":\\\"{now.hour}\\\"}}\")"
   ]
 }
 
 locals {
   # Originally this was always midnight, but we had multiple environments all trying to ingest
   # at once which stops any from succeeding, this hack reduces the chances of that happening.
-  # tell it to kick off 5 mins after now to give things time to deploy
+  # It won't invoke when we start up, because the time determined by terraform will already have
+  # passed, but see the null resource null_resource.initial_dns_ingest, which will invoke
+  # the lambda at startup
   # TODO https://dsdmoj.atlassian.net/browse/SA-123 Share the ingest logic to avoid the duplication
-  ingest_schedule = "${tonumber(data.external.current_minute.result.min)} 0 * * ? *"
+  ingest_schedule = "${tonumber(data.external.current_time.result.min)} ${tonumber(data.external.current_time.result.hour)} * * ? *"
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_dns_ingest" {
