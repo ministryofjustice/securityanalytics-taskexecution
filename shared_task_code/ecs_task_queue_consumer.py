@@ -15,11 +15,17 @@ class ECSTaskQueueConsumer:
     task_name = os.environ["TASK_NAME"]
     ssm_prefix = f"/{app_name}/{stage}"
     ssm_client = boto3.client("ssm", region_name=region)
+    ecs_client = boto3.client("ecs", region_name=region)
 
+    PRIVATE_SUBNETS = f"{ssm_prefix}/vpc/using_private_subnets"
+    SUBNETS = f"{ssm_prefix}/vpc/subnets/instance"
+    CLUSTER = f"{ssm_prefix}/ecs/cluster"
     RESULTS = f"{ssm_prefix}/tasks/{task_name}/s3/results/id"
+    SECURITY_GROUP = f"{ssm_prefix}/tasks/{task_name}/security_group/id"
+    IMAGE_ID = f"{ssm_prefix}/tasks/{task_name}/image/id"
 
-    def get_ssm_params(self, ssm_client, *param_names):
-        ret = self.ssm_client.get_parameters(Names=[*param_names])
+    def get_ssm_params(self, ssm_client, param_names):
+        ret = self.ssm_client.get_parameters(Names=param_names)
         params = ret['Parameters']
         return {p['Name']: p['Value'] for p in params}
 
@@ -28,47 +34,48 @@ class ECSTaskQueueConsumer:
 
     def submit_ecs_task(self, event, task_params, message_id):
         ssm_params = event["ssm_params"]
-        private_subnet = "true" == ssm_params[PRIVATE_SUBNETS]
+        private_subnet = "true" == ssm_params[self.PRIVATE_SUBNETS]
         network_configuration = {
             "awsvpcConfiguration": {
-                "subnets": ssm_params[SUBNETS].split(","),
-                "securityGroups": [ssm_params[SECURITY_GROUP]],
+                "subnets": ssm_params[self.SUBNETS].split(","),
+                "securityGroups": [ssm_params[self.SECURITY_GROUP]],
                 "assignPublicIp": "DISABLED" if private_subnet else "ENABLED"
             }
         }
         ecs_params = {
-            "cluster": ssm_params[CLUSTER],
+            "cluster": ssm_params[self.CLUSTER],
             "networkConfiguration": network_configuration,
-            "taskDefinition": ssm_params[IMAGE_ID],
+            "taskDefinition": ssm_params[self.IMAGE_ID],
             "launchType": "FARGATE",
             "overrides": {
                 "containerOverrides": [{
-                    "name": task_name,
+                    "name": self.task_name,
                     "environment": [
-                        # TODO The only bit of this file that isn't going to be the same for other
-                        # task queue executors, is this bit that maps the request body to some env vars
-                        # Extract the common code into a layer exported by the task-execution project
-                        # {
-                        #     "name": "NMAP_TARGET_STRING",
-                        #             "value": sanitise_nmap_target(host.strip())
-                        # },
                         {
-                            "name": "TASK_PARAMS",
-                            "value": task_params
+                            "name": "TASK_INPUT",
+                            "value": task_params['target']
                         },
                         {
                             "name": "MESSAGE_ID",
-                                    "value": message_id
+                            "value": message_id
                         },
                         {
                             "name": "RESULTS_BUCKET",
-                                    "value": ssm_params[RESULTS]
+                            "value": ssm_params[self.RESULTS]
+                        },
+                        {
+                            "name": "S3_METADATA",
+                            "value": "scan_end_time="+task_params['scan_end_time'] +
+                            ",address="+task_params['address'] +
+                            ",address_type="+task_params['address_type']
+
+
                         }]
                 }]
             }
         }
         print(f"Submitting task: {dumps(ecs_params)}")
-        task_response = ecs_client.run_task(**ecs_params)
+        task_response = self.ecs_client.run_task(**ecs_params)
         print(f"Submitted scanning task: {dumps(task_response)}")
 
         failures = task_response["failures"]
@@ -98,12 +105,15 @@ class ECSTaskQueueConsumer:
         # Pass in variables by name for:
         # ValidateData=func() - optional (validates the event data)
         # TaskCode=func() - the code to execute for this task
-        self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, self.RESULTS)
+        self.event['ssm_params'] = self.get_ssm_params(
+            self.ssm_client, [self.PRIVATE_SUBNETS,
+                              self.SUBNETS, self.CLUSTER, self.RESULTS, self.SECURITY_GROUP, self.IMAGE_ID])
 
         self.func_validatedata = ValidateData
         self.func_taskcode = TaskCode
         for record in self.event["Records"]:
-            scan = loads(record["body"])
+            # scan = loads(record["body"])
+            scan = record["body"]
             message_id = f"{record['messageId']}"
             if self.func_validatedata != None:
                 # validatedata should validate the data, and return a cleaned/destructured

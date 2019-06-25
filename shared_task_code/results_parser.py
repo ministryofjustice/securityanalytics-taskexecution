@@ -55,6 +55,15 @@ class ResultsParser:
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
         body = tar.extractfile(result_file_name).read().decode('utf-8').split('\n')
 
+        # there might be times where we want to handle the results ourselves, if so, pass out
+        # the file and let the scanning task handle it themselves
+
+       
+        if self.func_customdata!=None:
+            #TODO: document this
+            self.func_customdata(body, TarData=tar, MsgData=msgdata, TaskTopic=topic, TaskBucket=bucket, TaskKey=key)
+            
+
         # we need these to track the scan (TODO: this will be removed and replaced by a better identifier later)
         start_time, end_time = msgdata["scan_end_time"], msgdata["scan_end_time"]
         scan_id = os.path.splitext(result_file_name)[0]
@@ -72,15 +81,16 @@ class ResultsParser:
         if self.func_iterateresults != None:
             self.func_iterateresults(results_context, body, TaskTopic=topic, TaskBucket=bucket, TaskKey=key)
 
-
-    def start(self, PreProcessRecord=None, IterateResults=None):
+    def start(self, PreProcessRecord=None, IterateResults=None, CustomDataHandler=None):
         # Pass in variables by name for:
         # PreProcessRecord=func() - optional
         # IterateResults=func() - mandatory
+        # CustomDataHandler=func() - optional - if you want to handle the results yourself
         self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, self.SNS_TOPIC)
         topic = self.event['ssm_params'][self.SNS_TOPIC]
         self.func_preprocess = PreProcessRecord
         self.func_iterateresults = IterateResults
+        self.func_customdata = CustomDataHandler
         for record in self.event["Records"]:
             s3_object = objectify(record["s3"])
             bucket = s3_object.bucket.name
