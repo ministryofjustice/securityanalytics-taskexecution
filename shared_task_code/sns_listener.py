@@ -33,9 +33,9 @@ class SNSListener:
             MessageBody=dumps(json_data)
         )
 
-    def start(self, PassToQueue=None):
+    def start(self, pass_to_queue=None):
 
         self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, self.SQS_PUSH_URL)
         for record in self.event["Records"]:
             print(record)
-            PassToQueue(self.event, record["Sns"], self)
+            pass_to_queue(self.event, record["Sns"], self)

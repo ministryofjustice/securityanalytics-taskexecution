@@ -44,14 +44,14 @@ class TaskQueueConsumer:
             f"{s3file}.tar.gz",
             ExtraArgs={'ServerSideEncryption': "AES256", 'Metadata': scan})
 
-    def start(self, ValidateData=None, TaskCode=None):
+    def start(self, validate_data=None, task_code=None):
         # Pass in variables by name for:
         # ValidateData=func() - optional (validates the event data)
         # TaskCode=func() - the code to execute for this task
         self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, self.RESULTS)
 
-        self.func_validatedata = ValidateData
-        self.func_taskcode = TaskCode
+        self.func_validatedata = validate_data
+        self.func_taskcode = task_code
         for record in self.event["Records"]:
             scan = loads(record["body"])
             message_id = f"{record['messageId']}"

@@ -42,6 +42,28 @@ class ECSTaskQueueConsumer:
                 "assignPublicIp": "DISABLED" if private_subnet else "ENABLED"
             }
         }
+        env_obj = [
+            {
+                "name": "TASK_INPUT",
+                "value": task_params['target']
+            },
+            {
+                "name": "MESSAGE_ID",
+                "value": message_id
+            },
+            {
+                "name": "RESULTS_BUCKET",
+                "value": ssm_params[self.RESULTS]
+            },
+            {
+                "name": "S3_METADATA",
+                "value": f"scan_end_time={task_params['scan_end_time']},address={task_params['address']},address_type={task_params['address_type']}""
+
+        }]
+
+        if 'env_vars' in task_params:
+            env_obj += task_params['env_vars']
+            
         ecs_params = {
             "cluster": ssm_params[self.CLUSTER],
             "networkConfiguration": network_configuration,
@@ -50,27 +72,7 @@ class ECSTaskQueueConsumer:
             "overrides": {
                 "containerOverrides": [{
                     "name": self.task_name,
-                    "environment": [
-                        {
-                            "name": "TASK_INPUT",
-                            "value": task_params['target']
-                        },
-                        {
-                            "name": "MESSAGE_ID",
-                            "value": message_id
-                        },
-                        {
-                            "name": "RESULTS_BUCKET",
-                            "value": ssm_params[self.RESULTS]
-                        },
-                        {
-                            "name": "S3_METADATA",
-                            "value": "scan_end_time="+task_params['scan_end_time'] +
-                            ",address="+task_params['address'] +
-                            ",address_type="+task_params['address_type']
-
-
-                        }]
+                    "environment": env_obj
                 }]
             }
         }
@@ -83,25 +85,7 @@ class ECSTaskQueueConsumer:
             raise RuntimeError(
                 f"ECS task failed to start {dumps(failures)}")
 
-        def run_scan(self, scan, message_id):
-            # Use this format to have uniformly named files in S3
-            date_string = f"{datetime.now():%Y-%m-%dT%H%M%S%Z}"
-            s3file = f"{message_id}-{date_string}-{self.task_name}.txt"
-
-            results_filename = f"/tmp/{s3file}"
-
-            if self.func_taskcode != None:
-                self.func_taskcode(self.event, scan, message_id, results_filename, '/tmp/')
-
-            subprocess.check_output(f'cd /tmp;tar -czvf "{s3file}.tar.gz" "{s3file}"', shell=True)
-            s3 = boto3.resource("s3", region_name=self.region)
-            s3.meta.client.upload_file(
-                f"/tmp/{s3file}.tar.gz",
-                self.event["ssm_params"][self.RESULTS],
-                f"{s3file}.tar.gz",
-                ExtraArgs={'ServerSideEncryption': "AES256", 'Metadata': scan})
-
-    def start(self, ValidateData=None, TaskCode=None):
+    def start(self, validate_data=None, task_code=None):
         # Pass in variables by name for:
         # ValidateData=func() - optional (validates the event data)
         # TaskCode=func() - the code to execute for this task
@@ -109,10 +93,9 @@ class ECSTaskQueueConsumer:
             self.ssm_client, [self.PRIVATE_SUBNETS,
                               self.SUBNETS, self.CLUSTER, self.RESULTS, self.SECURITY_GROUP, self.IMAGE_ID])
 
-        self.func_validatedata = ValidateData
-        self.func_taskcode = TaskCode
+        self.func_validatedata = validate_data
+        self.func_taskcode = task_code
         for record in self.event["Records"]:
-            # scan = loads(record["body"])
             scan = record["body"]
             message_id = f"{record['messageId']}"
             if self.func_validatedata != None:
