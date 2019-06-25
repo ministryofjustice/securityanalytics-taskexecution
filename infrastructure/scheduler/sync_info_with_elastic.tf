@@ -37,6 +37,9 @@ module "sync_resolved_hosts" {
   account_id       = var.account_id
   app_name         = var.app_name
   aws_region       = var.aws_region
+  account_id = var.account_id
+  app_name = var.app_name
+  aws_region = var.aws_region
   ssm_source_stage = var.ssm_source_stage
   use_xray         = var.use_xray
 
