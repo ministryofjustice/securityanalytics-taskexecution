@@ -11,7 +11,7 @@ from shared_task_code.task_queue_consumer import TaskQueueConsumer
 
 class ECSTaskQueueConsumer(TaskQueueConsumer):
 
-    def __init__(self,event):
+    def __init__(self, event):
         self.ecs_client = boto3.client("ecs", region_name=self.region)
 
         self.PRIVATE_SUBNETS = f"{self.ssm_prefix}/vpc/using_private_subnets"
@@ -45,8 +45,9 @@ class ECSTaskQueueConsumer(TaskQueueConsumer):
                 "value": ssm_params[self.RESULTS]
             },
             {
+                # use comma format to allow other metadata fields to be easily appended in the docker task
                 "name": "S3_METADATA",
-                "value": f"scan_end_time={task_params['scan_end_time']},address={task_params['address']},address_type={task_params['address_type']}"
+                "value": f"address={task_params['address']},address_type={task_params['address_type']}"
 
             }]
 

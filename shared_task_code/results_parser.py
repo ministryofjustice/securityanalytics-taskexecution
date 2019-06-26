@@ -62,8 +62,7 @@ class ResultsParser:
             # TODO: document this
             self.func_customdata(body, TarData=tar, MsgData=msgdata, TaskTopic=topic, TaskBucket=bucket, TaskKey=key)
 
-        # we need these to track the scan (TODO: this will be removed and replaced by a better identifier later)
-        start_time, end_time = msgdata["scan_end_time"], msgdata["scan_end_time"]
+        start_time, end_time = msgdata["start_time"], msgdata["end_time"]
         scan_id = os.path.splitext(result_file_name)[0]
 
         # set up the base set of keys to send to elastic
@@ -71,8 +70,6 @@ class ResultsParser:
             "address": msgdata['address'],
             "address_type": msgdata['address_type']
         }
-        # TODO store start_time correctly
-        # TODO end_time will be correct once the scheduler is in place to change the key (currently end_time is used)
 
         results_context = ResultsContext(topic, non_temporal_key, scan_id, start_time,
                                          end_time, self.task_name, self.sns_client)

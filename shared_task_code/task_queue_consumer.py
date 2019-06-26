@@ -32,12 +32,13 @@ class TaskQueueConsumer:
         s3file = f"{message_id}-{date_string}-{self.task_name}.txt"
 
         results_filename = f"/tmp/{s3file}"
-
+        scan['start_time'] = f"{datetime.now():%Y-%m-%dT%H:%M:%S}Z"
         if self.func_taskcode != None:
             self.func_taskcode(self.event, scan, message_id, results_filename, '/tmp/')
-
+        scan['end_time'] = f"{datetime.now():%Y-%m-%dT%H:%M:%S}Z"
         subprocess.check_output(f'cd /tmp;tar -czvf "{s3file}.tar.gz" "{s3file}"', shell=True)
         s3 = boto3.resource("s3", region_name=self.region)
+
         s3.meta.client.upload_file(
             f"/tmp/{s3file}.tar.gz",
             self.event["ssm_params"][self.RESULTS],
