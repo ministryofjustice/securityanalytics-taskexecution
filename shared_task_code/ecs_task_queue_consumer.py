@@ -6,34 +6,24 @@ from utils.json_serialisation import dumps
 from json import loads
 from datetime import datetime
 import subprocess
+from shared_task_code.task_queue_consumer import TaskQueueConsumer
 
 
-class ECSTaskQueueConsumer:
-    region = os.environ["REGION"]
-    stage = os.environ["STAGE"]
-    app_name = os.environ["APP_NAME"]
-    task_name = os.environ["TASK_NAME"]
-    ssm_prefix = f"/{app_name}/{stage}"
-    ssm_client = boto3.client("ssm", region_name=region)
-    ecs_client = boto3.client("ecs", region_name=region)
+class ECSTaskQueueConsumer(TaskQueueConsumer):
 
-    PRIVATE_SUBNETS = f"{ssm_prefix}/vpc/using_private_subnets"
-    SUBNETS = f"{ssm_prefix}/vpc/subnets/instance"
-    CLUSTER = f"{ssm_prefix}/ecs/cluster"
-    RESULTS = f"{ssm_prefix}/tasks/{task_name}/s3/results/id"
-    SECURITY_GROUP = f"{ssm_prefix}/tasks/{task_name}/security_group/id"
-    IMAGE_ID = f"{ssm_prefix}/tasks/{task_name}/image/id"
+    def __init__(self,event):
+        self.ecs_client = boto3.client("ecs", region_name=self.region)
 
-    def get_ssm_params(self, ssm_client, param_names):
-        ret = self.ssm_client.get_parameters(Names=param_names)
-        params = ret['Parameters']
-        return {p['Name']: p['Value'] for p in params}
-
-    def __init__(self, event):
+        self.PRIVATE_SUBNETS = f"{self.ssm_prefix}/vpc/using_private_subnets"
+        self.SUBNETS = f"{self.ssm_prefix}/vpc/subnets/instance"
+        self.CLUSTER = f"{self.ssm_prefix}/ecs/cluster"
+        # RESULTS = f"{ssm_prefix}/tasks/{task_name}/s3/results/id"
+        self.SECURITY_GROUP = f"{self.ssm_prefix}/tasks/{self.task_name}/security_group/id"
+        self.IMAGE_ID = f"{self.ssm_prefix}/tasks/{self.task_name}/image/id"
         self.event = event
 
-    def submit_ecs_task(self, event, task_params, message_id):
-        ssm_params = event["ssm_params"]
+    def submit_ecs_task(self, task_params, message_id):
+        ssm_params = self.event["ssm_params"]
         private_subnet = "true" == ssm_params[self.PRIVATE_SUBNETS]
         network_configuration = {
             "awsvpcConfiguration": {
@@ -57,13 +47,13 @@ class ECSTaskQueueConsumer:
             },
             {
                 "name": "S3_METADATA",
-                "value": f"scan_end_time={task_params['scan_end_time']},address={task_params['address']},address_type={task_params['address_type']}""
+                "value": f"scan_end_time={task_params['scan_end_time']},address={task_params['address']},address_type={task_params['address_type']}"
 
-        }]
+            }]
 
         if 'env_vars' in task_params:
             env_obj += task_params['env_vars']
-            
+
         ecs_params = {
             "cluster": ssm_params[self.CLUSTER],
             "networkConfiguration": network_configuration,
@@ -92,23 +82,4 @@ class ECSTaskQueueConsumer:
         self.event['ssm_params'] = self.get_ssm_params(
             self.ssm_client, [self.PRIVATE_SUBNETS,
                               self.SUBNETS, self.CLUSTER, self.RESULTS, self.SECURITY_GROUP, self.IMAGE_ID])
-
-        self.func_validatedata = validate_data
-        self.func_taskcode = task_code
-        for record in self.event["Records"]:
-            scan = record["body"]
-            message_id = f"{record['messageId']}"
-            if self.func_validatedata != None:
-                # validatedata should validate the data, and return a cleaned/destructured
-                # version of it, e.g. for nmap scanner there's a case where there are a list
-                # of things to scan - so in this case, the string 'scan', could return as
-                # an array of strings
-                (valid, scan) = self.func_validatedata(self.event, scan, message_id)
-            else:
-                valid = True
-            if valid:
-                if isinstance(scan, list):
-                    for scanitem in scan:
-                        self.submit_ecs_task(self.event, scanitem, message_id)
-                else:
-                    self.submit_ecs_task(self.event, scan, message_id)
+        self.process_records(self.submit_ecs_task, validate_data, task_code)

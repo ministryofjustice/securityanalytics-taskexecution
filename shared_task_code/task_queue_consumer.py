@@ -18,8 +18,8 @@ class TaskQueueConsumer:
 
     RESULTS = f"{ssm_prefix}/tasks/{task_name}/s3/results/id"
 
-    def get_ssm_params(self, ssm_client, *param_names):
-        ret = self.ssm_client.get_parameters(Names=[*param_names])
+    def get_ssm_params(self, ssm_client, param_names):
+        ret = self.ssm_client.get_parameters(Names=param_names)
         params = ret['Parameters']
         return {p['Name']: p['Value'] for p in params}
 
@@ -44,24 +44,35 @@ class TaskQueueConsumer:
             f"{s3file}.tar.gz",
             ExtraArgs={'ServerSideEncryption': "AES256", 'Metadata': scan})
 
-    def start(self, validate_data=None, task_code=None):
-        # Pass in variables by name for:
-        # ValidateData=func() - optional (validates the event data)
-        # TaskCode=func() - the code to execute for this task
-        self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, self.RESULTS)
-
+    def process_records(self, task_func, validate_data, task_code):
         self.func_validatedata = validate_data
         self.func_taskcode = task_code
         for record in self.event["Records"]:
-            scan = loads(record["body"])
+            try:
+                scan = loads(record["body"])
+            except:
+                scan = record["body"]
+                pass
             message_id = f"{record['messageId']}"
             if self.func_validatedata != None:
+                # validatedata should validate the data, and return a cleaned/destructured
+                # version of it, e.g. for nmap scanner there's a case where there are a list
+                # of things to scan - so in this case, the string 'scan', could return as
+                # an array of strings
                 (valid, scan) = self.func_validatedata(self.event, scan, message_id)
             else:
                 valid = True
             if valid:
                 if isinstance(scan, list):
                     for scanitem in scan:
-                        self.run_scan(scanitem, message_id)
+                        task_func(scanitem, message_id)
                 else:
-                    self.run_scan(scan, message_id)
+                    task_func(scan, message_id)
+
+    def start(self, validate_data=None, task_code=None):
+        # Pass in variables by name for:
+        # ValidateData=func() - optional (validates the event data)
+        # TaskCode=func() - the code to execute for this task
+        self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, [self.RESULTS])
+
+        self.process_records(self.run_scan, validate_data, task_code)
