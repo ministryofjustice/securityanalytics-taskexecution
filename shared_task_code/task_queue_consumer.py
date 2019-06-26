@@ -45,9 +45,8 @@ class TaskQueueConsumer:
             f"{s3file}.tar.gz",
             ExtraArgs={'ServerSideEncryption': "AES256", 'Metadata': scan})
 
-    def process_records(self, task_func, validate_data, task_code):
-        self.func_validatedata = validate_data
-        self.func_taskcode = task_code
+    def process_records(self, task_func, validate_data, queue_input):
+
         for record in self.event["Records"]:
             try:
                 scan = loads(record["body"])
@@ -55,12 +54,13 @@ class TaskQueueConsumer:
                 scan = record["body"]
                 pass
             message_id = f"{record['messageId']}"
-            if self.func_validatedata != None:
+            scan = queue_input(scan)
+            if validate_data != None:
                 # validatedata should validate the data, and return a cleaned/destructured
                 # version of it, e.g. for nmap scanner there's a case where there are a list
                 # of things to scan - so in this case, the string 'scan', could return as
                 # an array of strings
-                (valid, scan) = self.func_validatedata(self.event, scan, message_id)
+                (valid, scan) = validate_data(self.event, scan, message_id)
             else:
                 valid = True
             if valid:
@@ -70,9 +70,22 @@ class TaskQueueConsumer:
                 else:
                     task_func(scan, message_id)
 
-    def start(self, validate_data=None, task_code=None):
+    def record_from_queue(self, scan_input):
+        if isinstance(scan_input, dict):
+            return scan_input
+        # manual kick off - tasks would normally be kicked off as a result of
+        # DNS ingestion or another scanner - this is provided to add parameters
+        # that would otherwise have been passed as the result of a previous scan
+        # allowing you to test out a particular scan as you develop it
+        scan_rec = {"target": scan_input, "address": scan_input, "address_type": "ipv4"}
+        return scan_rec
+
+    def start(self, validate_data=None, task_code=None, queue_input=None):
         # Pass in variables by name for:
         # ValidateData=func() - optional (validates the event data)
         # TaskCode=func() - the code to execute for this task
+        self.func_taskcode = task_code
+        if queue_input == None:
+            queue_input = self.record_from_queue
         self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, [self.RESULTS])
-        self.process_records(self.run_scan, validate_data, task_code)
+        self.process_records(self.run_scan, validate_data, queue_input)

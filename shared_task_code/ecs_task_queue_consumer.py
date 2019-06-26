@@ -75,11 +75,14 @@ class ECSTaskQueueConsumer(TaskQueueConsumer):
             raise RuntimeError(
                 f"ECS task failed to start {dumps(failures)}")
 
-    def start(self, validate_data=None, task_code=None):
+    def start(self, validate_data=None, task_code=None, queue_input=None):
         # Pass in variables by name for:
         # ValidateData=func() - optional (validates the event data)
         # TaskCode=func() - the code to execute for this task
+        self.func_taskcode = task_code
+        if queue_input == None:
+            queue_input = self.record_from_queue
         self.event['ssm_params'] = self.get_ssm_params(
             self.ssm_client, [self.PRIVATE_SUBNETS,
                               self.SUBNETS, self.CLUSTER, self.RESULTS, self.SECURITY_GROUP, self.IMAGE_ID])
-        self.process_records(self.submit_ecs_task, validate_data, task_code)
+        self.process_records(self.submit_ecs_task, validate_data, queue_input)
