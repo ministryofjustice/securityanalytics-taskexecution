@@ -17,7 +17,6 @@ class ECSTaskQueueConsumer(TaskQueueConsumer):
         self.PRIVATE_SUBNETS = f"{self.ssm_prefix}/vpc/using_private_subnets"
         self.SUBNETS = f"{self.ssm_prefix}/vpc/subnets/instance"
         self.CLUSTER = f"{self.ssm_prefix}/ecs/cluster"
-        # RESULTS = f"{ssm_prefix}/tasks/{task_name}/s3/results/id"
         self.SECURITY_GROUP = f"{self.ssm_prefix}/tasks/{self.task_name}/security_group/id"
         self.IMAGE_ID = f"{self.ssm_prefix}/tasks/{self.task_name}/image/id"
         self.event = event
