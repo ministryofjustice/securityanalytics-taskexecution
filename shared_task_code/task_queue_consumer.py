@@ -75,5 +75,4 @@ class TaskQueueConsumer:
         # ValidateData=func() - optional (validates the event data)
         # TaskCode=func() - the code to execute for this task
         self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, [self.RESULTS])
-
         self.process_records(self.run_scan, validate_data, task_code)
