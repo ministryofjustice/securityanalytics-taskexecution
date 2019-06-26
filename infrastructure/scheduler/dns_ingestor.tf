@@ -81,9 +81,11 @@ resource "null_resource" "initial_dns_ingest" {
     module.sync_resolved_addresses,
     # Similarly, the indexes and aliases need creating before we can run the ingest lambda
     module.resolved_hosts_index,
-    module.resolved_hosts_index_pattern,
+    module.resolved_hosts_index_pattern_history,
+    module.resolved_hosts_index_pattern_snapshot,
     module.resolved_addresses_index,
-    module.resolved_addresses_index_pattern,
+    module.resolved_addresses_index_pattern_history,
+    module.resolved_addresses_index_pattern_snapshot,
     module.address_info_index,
     module.address_info_index_pattern,
   ]

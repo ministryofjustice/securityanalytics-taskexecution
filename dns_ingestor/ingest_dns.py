@@ -92,6 +92,8 @@ async def ingest_dns(event, _):
             schedule
         )
 
+        await scan_plan_writer.prepare()
+
         # A bit of glue code that acts as the record consumer for the ingestor
         # resolves the IPs from records and then submits them to the plan writer
         async def scan_planner(record):
@@ -103,6 +105,8 @@ async def ingest_dns(event, _):
             db_writes.append(gathered_writes)
 
         await ingestor.ingest_records(scan_planner)
+
+        await scan_plan_writer.commit()
     finally:
         # ensure route53 connection is shut down and all writes are written
         await gather(
