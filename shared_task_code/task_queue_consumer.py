@@ -33,8 +33,8 @@ class TaskQueueConsumer:
 
         results_filename = f"/tmp/{s3file}"
         scan['start_time'] = f"{datetime.now():%Y-%m-%dT%H:%M:%S}Z"
-        if self.func_taskcode != None:
-            self.func_taskcode(self.event, scan, message_id, results_filename, '/tmp/')
+        if self.func_task_code != None:
+            self.func_task_code(self.event, scan, message_id, results_filename, '/tmp/')
         scan['end_time'] = f"{datetime.now():%Y-%m-%dT%H:%M:%S}Z"
         subprocess.check_output(f'cd /tmp;tar -czvf "{s3file}.tar.gz" "{s3file}"', shell=True)
         s3 = boto3.resource("s3", region_name=self.region)
@@ -52,9 +52,9 @@ class TaskQueueConsumer:
                 scan = loads(record["body"])
             except:
                 scan = record["body"]
-                pass
             message_id = f"{record['messageId']}"
-            scan = queue_input(scan)
+            if queue_input:
+                scan = queue_input(scan)
             if validate_data != None:
                 # validatedata should validate the data, and return a cleaned/destructured
                 # version of it, e.g. for nmap scanner there's a case where there are a list
@@ -65,8 +65,10 @@ class TaskQueueConsumer:
                 valid = True
             if valid:
                 if isinstance(scan, list):
+                    id=0
                     for scanitem in scan:
-                        task_func(scanitem, message_id)
+                        id+=1
+                        task_func(scanitem, f"{message_id}-{id}")
                 else:
                     task_func(scan, message_id)
 
@@ -84,8 +86,9 @@ class TaskQueueConsumer:
         # Pass in variables by name for:
         # ValidateData=func() - optional (validates the event data)
         # TaskCode=func() - the code to execute for this task
-        self.func_taskcode = task_code
+        self.func_task_code = task_code
         if queue_input == None:
+            # False is a valid input, which is caught later to not filter at all 
             queue_input = self.record_from_queue
         self.event['ssm_params'] = self.get_ssm_params(self.ssm_client, [self.RESULTS])
         self.process_records(self.run_scan, validate_data, queue_input)

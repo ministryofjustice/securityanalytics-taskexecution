@@ -43,8 +43,11 @@ class ECSTaskQueueConsumer(TaskQueueConsumer):
             {
                 "name": "RESULTS_BUCKET",
                 "value": ssm_params[self.RESULTS]
-            },
-            {
+            }]
+
+        if 'address' in task_params:
+            # this is usually only valid for secondary scans
+            env_obj += [{
                 # use comma format to allow other metadata fields to be easily appended in the docker task
                 "name": "S3_METADATA",
                 "value": f"address={task_params['address']},address_type={task_params['address_type']}"
