@@ -1,4 +1,5 @@
 from asyncio import sleep
+from itertools import islice
 
 
 # This class knows how to query route53 and resolve the IPs for all hosts recorded

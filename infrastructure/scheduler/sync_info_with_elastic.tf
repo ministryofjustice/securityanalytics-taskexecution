@@ -27,6 +27,7 @@ module "sync_resolved_addresses" {
   syncer_name = "resolved-addresses"
   set_column_to_diff = "Hosts"
   non_temporal_key_field = "Address"
+  temporal_key_field = "DnsIngestTime"
 }
 
 module "sync_resolved_hosts" {
@@ -43,4 +44,5 @@ module "sync_resolved_hosts" {
   syncer_name = "resolved-hosts"
   set_column_to_diff = "Addresses"
   non_temporal_key_field = "Host"
+  temporal_key_field = "DnsIngestTime"
 }
