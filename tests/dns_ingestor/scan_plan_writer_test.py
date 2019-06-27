@@ -21,10 +21,12 @@ async def test_uses_schedule():
     address_table = mock_table()
     address_info_table = mock_table()
     writer = PlannedScanDbWriter(scan_plan_table, host_table, address_table, address_info_table, 999, schedule)
+    await writer.prepare()
     # asyncly call write 10 times
     await gather(*[
-        writer.write(HostToScan("123.4.5.6", "foo.bar")) for _ in range(0, 10)
+        writer.write(HostToScan(f"123.4.5.{x}", "foo.bar")) for x in range(0, 10)
     ])
+    await writer.commit()
     assert schedule.__next__.call_count == 10
 
 
@@ -37,10 +39,12 @@ async def test_is_async():
     address_table = mock_table()
     address_info_table = mock_table()
     writer = PlannedScanDbWriter(scan_plan_table, host_table, address_table, address_info_table, 999, schedule)
+    await writer.prepare()
     # asyncly call write 10 times
     all_writes = gather(*[
-        writer.write(HostToScan("123.4.5.6", "foo.bar")) for _ in range(0, 10)
+        writer.write(HostToScan(f"123.4.5.{x}", "foo.bar")) for x in range(0, 10)
     ])
+    await writer.commit()
     assert not all_writes.done()
 
     # asyncly set the results
@@ -60,7 +64,9 @@ async def test_dynamo_db_call_params():
     address_table = mock_table()
     address_info_table = mock_table()
     writer = PlannedScanDbWriter(scan_plan_table, host_table, address_table, address_info_table, 999, schedule)
+    await writer.prepare()
     await writer.write(HostToScan("123.4.5.6", "foo.bar"))
+    await writer.commit()
 
     scan_plan_table.update_item.assert_called_once_with(
         Key={"Address": "123.4.5.6"},
