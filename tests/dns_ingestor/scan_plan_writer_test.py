@@ -44,11 +44,11 @@ async def test_is_async():
     all_writes = gather(*[
         writer.write(HostToScan(f"123.4.5.{x}", "foo.bar")) for x in range(0, 10)
     ])
-    await writer.commit()
     assert not all_writes.done()
 
     # asyncly set the results
     await all_writes
+    await writer.commit()
 
     # check that we now have the calls made
     assert scan_plan_table.update_item.call_count == 10
@@ -70,12 +70,8 @@ async def test_dynamo_db_call_params():
 
     scan_plan_table.update_item.assert_called_once_with(
         Key={"Address": "123.4.5.6"},
-        UpdateExpression="ADD #Hosts :Host SET PlannedScanTime = :PlannedScanTime, DnsIngestTime = :DnsIngestTime",
-        ExpressionAttributeNames={
-            "#Hosts": "HostsResolvingToAddress"
-        },
+        UpdateExpression="SET PlannedScanTime = :PlannedScanTime, DnsIngestTime = :DnsIngestTime",
         ExpressionAttributeValues={
-            ":Host": set(["foo.bar"]),
             ":PlannedScanTime": 1050,
             ":DnsIngestTime": 999
         }
