@@ -14,7 +14,8 @@ module "address_info_index" {
   index_file = "${path.module}/indexes/address_info.index.json"
   index_name = "data"
   task_name = "address_info"
-  snapshot_and_history = false
+  # We only have the snapshot flavour for this data
+  flavours = ["_snapshot"]
   es_domain = data.aws_ssm_parameter.es_domain.value
 }
 
@@ -36,7 +37,7 @@ module "address_info_index_pattern" {
   object_substitutions = {}
 
   object_type = "index-pattern"
-  object_title = "address_info:data:read*"
+  object_title = "address_info:data_snapshot:read*"
   es_domain = data.aws_ssm_parameter.es_domain.value
 }
 
