@@ -16,7 +16,7 @@ module "address_info_index" {
   task_name            = "address_info"
   snapshot_and_history = false
   # We only have the snapshot flavour for this data
-  flavours = ["_snapshot"]
+  flavours  = ["_snapshot"]
   es_domain = data.aws_ssm_parameter.es_domain.value
 }
 

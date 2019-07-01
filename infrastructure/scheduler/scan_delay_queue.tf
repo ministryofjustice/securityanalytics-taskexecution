@@ -1,10 +1,10 @@
 data "aws_iam_policy_document" "scan_delay_queue_policy" {
   statement {
     actions = ["sqs:SendMessage"]
-    effect = "Allow"
+    effect  = "Allow"
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = [var.account_id]
     }
 

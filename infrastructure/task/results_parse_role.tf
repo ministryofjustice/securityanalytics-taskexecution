@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "results_parse_policy" {
   }
 
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["s3:GetObject"]
 
     resources = [
@@ -77,8 +77,8 @@ data "aws_iam_policy_document" "results_parse_policy" {
   }
 
   statement {
-    effect = "Allow"
-    actions = ["sns:Publish"]
+    effect    = "Allow"
+    actions   = ["sns:Publish"]
     resources = [aws_sns_topic.task_results.id]
   }
 

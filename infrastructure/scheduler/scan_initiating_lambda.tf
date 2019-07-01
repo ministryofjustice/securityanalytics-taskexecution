@@ -14,7 +14,7 @@ module "scan_initiator_dead_letters" {
 }
 
 resource "aws_lambda_function" "scan_initiator" {
-  depends_on = [aws_iam_role_policy_attachment.scan_initiator_perms]
+  depends_on       = [aws_iam_role_policy_attachment.scan_initiator_perms]
   function_name    = "${terraform.workspace}-${var.app_name}-scan-initiator"
   handler          = "scan_initiator.scan_initiator.initiate_scans"
   role             = aws_iam_role.scan_initiator.arn

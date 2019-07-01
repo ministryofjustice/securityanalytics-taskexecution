@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "trigger_queue_policy_iam" {
     effect = "Allow"
 
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["sns.amazonaws.com"]
     }
 

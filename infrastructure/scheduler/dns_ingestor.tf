@@ -14,7 +14,7 @@ module "dns_ingestor_dead_letters" {
 }
 
 resource "aws_lambda_function" "ingest_dns" {
-  depends_on = [aws_iam_role_policy_attachment.dns_ingestor_perms]
+  depends_on       = [aws_iam_role_policy_attachment.dns_ingestor_perms]
   function_name    = "${terraform.workspace}-${var.app_name}-ingest-dns"
   handler          = "dns_ingestor.ingest_dns.ingest_dns"
   role             = aws_iam_role.dns_ingestor.arn
@@ -108,10 +108,10 @@ resource "null_resource" "initial_dns_ingest" {
 data "aws_iam_policy_document" "lambda_trust" {
   statement {
     actions = ["sts:AssumeRole"]
-    effect = "Allow"
+    effect  = "Allow"
 
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
     }
   }

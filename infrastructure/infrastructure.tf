@@ -32,7 +32,7 @@ variable "ssm_source_stage" {
 }
 
 variable "known_deployment_stages" {
-  type = list(string)
+  type    = list(string)
   default = ["dev", "qa", "prod"]
 }
 
@@ -97,8 +97,8 @@ data "external" "shared_task_code_zip" {
 
 
 resource "aws_lambda_layer_version" "shared_task_code_layer" {
-  description = "Shared Task Code layer with hash ${data.external.shared_task_code_zip.result.hash}"
-  filename    = local.shared_task_code_zip
-  layer_name  = "${terraform.workspace}-${var.app_name}-shared-task-code"
+  description         = "Shared Task Code layer with hash ${data.external.shared_task_code_zip.result.hash}"
+  filename            = local.shared_task_code_zip
+  layer_name          = "${terraform.workspace}-${var.app_name}-shared-task-code"
   compatible_runtimes = ["python3.7"]
 }

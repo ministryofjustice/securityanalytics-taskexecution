@@ -20,10 +20,10 @@ resource "aws_dynamodb_table" "planned_scans" {
   }
 
   global_secondary_index {
-    name            = local.plan_index
-    hash_key        = "Address"
-    range_key       = "PlannedScanTime"
-    projection_type = "INCLUDE"
+    name               = local.plan_index
+    hash_key           = "Address"
+    range_key          = "PlannedScanTime"
+    projection_type    = "INCLUDE"
     non_key_attributes = ["DnsIngestTime"]
   }
 
