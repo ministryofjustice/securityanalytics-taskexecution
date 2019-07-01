@@ -8,12 +8,13 @@ module "address_info_index" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/elastic_index"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  index_file = "${path.module}/indexes/address_info.index.json"
-  index_name = "data"
-  task_name = "address_info"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  index_file           = "${path.module}/indexes/address_info.index.json"
+  index_name           = "data"
+  task_name            = "address_info"
+  snapshot_and_history = false
   # We only have the snapshot flavour for this data
   flavours = ["_snapshot"]
   es_domain = data.aws_ssm_parameter.es_domain.value
@@ -29,16 +30,16 @@ module "address_info_index_pattern" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/kibana_saved_object"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  task_name = "address_info"
-  object_template = "${path.module}/indexes/address_info.pattern.json"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  task_name            = "address_info"
+  object_template      = "${path.module}/indexes/address_info.pattern.json"
   object_substitutions = {}
 
-  object_type = "index-pattern"
+  object_type  = "index-pattern"
   object_title = "address_info:data_snapshot:read*"
-  es_domain = data.aws_ssm_parameter.es_domain.value
+  es_domain    = data.aws_ssm_parameter.es_domain.value
 }
 
 module "resolved_addresses_index" {
@@ -51,14 +52,14 @@ module "resolved_addresses_index" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/elastic_index"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  index_file = "${path.module}/indexes/resolved_addresses.index.json"
-  index_name = "data"
-  task_name = "resolved_addresses"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  index_file           = "${path.module}/indexes/resolved_addresses.index.json"
+  index_name           = "data"
+  task_name            = "resolved_addresses"
   snapshot_and_history = true
-  es_domain = data.aws_ssm_parameter.es_domain.value
+  es_domain            = data.aws_ssm_parameter.es_domain.value
 }
 
 module "resolved_addresses_index_pattern_history" {
@@ -71,16 +72,16 @@ module "resolved_addresses_index_pattern_history" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/kibana_saved_object"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  task_name = "resolved_addresses"
-  object_template = "${path.module}/indexes/resolved_addresses.pattern.json"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  task_name            = "resolved_addresses"
+  object_template      = "${path.module}/indexes/resolved_addresses.pattern.json"
   object_substitutions = {}
 
-  object_type = "index-pattern"
+  object_type  = "index-pattern"
   object_title = "resolved_addresses:data_history:read*"
-  es_domain = data.aws_ssm_parameter.es_domain.value
+  es_domain    = data.aws_ssm_parameter.es_domain.value
 }
 
 module "resolved_addresses_index_pattern_snapshot" {
@@ -93,16 +94,16 @@ module "resolved_addresses_index_pattern_snapshot" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/kibana_saved_object"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  task_name = "resolved_addresses"
-  object_template = "${path.module}/indexes/resolved_addresses.pattern.json"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  task_name            = "resolved_addresses"
+  object_template      = "${path.module}/indexes/resolved_addresses.pattern.json"
   object_substitutions = {}
 
-  object_type = "index-pattern"
+  object_type  = "index-pattern"
   object_title = "resolved_addresses:data_snapshot:read*"
-  es_domain = data.aws_ssm_parameter.es_domain.value
+  es_domain    = data.aws_ssm_parameter.es_domain.value
 }
 
 module "resolved_hosts_index" {
@@ -115,14 +116,14 @@ module "resolved_hosts_index" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/elastic_index"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  index_file = "${path.module}/indexes/resolved_hosts.index.json"
-  index_name = "data"
-  task_name = "resolved_hosts"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  index_file           = "${path.module}/indexes/resolved_hosts.index.json"
+  index_name           = "data"
+  task_name            = "resolved_hosts"
   snapshot_and_history = true
-  es_domain = data.aws_ssm_parameter.es_domain.value
+  es_domain            = data.aws_ssm_parameter.es_domain.value
 }
 
 module "resolved_hosts_index_pattern_history" {
@@ -135,16 +136,16 @@ module "resolved_hosts_index_pattern_history" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/kibana_saved_object"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  task_name = "resolved_hosts"
-  object_template = "${path.module}/indexes/resolved_hosts.pattern.json"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  task_name            = "resolved_hosts"
+  object_template      = "${path.module}/indexes/resolved_hosts.pattern.json"
   object_substitutions = {}
 
-  object_type = "index-pattern"
+  object_type  = "index-pattern"
   object_title = "resolved_hosts:data_history:read*"
-  es_domain = data.aws_ssm_parameter.es_domain.value
+  es_domain    = data.aws_ssm_parameter.es_domain.value
 }
 
 module "resolved_hosts_index_pattern_snapshot" {
@@ -157,14 +158,14 @@ module "resolved_hosts_index_pattern_snapshot" {
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
   # source = "../../../securityanalytics-analyticsplatform/infrastructure/kibana_saved_object"
-  app_name = var.app_name
-  aws_region = var.aws_region
-  ssm_source_stage = var.ssm_source_stage
-  task_name = "resolved_hosts"
-  object_template = "${path.module}/indexes/resolved_hosts.pattern.json"
+  app_name             = var.app_name
+  aws_region           = var.aws_region
+  ssm_source_stage     = var.ssm_source_stage
+  task_name            = "resolved_hosts"
+  object_template      = "${path.module}/indexes/resolved_hosts.pattern.json"
   object_substitutions = {}
 
-  object_type = "index-pattern"
+  object_type  = "index-pattern"
   object_title = "resolved_hosts:data_snapshot:read*"
-  es_domain = data.aws_ssm_parameter.es_domain.value
+  es_domain    = data.aws_ssm_parameter.es_domain.value
 }

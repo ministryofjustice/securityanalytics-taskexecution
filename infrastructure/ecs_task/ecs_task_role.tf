@@ -1,10 +1,10 @@
 data "aws_iam_policy_document" "ecs_trust" {
   statement {
     actions = ["sts:AssumeRole"]
-    effect  = "Allow"
+    effect = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }

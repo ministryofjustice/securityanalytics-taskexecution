@@ -1,19 +1,20 @@
 module "scan_initiator_dead_letters" {
   source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
   # source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
-  aws_region = var.aws_region
-  app_name = var.app_name
-  account_id = var.account_id
+  aws_region       = var.aws_region
+  app_name         = var.app_name
+  account_id       = var.account_id
   ssm_source_stage = var.ssm_source_stage
-  use_xray = var.use_xray
-  recorder_name = "scan-initiator-DLQ"
-  s3_bucket = data.aws_ssm_parameter.dead_letter_bucket_name.value
-  s3_bucket_arn = data.aws_ssm_parameter.dead_letter_bucket_arn.value
-  s3_key_prefix = "task_execution/scan-initiator"
-  source_arn = aws_lambda_function.scan_initiator.arn
+  use_xray         = var.use_xray
+  recorder_name    = "scan-initiator-DLQ"
+  s3_bucket        = data.aws_ssm_parameter.dead_letter_bucket_name.value
+  s3_bucket_arn    = data.aws_ssm_parameter.dead_letter_bucket_arn.value
+  s3_key_prefix    = "task_execution/scan-initiator"
+  source_arn       = aws_lambda_function.scan_initiator.arn
 }
 
 resource "aws_lambda_function" "scan_initiator" {
+  depends_on = [aws_iam_role_policy_attachment.scan_initiator_perms]
   function_name    = "${terraform.workspace}-${var.app_name}-scan-initiator"
   handler          = "scan_initiator.scan_initiator.initiate_scans"
   role             = aws_iam_role.scan_initiator.arn

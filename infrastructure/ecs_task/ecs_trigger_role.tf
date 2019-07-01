@@ -3,14 +3,14 @@ data "aws_caller_identity" "account" {
 
 data "aws_iam_policy_document" "ecs_trigger_policy" {
   statement {
-    effect    = "Allow"
-    actions   = ["ecs:RunTask"]
+    effect = "Allow"
+    actions = ["ecs:RunTask"]
     resources = [aws_ecs_task_definition.task.arn]
   }
 
   # To allow the trigger to pass the execution role to ecs to assume when running the task
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = ["iam:PassRole"]
 
     resources = [

@@ -1,6 +1,6 @@
 data "aws_iam_policy_document" "output_bucket_access" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = ["s3:PutObject"]
 
     resources = [
@@ -49,10 +49,10 @@ resource "aws_iam_policy" "s3_bucket_access_policy" {
 data "aws_iam_policy_document" "lambda_trust" {
   statement {
     actions = ["sts:AssumeRole"]
-    effect  = "Allow"
+    effect = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["lambda.amazonaws.com"]
     }
   }

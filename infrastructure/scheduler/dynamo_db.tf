@@ -20,10 +20,10 @@ resource "aws_dynamodb_table" "planned_scans" {
   }
 
   global_secondary_index {
-    name               = local.plan_index
-    hash_key     = "Address"
-    range_key          = "PlannedScanTime"
-    projection_type    = "INCLUDE"
+    name            = local.plan_index
+    hash_key        = "Address"
+    range_key       = "PlannedScanTime"
+    projection_type = "INCLUDE"
     non_key_attributes = ["DnsIngestTime"]
   }
 
@@ -45,7 +45,7 @@ resource "aws_dynamodb_table" "resolved_hosts" {
   # TODO could well be cheaper to provision rather than pay per request
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "Host"
-  range_key = "DnsIngestTime"
+  range_key    = "DnsIngestTime"
 
   attribute {
     name = "Host"
@@ -57,7 +57,7 @@ resource "aws_dynamodb_table" "resolved_hosts" {
     type = "N"
   }
 
-  stream_enabled = true
+  stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   # TODO add server side encryption
@@ -74,7 +74,7 @@ resource "aws_dynamodb_table" "resolved_addresses" {
   # TODO could well be cheaper to provision rather than pay per request
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "Address"
-  range_key = "DnsIngestTime"
+  range_key    = "DnsIngestTime"
 
   attribute {
     name = "Address"
@@ -86,7 +86,7 @@ resource "aws_dynamodb_table" "resolved_addresses" {
     type = "N"
   }
 
-  stream_enabled = true
+  stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   # TODO add server side encryption
@@ -109,7 +109,7 @@ resource "aws_dynamodb_table" "address_info" {
     type = "S"
   }
 
-  stream_enabled = true
+  stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   # TODO add server side encryption

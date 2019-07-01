@@ -24,14 +24,14 @@ resource "aws_cloudwatch_log_group" "task_logs" {
 }
 
 resource "aws_ecs_task_definition" "task" {
-  family                   = "${terraform.workspace}-${var.app_name}-${var.task_name}"
-  task_role_arn            = aws_iam_role.task_role.arn
-  execution_role_arn       = data.aws_iam_role.ecs_exec_role.arn
-  network_mode             = "awsvpc"
-  container_definitions    = data.template_file.task.rendered
+  family                = "${terraform.workspace}-${var.app_name}-${var.task_name}"
+  task_role_arn         = aws_iam_role.task_role.arn
+  execution_role_arn    = data.aws_iam_role.ecs_exec_role.arn
+  network_mode          = "awsvpc"
+  container_definitions = data.template_file.task.rendered
   requires_compatibilities = ["FARGATE"]
-  cpu                      = var.cpu
-  memory                   = var.memory
+  cpu    = var.cpu
+  memory = var.memory
 
   tags = {
     task_name = var.task_name
@@ -49,7 +49,7 @@ module "taskmodule" {
   account_id                    = var.account_id
   ssm_source_stage              = var.ssm_source_stage
   transient_workspace           = var.transient_workspace
-  use_xray = var.use_xray
-  results_parser_arn = var.results_parser_arn
+  use_xray                      = var.use_xray
+  results_parser_arn            = var.results_parser_arn
 }
 

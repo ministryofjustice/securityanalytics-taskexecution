@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "trigger_queue_policy_iam" {
     effect = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["sns.amazonaws.com"]
     }
 
@@ -37,7 +37,7 @@ resource "aws_sqs_queue" "trigger_queue" {
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = module.task_queue_dead_letters.arn
-    maxReceiveCount = 1
+    maxReceiveCount     = 1
   })
 
   tags = {
@@ -50,14 +50,14 @@ resource "aws_sqs_queue" "trigger_queue" {
 module "task_queue_dead_letters" {
   source = "github.com/ministryofjustice/securityanalytics-sharedcode//infrastructure/dead_letter_recorder"
   # source = "../../../securityanalytics-sharedcode/infrastructure/dead_letter_recorder"
-  aws_region = var.aws_region
-  app_name = var.app_name
-  account_id = var.account_id
+  aws_region       = var.aws_region
+  app_name         = var.app_name
+  account_id       = var.account_id
   ssm_source_stage = var.ssm_source_stage
-  use_xray = var.use_xray
-  recorder_name = "${var.task_name}-task-queue-DLQ"
-  s3_bucket = data.aws_ssm_parameter.dead_letter_bucket_name.value
-  s3_bucket_arn = data.aws_ssm_parameter.dead_letter_bucket_arn.value
-  s3_key_prefix = "${var.task_name}/task-queue"
-  source_arn = aws_sqs_queue.trigger_queue.arn
+  use_xray         = var.use_xray
+  recorder_name    = "${var.task_name}-task-queue-DLQ"
+  s3_bucket        = data.aws_ssm_parameter.dead_letter_bucket_name.value
+  s3_bucket_arn    = data.aws_ssm_parameter.dead_letter_bucket_arn.value
+  s3_key_prefix    = "${var.task_name}/task-queue"
+  source_arn       = aws_sqs_queue.trigger_queue.arn
 }

@@ -11,7 +11,7 @@ variable "account_id" {
 }
 
 variable "use_xray" {
-  type = string
+  type        = string
   description = "Whether to instrument lambdas"
 }
 
