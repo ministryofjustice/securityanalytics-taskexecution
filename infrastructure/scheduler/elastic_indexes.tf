@@ -33,7 +33,6 @@ module "address_info_index_pattern" {
   app_name             = var.app_name
   aws_region           = var.aws_region
   ssm_source_stage     = var.ssm_source_stage
-  task_name            = "address_info"
   object_template      = "${path.module}/indexes/address_info.pattern.json"
   object_substitutions = {}
 
@@ -75,7 +74,6 @@ module "resolved_addresses_index_pattern_history" {
   app_name             = var.app_name
   aws_region           = var.aws_region
   ssm_source_stage     = var.ssm_source_stage
-  task_name            = "resolved_addresses"
   object_template      = "${path.module}/indexes/resolved_addresses.pattern.json"
   object_substitutions = {}
 
@@ -97,7 +95,6 @@ module "resolved_addresses_index_pattern_snapshot" {
   app_name             = var.app_name
   aws_region           = var.aws_region
   ssm_source_stage     = var.ssm_source_stage
-  task_name            = "resolved_addresses"
   object_template      = "${path.module}/indexes/resolved_addresses.pattern.json"
   object_substitutions = {}
 
@@ -139,7 +136,6 @@ module "resolved_hosts_index_pattern_history" {
   app_name             = var.app_name
   aws_region           = var.aws_region
   ssm_source_stage     = var.ssm_source_stage
-  task_name            = "resolved_hosts"
   object_template      = "${path.module}/indexes/resolved_hosts.pattern.json"
   object_substitutions = {}
 
@@ -161,7 +157,6 @@ module "resolved_hosts_index_pattern_snapshot" {
   app_name             = var.app_name
   aws_region           = var.aws_region
   ssm_source_stage     = var.ssm_source_stage
-  task_name            = "resolved_hosts"
   object_template      = "${path.module}/indexes/resolved_hosts.pattern.json"
   object_substitutions = {}
 

@@ -48,3 +48,9 @@ variable "log_unhandled" {
   description = "Whether to log unhandled dns records when ingesting"
   default     = false
 }
+
+variable "rate_limit_slowdown" {
+  type        = string
+  description = "We are allowed 5 requests a second, if this number was e.g. 10, then we would submit 1 request every 2 seconds"
+  default = 10
+}

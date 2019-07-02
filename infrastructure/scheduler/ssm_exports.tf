@@ -168,6 +168,19 @@ resource "aws_ssm_parameter" "config_log_unhandled" {
   }
 }
 
+resource "aws_ssm_parameter" "config_rate_limit_slowdown" {
+  name        = "/${var.app_name}/${terraform.workspace}/scheduler/config/rate_limit_slowdown"
+  description = "We are allowed 5 requests a second, if this number was e.g. 10, then we would submit 1 request every 2 seconds"
+  type        = "String"
+  value       = var.rate_limit_slowdown
+  overwrite   = "true"
+
+  tags = {
+    app_name  = var.app_name
+    workspace = terraform.workspace
+  }
+}
+
 resource "aws_ssm_parameter" "scan_delay_queue" {
   name        = "/${var.app_name}/${terraform.workspace}/scheduler/scan_delay_queue"
   description = "The URL of the queue used to delay scan initiation"

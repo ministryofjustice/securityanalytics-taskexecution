@@ -21,3 +21,7 @@ data "aws_ssm_parameter" "elastic_ingestion_queue_arn" {
 data "aws_ssm_parameter" "es_domain" {
   name = "/${var.app_name}/${var.ssm_source_stage}/analytics/elastic/es_endpoint/url"
 }
+
+data "aws_ssm_parameter" "dead_letter_index_pattern" {
+  name = "/${var.app_name}/${terraform.workspace}/analytics/kibana/dead_letter_index_pattern/id"
+}

@@ -76,6 +76,7 @@ resource "null_resource" "initial_dns_ingest" {
     aws_ssm_parameter.config_period,
     aws_ssm_parameter.config_buckets,
     aws_ssm_parameter.config_log_unhandled,
+    aws_ssm_parameter.config_rate_limit_slowdown,
     # Need the sync lambdas in place or else we will miss the data in kibana
     module.sync_address_info,
     module.sync_resolved_hosts,
@@ -95,7 +96,7 @@ resource "null_resource" "initial_dns_ingest" {
     always = timestamp()
   }
 
-  # This provisioner will invoke the lambda as soon as the function is added
+  # This provisioner will invoke the dns ingest lambda as soon as the function is added
   # TODO I am hoping that since the lambda will depend on all of its dependencies, it will be
   # deployed after all of its runtime dependencies. If it is not, this initial invocation may fail
   # Since we use async invocation it wont hold up the deployment, but it also wont be checked for

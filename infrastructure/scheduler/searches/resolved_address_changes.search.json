@@ -1,0 +1,17 @@
+{
+  "attributes": {
+    "title": "${object_title}",
+    "description": "",
+    "columns": [
+      "_source"
+    ],
+    "sort": [
+      "_score",
+      "desc"
+    ],
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"${index}\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[{\"query\":{\"bool\":{\"should\":[{\"exists\":{\"field\":\"Addresses_added\"}},{\"exists\":{\"field\":\"Addresses_removed\"}}]}},\"meta\":{\"negate\":false,\"index\":\"${index}\",\"disabled\":false,\"alias\":null,\"type\":\"custom\",\"key\":\"query\",\"value\":\"{\\\"bool\\\":{\\\"should\\\":[{\\\"exists\\\":{\\\"field\\\":\\\"Addresses_added\\\"}},{\\\"exists\\\":{\\\"field\\\":\\\"Addresses_removed\\\"}}]}}\"},\"$state\":{\"store\":\"appState\"}}]}"
+    }
+  }
+}

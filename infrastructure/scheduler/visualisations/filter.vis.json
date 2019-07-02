@@ -1,0 +1,12 @@
+{
+  "attributes": {
+    "title": "${object_title}",
+    "visState": "{\"title\":\"${object_title}\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1562050339151\",\"indexPattern\":\"${index}\",\"fieldName\":\"${filter_field}\",\"parent\":\"\",\"label\":\"${filter_field}\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":10000,\"order\":\"desc\"}}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
+    "uiStateJSON": "{}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    }
+  }
+}

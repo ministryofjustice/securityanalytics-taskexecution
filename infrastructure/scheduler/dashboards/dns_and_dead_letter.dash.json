@@ -1,0 +1,14 @@
+{
+  "attributes": {
+    "title": "${object_title}",
+    "hits": 0,
+    "description": "",
+    "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"1\"},\"embeddableConfig\":{},\"id\":\"${changed_addresses}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":24,\"y\":15,\"w\":24,\"h\":15,\"i\":\"2\"},\"embeddableConfig\":{},\"id\":\"${changed_hosts}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":24,\"y\":52,\"w\":24,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{\"spy\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}}}},\"id\":\"${recent_scans}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":52,\"w\":24,\"h\":15,\"i\":\"5\"},\"embeddableConfig\":{},\"id\":\"${upcoming_scans}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":0,\"y\":37,\"w\":24,\"h\":15,\"i\":\"7\"},\"embeddableConfig\":{},\"id\":\"${resolved_addresses}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"8\",\"gridData\":{\"x\":24,\"y\":37,\"w\":24,\"h\":15,\"i\":\"8\"},\"embeddableConfig\":{},\"id\":\"${resolved_hosts}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"9\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"9\"},\"embeddableConfig\":{},\"id\":\"${next_planned_scan}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"10\"},\"embeddableConfig\":{},\"id\":\"${dead_letters}\",\"type\":\"visualization\",\"version\":\"6.3.1\"},{\"panelIndex\":\"12\",\"gridData\":{\"x\":24,\"y\":30,\"w\":24,\"h\":7,\"i\":\"12\"},\"version\":\"6.3.1\",\"type\":\"visualization\",\"id\":\"${host_filter}\",\"embeddableConfig\":{}},{\"panelIndex\":\"13\",\"gridData\":{\"x\":0,\"y\":30,\"w\":24,\"h\":7,\"i\":\"13\"},\"version\":\"6.3.1\",\"type\":\"visualization\",\"id\":\"${address_filter}\",\"embeddableConfig\":{}}]",
+    "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+    "version": 1,
+    "timeRestore": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+    }
+  }
+}

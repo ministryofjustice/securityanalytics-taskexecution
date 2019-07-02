@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "title": "${object_title}",
+    "description": "",
+    "hits": 0,
+    "columns": [
+      "_source"
+    ],
+    "sort": [
+      "_score",
+      "desc"
+    ],
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"${index}\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[{\"meta\":{\"index\":\"${index}\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"range\",\"key\":\"NextPlannedScanTime\",\"value\":\"now to now+1d\",\"params\":{\"gte\":\"now\",\"lt\":\"now+1d\"}},\"range\":{\"NextPlannedScanTime\":{\"gte\":\"now\",\"lt\":\"now+1d\"}},\"$state\":{\"store\":\"appState\"}}]}"
+    }
+  }
+}

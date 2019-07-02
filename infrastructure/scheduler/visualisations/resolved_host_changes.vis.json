@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "title": "${object_title}",
+    "visState": "{\n  \"title\": \"${object_title}\",\n  \"type\": \"table\",\n  \"params\": {\n    \"perPage\": 10,\n    \"showPartialRows\": false,\n    \"showMeticsAtAllLevels\": false,\n    \"sort\": {\n      \"columnIndex\": null,\n      \"direction\": null\n    },\n    \"showTotal\": false,\n    \"totalFunc\": \"sum\"\n  },\n  \"aggs\": [\n    {\n      \"id\": \"1\",\n      \"enabled\": true,\n      \"type\": \"top_hits\",\n      \"schema\": \"metric\",\n      \"params\": {\n        \"field\": \"Hosts_added\",\n        \"aggregate\": \"concat\",\n        \"size\": 1,\n        \"sortField\": \"DnsIngestTime\",\n        \"sortOrder\": \"desc\",\n        \"customLabel\": \"Hosts Added\"\n      }\n    },\n    {\n      \"id\": \"2\",\n      \"enabled\": true,\n      \"type\": \"top_hits\",\n      \"schema\": \"metric\",\n      \"params\": {\n        \"field\": \"Hosts_removed\",\n        \"aggregate\": \"concat\",\n        \"size\": 1,\n        \"sortField\": \"DnsIngestTime\",\n        \"sortOrder\": \"desc\",\n        \"customLabel\": \"Hosts Removed\"\n      }\n    },\n    {\n      \"id\": \"3\",\n      \"enabled\": true,\n      \"type\": \"terms\",\n      \"schema\": \"bucket\",\n      \"params\": {\n        \"field\": \"Address\",\n        \"otherBucket\": true,\n        \"otherBucketLabel\": \"Other\",\n        \"missingBucket\": true,\n        \"missingBucketLabel\": \"Missing\",\n        \"size\": 1023,\n        \"order\": \"desc\",\n        \"orderBy\": \"_term\",\n        \"customLabel\": \"Address\"\n      }\n    }\n  ]\n}",
+    "uiStateJSON": "{\n  \"vis\": {\n    \"params\": {\n      \"sort\": {\n        \"columnIndex\": null,\n        \"direction\": null\n      }\n    }\n  }\n}",
+    "description": "",
+    "savedSearchId": "${search_id}",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\n  \"filter\": [],\n  \"query\": {\n    \"query\": \"\",\n    \"language\": \"lucene\"\n  }\n}"
+    }
+  }
+}

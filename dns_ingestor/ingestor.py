@@ -5,7 +5,7 @@ from itertools import islice
 # This class knows how to query route53 and resolve the IPs for all hosts recorded
 # TODO this class should probably now be split into two, the zone ingestor and the record ingestor
 class DnsZoneIngestor:
-    def __init__(self, route53_client):
+    def __init__(self, route53_client, rate_limit_slowdown=0.3):
         self.known_zones = {}
         self.record_count = {}
         self.route53_client = route53_client

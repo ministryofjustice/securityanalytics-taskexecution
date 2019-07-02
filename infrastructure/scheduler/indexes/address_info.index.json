@@ -2,6 +2,9 @@
   "mappings": {
     "_doc": {
       "properties": {
+        "Address": {
+          "type": "keyword"
+        },
         "LastDnsIngestTime": {
           "type": "date"
         },

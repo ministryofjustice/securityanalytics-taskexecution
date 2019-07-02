@@ -5,6 +5,15 @@
         "Host": {
           "type": "keyword"
         },
+        "Addresses": {
+          "type": "keyword"
+        },
+        "Addresses_added": {
+          "type": "keyword"
+        },
+        "Addresses_removed": {
+          "type": "keyword"
+        },
         "DnsIngestTime": {
           "type": "date"
         }

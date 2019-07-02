@@ -28,6 +28,7 @@ ADDRESS_INFO_TABLE = f"{ssm_prefix}/scheduler/dynamodb/address_info/id"
 PLANNING_PERIOD_SECONDS = f"{ssm_prefix}/scheduler/config/period"
 PLANNING_BUCKETS = f"{ssm_prefix}/scheduler/config/buckets"
 LOG_UNHANDLED = f"{ssm_prefix}/scheduler/config/log_unhandled"
+RATE_LIMIT_SLOWDOWN = f"{ssm_prefix}/scheduler/config/rate_limit_slowdown"
 
 
 async def _get_route53_client(role):
@@ -50,7 +51,8 @@ async def _get_route53_client(role):
     ADDRESS_INFO_TABLE,
     PLANNING_PERIOD_SECONDS,
     PLANNING_BUCKETS,
-    LOG_UNHANDLED
+    LOG_UNHANDLED,
+    RATE_LIMIT_SLOWDOWN
 )
 @async_handler()
 async def ingest_dns(event, _):
@@ -68,7 +70,7 @@ async def ingest_dns(event, _):
 
     try:
         # first create the ingestor and get it to load the list of zones
-        ingestor = DnsZoneIngestor(route53_client)
+        ingestor = DnsZoneIngestor(route53_client, rate_limit_slowdown=float(params[RATE_LIMIT_SLOWDOWN]))
         await ingestor.ingest_zones()
 
         # the list of known zones is needed by the record resolver
