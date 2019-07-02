@@ -221,7 +221,7 @@ module "host_filter" {
   }
 
   object_type  = "visualization"
-  object_title = "Resolved Addresses"
+  object_title = "Resolved Hosts"
   es_domain    = data.aws_ssm_parameter.es_domain.value
 }
 
