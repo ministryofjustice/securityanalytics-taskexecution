@@ -6,19 +6,39 @@ import aioboto3
 import tarfile
 import re
 import io
+import os
 from asyncio import gather
+from utils.scan_results import ResultsContext
 
 
 class ResultsParser(ABC, ScanningLambda):
     def __init__(self, ssm_params_to_load):
+        task_name = os.environ["TASK_NAME"]
+
+        # Add the SNS topic to the params to retreive
+        self._sns_topic_param = f"/tasks/{task_name}/results/arn"
+        ssm_params_to_load.append(self._sns_topic_param)
+
         ScanningLambda.__init__(self, ssm_params_to_load)
 
     async def _initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
+        self.sns_client = aioboto3.client("sns", region_name=self.region)
 
     @abstractmethod
     async def _parse_results(self, results_doc, meta_data):
         pass
+
+    def create_results_context(self, non_temporal_key, scan_id, start_time, end_time):
+        return ResultsContext(
+            self.get_ssm_param(self._sns_topic_param),
+            non_temporal_key,
+            scan_id,
+            start_time,
+            end_time,
+            self.task_name,
+            self.sns_client
+        )
 
     # Process all the results, N.B. assumes processing of each record is independent
     async def _invoke(self, event, _):

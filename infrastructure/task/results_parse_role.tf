@@ -127,5 +127,5 @@ resource "aws_iam_policy" "results_parse_permission_extension_policy" {
 resource "aws_iam_role_policy_attachment" "results_parse_permission_extension_policy" {
   count      = var.results_parse_extension_policy_doc == null ? 0 : 1
   role       = aws_iam_role.results_parse_role.name
-  policy_arn = aws_iam_policy.results_parse_permission_extension_policy.arn
+  policy_arn = aws_iam_policy.results_parse_permission_extension_policy[count.index].arn
 }

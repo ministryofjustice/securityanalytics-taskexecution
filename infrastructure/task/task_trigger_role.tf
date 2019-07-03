@@ -108,7 +108,6 @@ resource "aws_iam_role_policy_attachment" "task_trigger_policy" {
   policy_arn = aws_iam_policy.task_trigger_policy.arn
 }
 
-
 resource "aws_iam_policy" "task_trigger_permission_extension_policy" {
   count  = var.results_parse_extension_policy_doc == null ? 0 : 1
   name   = "${terraform.workspace}-${var.app_name}-${var.task_name}-task-trigger-extension"
@@ -118,7 +117,7 @@ resource "aws_iam_policy" "task_trigger_permission_extension_policy" {
 resource "aws_iam_role_policy_attachment" "task_trigger_permission_extension_policy" {
   count      = var.results_parse_extension_policy_doc == null ? 0 : 1
   role       = aws_iam_role.task_trigger_role.name
-  policy_arn = aws_iam_policy.task_trigger_permission_extension_policy.arn
+  policy_arn = aws_iam_policy.task_trigger_permission_extension_policy[count.index].arn
 }
 
 

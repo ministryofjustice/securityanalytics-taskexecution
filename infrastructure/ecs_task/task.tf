@@ -50,5 +50,9 @@ module "taskmodule" {
   transient_workspace           = var.transient_workspace
   use_xray                      = var.use_xray
   results_parser_arn            = aws_lambda_function.results_parser.arn
+  results_parse_lambda = var.results_parse_lambda
+  scan_lambda = var.param_parse_lambda
+  results_parse_extension_policy_doc = var.results_parse_extension_policy_doc
+  scan_extension_policy_doc = var.param_parse_extension_policy_doc
 }
 
