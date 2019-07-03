@@ -11,7 +11,7 @@
       }
     },
     "dockerLabels": {
-      "image_hash": "${docker_hash}",
+      "image_hash": "${docker_combined_hash}",
       "docker_combined_hash": "${docker_combined_hash}"
     }
   }

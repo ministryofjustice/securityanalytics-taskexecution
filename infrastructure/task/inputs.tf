@@ -37,3 +37,23 @@ variable "transient_workspace" {
 variable "results_parser_arn" {
   type = string
 }
+
+variable "scan_lambda" {
+  type = string
+}
+
+variable "scan_extension_policy_doc" {
+  type        = string
+  default     = null
+  description = "If you provide a json doc here it will be attached to the parameter parsing lambda's role"
+}
+
+variable "results_parse_lambda" {
+  type = string
+}
+
+variable "results_parse_extension_policy_doc" {
+  type        = string
+  default     = null
+  description = "If you provide a json doc here it will be attached to the results parsing lambda's role"
+}

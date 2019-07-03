@@ -167,12 +167,12 @@ def test_replace_punctuation_in_address_ids(_, scan_initiator):
             {
                 "Id": "123-456-123-456",
                 "DelaySeconds": 67890-1984,  # planned scan time minus now time
-                "MessageBody": "{\"CloudWatchEventHosts\":[\"123.456.123.456\"]}"
+                "MessageBody": "{\"AddressesToScan\":[\"123.456.123.456\"]}"
             },
             {
                 "Id": "2001-0db8-85a3-0000-0000-8a2e-0370-7334",
                 "DelaySeconds": 67890-1984,  # planned scan time minus now time
-                "MessageBody": "{\"CloudWatchEventHosts\":[\"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"]}"
+                "MessageBody": "{\"AddressesToScan\":[\"2001:0db8:85a3:0000:0000:8a2e:0370:7334\"]}"
             }
         ]
     )
