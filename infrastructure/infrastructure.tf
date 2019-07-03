@@ -89,7 +89,7 @@ module "scheduler" {
 data "external" "shared_task_code_zip" {
   program = [
     "python",
-    "../shared_task_code/package_lambda.py",
+    "../shared_code/python/package_lambda.py",
     local.shared_task_code_zip,
     "shared_task_code.packaging.config.json",
   "../Pipfile.lock"]

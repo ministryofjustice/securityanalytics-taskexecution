@@ -1,10 +1,10 @@
 import aioboto3
 from utils.json_serialisation import dumps
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from .base_scanner import BaseScanner
 
 
-class EcsScanner(BaseScanner):
+class EcsScanner(ABC, BaseScanner):
 
     def __init__(self, ssm_params_to_load):
         self.ecs_client = None
@@ -22,7 +22,7 @@ class EcsScanner(BaseScanner):
             self._security_group_param,
             self._image_id_param
         ]
-        BaseScanner.__init__(self)
+        BaseScanner.__init__(self, ssm_params_to_load)
 
     async def _initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
