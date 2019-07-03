@@ -20,7 +20,7 @@ class ScanningLambda(ABC, LazyInitLambda):
     def results_bucket(self):
         return self.event.ssm_params[self._results_bucket_param]
 
-    async def _initialise(self):
+    async def initialise(self):
         self.s3_client = aioboto3.resource("s3", region_name=self.region)
 
     @abstractmethod

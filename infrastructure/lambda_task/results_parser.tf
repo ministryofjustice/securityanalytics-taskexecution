@@ -3,12 +3,12 @@ resource "aws_lambda_permission" "s3_invoke" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.results_parser.function_name
   principal     = "s3.amazonaws.com"
-  source_arn    = module.taskmodule.results_bucket_arn
+  source_arn    = aws_s3_bucket.results.arn
 }
 
 resource "aws_s3_bucket_notification" "ingestor_queue_trigger" {
   depends_on = [aws_lambda_permission.s3_invoke]
-  bucket     = module.taskmodule.results_bucket_id
+  bucket     = aws_s3_bucket.results.arn
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.results_parser.arn
@@ -20,13 +20,13 @@ resource "aws_s3_bucket_notification" "ingestor_queue_trigger" {
 resource "aws_lambda_function" "results_parser" {
   function_name    = "${terraform.workspace}-${var.app_name}-${var.task_name}-results-parser"
   handler          = var.results_parse_lambda
-  role             = module.taskmodule.results_parser
+  role             = aws_iam_role.results_parse_role.arn
   runtime          = "python3.7"
   filename         = var.lambda_zip
   source_code_hash = filebase64sha256(var.lambda_zip)
 
   dead_letter_config {
-    target_arn = module.taskmodule.results_dead_letter_queue
+    target_arn = module.results_parser_dead_letters.arn
   }
 
   layers = [

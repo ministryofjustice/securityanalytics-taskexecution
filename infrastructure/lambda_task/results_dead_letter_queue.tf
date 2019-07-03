@@ -10,5 +10,5 @@ module "results_parser_dead_letters" {
   s3_bucket        = data.aws_ssm_parameter.dead_letter_bucket_name.value
   s3_bucket_arn    = data.aws_ssm_parameter.dead_letter_bucket_arn.value
   s3_key_prefix    = "${var.task_name}/results-parser"
-  source_arn       = var.results_parser_arn
+  source_arn       = aws_lambda_function.results_parser.arn
 }

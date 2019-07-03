@@ -19,9 +19,12 @@ variable "task_name" {
   type = string
 }
 
-variable "subscribe_elastic_to_notifier" {
-  type        = string
-  description = "If this task produces elastic compatible output, this can be used to connect the task directly to elastic."
+variable "subscribe_input_to_scan_initiator" {
+  type = string
+}
+
+variable "subscribe_es_to_output" {
+  type = string
 }
 
 variable "ssm_source_stage" {
@@ -34,7 +37,7 @@ variable "transient_workspace" {
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
 
-variable "results_parser_arn" {
+variable "lambda_zip" {
   type = string
 }
 
@@ -56,4 +59,12 @@ variable "results_parse_extension_policy_doc" {
   type        = string
   default     = null
   description = "If you provide a json doc here it will be attached to the results parsing lambda's role"
+}
+
+variable "cpu" {
+  type = string
+}
+
+variable "memory" {
+  type = string
 }

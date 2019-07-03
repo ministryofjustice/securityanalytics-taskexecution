@@ -40,7 +40,7 @@ resource "aws_ecs_task_definition" "task" {
 }
 
 module "taskmodule" {
-  source                        = "../task"
+  source                        = "../lambda_task"
   app_name                      = var.app_name
   aws_region                    = var.aws_region
   task_name                     = var.task_name
@@ -49,10 +49,14 @@ module "taskmodule" {
   ssm_source_stage              = var.ssm_source_stage
   transient_workspace           = var.transient_workspace
   use_xray                      = var.use_xray
-  results_parser_arn            = aws_lambda_function.results_parser.arn
   results_parse_lambda = var.results_parse_lambda
   scan_lambda = var.param_parse_lambda
   results_parse_extension_policy_doc = var.results_parse_extension_policy_doc
   scan_extension_policy_doc = var.param_parse_extension_policy_doc
+  subscribe_es_to_output = var.subscribe_es_to_output
+  subscribe_input_to_scan_initiator = var.subscribe_input_to_scan_initiator
+  cpu = var.cpu
+  memory = var.memory
+  lambda_zip = var.lambda_zip
 }
 

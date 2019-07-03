@@ -24,7 +24,7 @@ class EcsScanner(ABC, BaseScanner):
         ]
         BaseScanner.__init__(self, ssm_params_to_load)
 
-    async def _initialise(self):
+    async def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
 
     # This method is implemented by subclasses of the EcsScanStarter to extract environment variables

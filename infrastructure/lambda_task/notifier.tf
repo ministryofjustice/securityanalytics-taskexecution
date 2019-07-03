@@ -14,7 +14,7 @@ resource "aws_sns_topic" "task_results" {
 }
 
 locals {
-  is_not_integration_test = terraform.workspace == var.ssm_source_stage ? var.subscribe_elastic_to_notifier ? 1 : 0 : 0
+  is_not_integration_test = terraform.workspace == var.ssm_source_stage ? var.subscribe_es_to_output ? 1 : 0 : 0
 }
 
 resource "aws_sns_topic_subscription" "user_updates_sqs_target" {

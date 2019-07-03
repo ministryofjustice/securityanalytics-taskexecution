@@ -21,7 +21,7 @@ class ResultsParser(ABC, ScanningLambda):
 
         ScanningLambda.__init__(self, ssm_params_to_load)
 
-    async def _initialise(self):
+    async def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 

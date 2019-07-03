@@ -14,7 +14,7 @@ class BaseScanner(ABC, ScanningLambda, SqsConsumerMixin):
 
     # Overriding this method allows subclasses to initialise clients
     @abstractmethod
-    async def _initialise(self):
+    async def initialise(self):
         pass
 
     # Doesn't do anything here, but it is a useful extension point for other subclasses

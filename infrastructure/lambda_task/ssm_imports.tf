@@ -1,3 +1,11 @@
+data "aws_ssm_parameter" "utils_layer" {
+  name = "/${var.app_name}/${var.ssm_source_stage}/lambda/layers/utils/arn"
+}
+
+data "aws_ssm_parameter" "tasks_layer" {
+  name = "/${var.app_name}/${var.ssm_source_stage}/lambda/layers/shared_task_code/arn"
+}
+
 data "aws_ssm_parameter" "vpc_id" {
   name = "/${var.app_name}/${var.ssm_source_stage}/vpc/id"
 }
