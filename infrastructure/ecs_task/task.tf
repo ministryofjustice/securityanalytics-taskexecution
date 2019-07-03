@@ -44,7 +44,6 @@ module "taskmodule" {
   app_name                      = var.app_name
   aws_region                    = var.aws_region
   task_name                     = var.task_name
-  subscribe_elastic_to_notifier = var.subscribe_es_to_output
   account_id                    = var.account_id
   ssm_source_stage              = var.ssm_source_stage
   transient_workspace           = var.transient_workspace

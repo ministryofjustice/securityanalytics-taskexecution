@@ -8,7 +8,7 @@ resource "aws_lambda_permission" "s3_invoke" {
 
 resource "aws_s3_bucket_notification" "ingestor_queue_trigger" {
   depends_on = [aws_lambda_permission.s3_invoke]
-  bucket     = aws_s3_bucket.results.arn
+  bucket     = aws_s3_bucket.results.id
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.results_parser.arn
