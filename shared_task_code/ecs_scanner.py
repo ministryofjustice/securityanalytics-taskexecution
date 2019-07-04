@@ -40,12 +40,11 @@ class EcsScanner(BaseScanner):
         print(f"Scanning {scan_request_id} - {scan_request}")
         task_environment = await self.create_environment_from_request(scan_request_id, scan_request)
 
-        ssm_params = self.event["ssm_params"]
         private_subnet = "true" == self.get_ssm_param(self._private_subnets_param)
         network_configuration = {
             "awsvpcConfiguration": {
-                "subnets": ssm_params[self._subnets_param].split(","),
-                "securityGroups": [ssm_params[self._security_group_param]],
+                "subnets": self.get_ssm_param(self._subnets_param).split(","),
+                "securityGroups": [self.get_ssm_param(self._security_group_param)],
                 "assignPublicIp": "DISABLED" if private_subnet else "ENABLED"
             }
         }
@@ -69,9 +68,9 @@ class EcsScanner(BaseScanner):
             }]
 
         ecs_params = {
-            "cluster": ssm_params[self._cluster_param],
+            "cluster": self.get_ssm_param(self._cluster_param),
             "networkConfiguration": network_configuration,
-            "taskDefinition": ssm_params[self._image_id_param],
+            "taskDefinition": self.get_ssm_param(self._image_id_param),
             "launchType": "FARGATE",
             "overrides": {
                 "containerOverrides": [{
