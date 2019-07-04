@@ -3,7 +3,7 @@ from datetime import datetime
 from utils.time_utils import iso_date_string_from_timestamp
 import tarfile
 import io
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 
 
 class LambdaScanner(BaseScanner):

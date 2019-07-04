@@ -2,6 +2,7 @@ import aioboto3
 from utils.json_serialisation import dumps
 from abc import abstractmethod
 from .base_scanner import BaseScanner
+import os
 
 
 class EcsScanner(BaseScanner):
@@ -12,8 +13,9 @@ class EcsScanner(BaseScanner):
         self._private_subnets_param = "/vpc/using_private_subnets"
         self._subnets_param = "/vpc/subnets/instance"
         self._cluster_param = "/ecs/cluster"
-        self._security_group_param = f"/tasks/{self.task_name}/security_group/id"
-        self._image_id_param = f"/tasks/{self.task_name}/image/id"
+        task_name = os.environ["TASK_NAME"]
+        self._security_group_param = f"/tasks/{task_name}/security_group/id"
+        self._image_id_param = f"/tasks/{task_name}/image/id"
 
         ssm_params_to_load += [
             self._private_subnets_param,

@@ -1,5 +1,5 @@
 from lambda_templates.lazy_initialising_lambda import LazyInitLambda
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 import aioboto3
 import os
 
