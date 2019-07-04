@@ -23,7 +23,7 @@ class ScanningLambda(LazyInitLambda):
 
     def initialise(self):
         super().initialise()
-        self.s3_client = aioboto3.resource("s3", region_name=self.region)
+        self.s3_client = aioboto3.client("s3", region_name=self.region)
 
     @abstractmethod
     async def invoke_impl(self, event, context):
