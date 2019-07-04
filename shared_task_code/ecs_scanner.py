@@ -1,6 +1,6 @@
 import aioboto3
 from utils.json_serialisation import dumps
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 from .base_scanner import BaseScanner
 
 
@@ -22,7 +22,7 @@ class EcsScanner(BaseScanner):
             self._security_group_param,
             self._image_id_param
         ]
-        BaseScanner.__init__(self, ssm_params_to_load)
+        super().__init__(ssm_params_to_load)
 
     def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
@@ -34,6 +34,7 @@ class EcsScanner(BaseScanner):
         pass
 
     async def scan(self, scan_request_id, scan_request):
+        await super().scan(scan_request_id, scan_request)
         task_environment = await self.create_environment_from_request(scan_request_id, scan_request)
 
         ssm_params = self.event["ssm_params"]
@@ -61,7 +62,7 @@ class EcsScanner(BaseScanner):
             },
             {
                 "name": "RESULTS_BUCKET",
-                "value": ssm_params[self.RESULTS]
+                "value": self.results_bucket()
             }]
 
         ecs_params = {

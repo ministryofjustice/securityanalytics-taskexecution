@@ -1,4 +1,4 @@
-from .scanning_lambda import ScanningLambda
+from .base_scanner import BaseScanner
 from datetime import datetime
 from utils.time_utils import iso_date_string_from_timestamp
 import tarfile
@@ -6,12 +6,13 @@ import io
 from abc import abstractmethod, ABC
 
 
-class LambdaScanner(ScanningLambda):
+class LambdaScanner(BaseScanner):
     def __init__(self, ssm_params_to_load):
-        ScanningLambda.__init__(self, ssm_params_to_load)
+        super().__init__(ssm_params_to_load)
 
     # Overrides the base scan to also handle the results publication for you
     async def process_event(self, scan_request_id, scan_request):
+        await super().process_event(scan_request_id, scan_request)
         # Use this format to have uniformly named files in S3
         scan_start_time = iso_date_string_from_timestamp(datetime.now())
         

@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from .scanning_lambda import ScanningLambda
 from utils.objectify_dict import objectify
 from urllib.parse import unquote_plus
@@ -21,7 +21,7 @@ class ResultsParser(ScanningLambda):
         self._sns_topic_param = f"/tasks/{task_name}/results/arn"
         ssm_params_to_load.append(self._sns_topic_param)
 
-        ScanningLambda.__init__(self, ssm_params_to_load)
+        super().__init__(ssm_params_to_load)
 
     def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
