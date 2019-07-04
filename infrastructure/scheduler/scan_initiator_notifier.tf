@@ -22,7 +22,7 @@ module "delay_queue_notifier_glue" {
   # (or other future tasks), at the same time, without requiring the task execution changes to be
   # pushed to master. Unfortunately you can not interpolate variables to generate source locations, so
   # devs will have to comment in/out this line as and when they need
-  #  source = "../../../securityanalytics-sharedcode/infrastructure/sqs_sns_glue"
+  # source = "../../../securityanalytics-sharedcode/infrastructure/sqs_sns_glue"
 
   aws_region       = var.aws_region
   account_id       = var.account_id
