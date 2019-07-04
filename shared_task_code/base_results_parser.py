@@ -17,7 +17,7 @@ class ResultsParser(ScanningLambda):
         self.ecs_client = None
         self.sns_client = None
 
-        # Add the SNS topic to the params to retreive
+        # Add the SNS topic to the params to retrieve
         self._sns_topic_param = f"/tasks/{task_name}/results/arn"
         ssm_params_to_load.append(self._sns_topic_param)
 
