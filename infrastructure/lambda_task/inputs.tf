@@ -41,6 +41,10 @@ variable "lambda_zip" {
   type = string
 }
 
+variable "lambda_hash" {
+  type = string
+}
+
 variable "scan_lambda" {
   type = string
 }

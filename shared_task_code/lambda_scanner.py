@@ -6,12 +6,12 @@ import io
 from abc import abstractmethod, ABC
 
 
-class LambdaScanner(ABC, ScanningLambda):
+class LambdaScanner(ScanningLambda):
     def __init__(self, ssm_params_to_load):
         ScanningLambda.__init__(self, ssm_params_to_load)
 
     # Overrides the base scan to also handle the results publication for you
-    async def _process_event(self, scan_request_id, scan_request):
+    async def process_event(self, scan_request_id, scan_request):
         # Use this format to have uniformly named files in S3
         scan_start_time = iso_date_string_from_timestamp(datetime.now())
         
@@ -45,5 +45,5 @@ class LambdaScanner(ABC, ScanningLambda):
     # Implementing this method implements a lambda scan, it should return a pair json objects, one to be serialised
     # with timestamps as the data, and the other a dictionary used to setup meta-data
     @abstractmethod
-    def _scan(self, scan_request_id, scan_request):
+    def scan(self, scan_request_id, scan_request):
         pass  # e.g. return ({"body":"text"},{"meta_key":"meta_value"})

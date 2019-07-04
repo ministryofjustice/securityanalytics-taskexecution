@@ -11,7 +11,7 @@ from asyncio import gather
 from utils.scan_results import ResultsContext
 
 
-class ResultsParser(ABC, ScanningLambda):
+class ResultsParser(ScanningLambda):
     def __init__(self, ssm_params_to_load):
         task_name = os.environ["TASK_NAME"]
 
@@ -21,12 +21,12 @@ class ResultsParser(ABC, ScanningLambda):
 
         ScanningLambda.__init__(self, ssm_params_to_load)
 
-    async def initialise(self):
+    def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 
     @abstractmethod
-    async def _parse_results(self, results_doc, meta_data):
+    async def parse_results(self, results_doc, meta_data):
         pass
 
     def create_results_context(self, non_temporal_key, scan_id, start_time, end_time):
@@ -41,7 +41,7 @@ class ResultsParser(ABC, ScanningLambda):
         )
 
     # Process all the results, N.B. assumes processing of each record is independent
-    async def _invoke(self, event, _):
+    async def invoke(self, event, _):
         return await gather(*[self._load_results(record) for record in event["Records"]])
 
     async def _load_results(self, record):

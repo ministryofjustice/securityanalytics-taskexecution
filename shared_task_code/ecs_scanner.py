@@ -4,7 +4,7 @@ from abc import abstractmethod, ABC
 from .base_scanner import BaseScanner
 
 
-class EcsScanner(ABC, BaseScanner):
+class EcsScanner(BaseScanner):
 
     def __init__(self, ssm_params_to_load):
         self.ecs_client = None
@@ -24,16 +24,16 @@ class EcsScanner(ABC, BaseScanner):
         ]
         BaseScanner.__init__(self, ssm_params_to_load)
 
-    async def initialise(self):
+    def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
 
     # This method is implemented by subclasses of the EcsScanStarter to extract environment variables
     # from the event received. Should return a dictionary.
     @abstractmethod
-    async def _create_environment_from_request(self, scan_request_id, scan_request):
+    async def create_environment_from_request(self, scan_request_id, scan_request):
         pass
 
-    async def _scan(self, scan_request_id, scan_request):
+    async def scan(self, scan_request_id, scan_request):
         task_environment = await self._create_environment_from_request(scan_request_id, scan_request)
 
         ssm_params = self.event["ssm_params"]

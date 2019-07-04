@@ -23,7 +23,8 @@ resource "aws_lambda_function" "results_parser" {
   role             = aws_iam_role.results_parse_role.arn
   runtime          = "python3.7"
   filename         = var.lambda_zip
-  source_code_hash = filebase64sha256(var.lambda_zip)
+  source_code_hash = var.lambda_hash
+  description = var.lambda_hash
 
   dead_letter_config {
     target_arn = module.results_parser_dead_letters.arn

@@ -4,7 +4,7 @@ from lambda_templates.lazy_initialising_lambda import LazyInitLambda
 from abc import ABC, abstractmethod
 
 
-class FilteringAndTransformingSnsToSqsGlue(ABC, LazyInitLambda):
+class FilteringAndTransformingSnsToSqsGlue(LazyInitLambda):
     def __init__(self, ssm_params_to_load):
         glue_name = os.environ["GLUE_NAME"]
         self._sqs_targets_param = f"/glue/{glue_name}/targets"
@@ -14,7 +14,7 @@ class FilteringAndTransformingSnsToSqsGlue(ABC, LazyInitLambda):
 
         LazyInitLambda.__init__(self, ssm_params_to_load)
 
-    async def initialise(self):
+    def initialise(self):
         await LazyInitLambda.initialise(self)
         self.sqs_targets = list(self.get_ssm_param(self._sqs_targets_param))
 
@@ -31,7 +31,7 @@ class FilteringAndTransformingSnsToSqsGlue(ABC, LazyInitLambda):
     async def handle_incoming_sns_event(self, sns_message):
         pass
 
-    def _invoke(self, event, context):
+    def invoke(self, event, context):
         for record in event["Records"]:
             print(record)
             await self.handle_incoming_sns_event(record["Sns"])

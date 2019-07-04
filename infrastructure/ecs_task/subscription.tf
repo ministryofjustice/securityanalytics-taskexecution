@@ -1,5 +1,6 @@
-data "aws_iam_policy_document" "notify_topic_policy" {
+data "aws_iam_policy_document" "notify_topic_policy_2" {
   statement {
+    sid = var.lambda_hash
     actions = [
       "sqs:SendMessage",
     ]
@@ -29,7 +30,7 @@ data "aws_iam_policy_document" "notify_topic_policy" {
 resource "aws_sqs_queue_policy" "queue_policy" {
   count     = local.is_not_integration_test
   queue_url = module.taskmodule.task_queue_url
-  policy    = data.aws_iam_policy_document.notify_topic_policy.json
+  policy    = data.aws_iam_policy_document.notify_topic_policy_2.json
 }
 
 locals {

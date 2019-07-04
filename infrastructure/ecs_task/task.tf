@@ -57,5 +57,6 @@ module "taskmodule" {
   cpu = var.cpu
   memory = var.memory
   lambda_zip = var.lambda_zip
+  lambda_hash = var.lambda_hash
 }
 

@@ -35,7 +35,7 @@ resource "aws_lambda_function" "queue_consumer" {
   role             = module.taskmodule.trigger_role_arn
   runtime          = "python3.7"
   filename         = var.lambda_zip
-  source_code_hash = filebase64sha256(var.lambda_zip)
+  source_code_hash = var.lambda_hash
 
   layers = [
     data.aws_ssm_parameter.utils_layer.value,
