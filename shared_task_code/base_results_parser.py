@@ -50,14 +50,17 @@ class ResultsParser(ScanningLambda):
         s3_object = objectify(record["s3"])
         key = unquote_plus(s3_object.object.key)
         obj = await self.s3_client.get_object(Bucket=self.results_bucket(), Key=key)
+
         # extract the message data from the S3 Metadata,
         # and remove the suffix added to the keys by boto3
         meta_data = self._extract_meta_data(obj)
         # extract the results from the tar file
         content = obj["Body"].read()
+
         tar = tarfile.open(mode="r:gz", fileobj=io.BytesIO(content), format=tarfile.PAX_FORMAT)
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
         results_doc = tar.extractfile(result_file_name).read()
+        
         await self.parse_results(results_doc, meta_data)
 
     @staticmethod
