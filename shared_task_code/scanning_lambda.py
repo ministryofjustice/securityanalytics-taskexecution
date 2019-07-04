@@ -19,7 +19,7 @@ class ScanningLambda(LazyInitLambda):
 
     # The scans can get access to the s3 bucket using this method
     def results_bucket(self):
-        return self.event.ssm_params[self.results_bucket_param]
+        return self.get_ssm_param(self.results_bucket_param)
 
     def initialise(self):
         self.s3_client = aioboto3.resource("s3", region_name=self.region)
