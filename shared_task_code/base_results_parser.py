@@ -42,7 +42,7 @@ class ResultsParser(ScanningLambda):
             self.sns_client
         )
 
-    # Process all the results, N.B. assumes processing of each record is independent
+    # Process all the results, N.B. assumes processing of each record is independent.
     async def invoke_impl(self, event, _):
         return await gather(*[self._load_results(record) for record in event["Records"]])
 
