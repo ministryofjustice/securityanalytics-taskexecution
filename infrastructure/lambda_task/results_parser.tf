@@ -24,7 +24,6 @@ resource "aws_lambda_function" "results_parser" {
   runtime          = "python3.7"
   filename         = var.lambda_zip
   source_code_hash = var.lambda_hash
-  description = var.lambda_hash
 
   dead_letter_config {
     target_arn = module.results_parser_dead_letters.arn
