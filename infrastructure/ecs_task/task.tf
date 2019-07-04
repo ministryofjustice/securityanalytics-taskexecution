@@ -1,4 +1,4 @@
-// Import the standard execution role AWS generate for us
+# Import the standard execution role AWS generate for us
 data "aws_iam_role" "ecs_exec_role" {
   name = "ecsTaskExecutionRole"
 }
