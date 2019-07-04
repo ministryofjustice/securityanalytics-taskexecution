@@ -90,6 +90,8 @@ resource "null_resource" "initial_dns_ingest" {
     module.resolved_addresses_index_pattern_snapshot,
     module.address_info_index,
     module.address_info_index_pattern,
+    module.resolved_address_changes_search,
+    module.resolved_host_changes_search
   ]
 
   triggers = {
