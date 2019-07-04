@@ -1,11 +1,11 @@
 import os
 from utils.json_serialisation import dumps
 from lambda_templates.lazy_initialising_lambda import LazyInitLambda
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import aioboto3
 
 
-class FilteringAndTransformingSnsToSnsGlue(ABC, LazyInitLambda):
+class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
     def __init__(self, ssm_params_to_load):
         glue_name = os.environ["GLUE_NAME"]
         self._sns_target_topic = f"/glue/{glue_name}/sns_target"
@@ -14,10 +14,10 @@ class FilteringAndTransformingSnsToSnsGlue(ABC, LazyInitLambda):
         self.sqs_targets = None
         self.sns_client = None
 
-        LazyInitLambda.__init__(self, ssm_params_to_load)
+        super(LazyInitLambda, self).__init__(ssm_params_to_load)
 
-    async def initialise(self):
-        await LazyInitLambda.initialise(self)
+    def initialise(self):
+        super(LazyInitLambda, self).initialise()
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 
     async def forward_message(self, json_data, msg_attributes=None):

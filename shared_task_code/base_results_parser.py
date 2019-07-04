@@ -21,7 +21,7 @@ class ResultsParser(ScanningLambda):
         self._sns_topic_param = f"/tasks/{task_name}/results/arn"
         ssm_params_to_load.append(self._sns_topic_param)
 
-        super().__init__(ssm_params_to_load)
+        super(ScanningLambda, self).__init__(ssm_params_to_load)
 
     def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
