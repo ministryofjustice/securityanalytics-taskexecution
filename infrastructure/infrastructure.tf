@@ -89,12 +89,11 @@ module "scheduler" {
 data "external" "shared_task_code_zip" {
   program = [
     "python",
-    "../shared_task_code/package_lambda.py",
+    "../shared_code/python/package_lambda.py",
     local.shared_task_code_zip,
     "shared_task_code.packaging.config.json",
   "../Pipfile.lock"]
 }
-
 
 resource "aws_lambda_layer_version" "shared_task_code_layer" {
   description         = "Shared Task Code layer with hash ${data.external.shared_task_code_zip.result.hash}"

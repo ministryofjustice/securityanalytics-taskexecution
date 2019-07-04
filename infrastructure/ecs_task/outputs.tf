@@ -19,7 +19,7 @@ output "results_bucket_id" {
 }
 
 output "task_queue_consumer" {
-  value = module.taskmodule.task_queue_consumer_arn
+  value = module.taskmodule.trigger_role_arn
 }
 
 output "results_parser" {
@@ -32,4 +32,12 @@ output "trigger_dead_letter_queue" {
 
 output "results_dead_letter_queue" {
   value = module.taskmodule.results_dead_letter_queue
+}
+
+output "trigger_role_name" {
+  value = module.taskmodule.trigger_role_name
+}
+
+output "trigger_role_arn" {
+  value = module.taskmodule.trigger_role_arn
 }

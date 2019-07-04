@@ -36,7 +36,7 @@ async def queue_scans(batch, initiation_queue, scan_info_table):
                 # IP4 addresses have . and IP6 have : replace those with -
                 "Id": address.replace(".", "-").replace(":", "-"),
                 "DelaySeconds": delay,
-                "MessageBody": f"{{\"CloudWatchEventHosts\":[\"{address}\"]}}"
+                "MessageBody": f"{{\"AddressToScan\":\"{address}\"}}"
             }
             for address, _, delay in batch
         ]

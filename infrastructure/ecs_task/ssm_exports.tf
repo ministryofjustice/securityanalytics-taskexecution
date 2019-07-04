@@ -23,4 +23,3 @@ resource "aws_ssm_parameter" "image_id" {
     workspace = terraform.workspace
   }
 }
-

@@ -7,9 +7,23 @@ variable "aws_region" {
 }
 
 variable "account_id" {
+  type = string
+}
+
+variable "use_xray" {
+  type        = string
+  description = "Whether to instrument lambdas"
 }
 
 variable "task_name" {
+  type = string
+}
+
+variable "subscribe_input_to_scan_initiator" {
+  type = string
+}
+
+variable "subscribe_es_to_output" {
   type = string
 }
 
@@ -23,34 +37,19 @@ variable "transient_workspace" {
   description = "Used when doing integration tests to make the results buckets created deleteable."
 }
 
-variable "use_xray" {
-  type        = string
-  description = "Whether to instrument lambdas"
-}
-
-variable "cpu" {
+variable "lambda_zip" {
   type = string
 }
 
-variable "memory" {
+variable "lambda_hash" {
   type = string
 }
 
-# ECS specific
-variable "docker_file" {
+variable "scan_lambda" {
   type = string
 }
 
-variable "docker_combined_hash" {
-  type        = "string"
-  description = "Since a docker file makes use of external resources e.g. scripts or executables, we need a combined hash of all those resources and the docker file itself to ensure we rebuild docker when any of those resources change"
-}
-
-variable "param_parse_lambda" {
-  type = string
-}
-
-variable "param_parse_extension_policy_doc" {
+variable "scan_extension_policy_doc" {
   type        = string
   default     = null
   description = "If you provide a json doc here it will be attached to the parameter parsing lambda's role"
@@ -66,19 +65,10 @@ variable "results_parse_extension_policy_doc" {
   description = "If you provide a json doc here it will be attached to the results parsing lambda's role"
 }
 
-# General
-variable "lambda_zip" {
+variable "cpu" {
   type = string
 }
 
-variable "lambda_hash" {
-  type = string
-}
-
-variable "subscribe_input_to_scan_initiator" {
-  type = string
-}
-
-variable "subscribe_es_to_output" {
+variable "memory" {
   type = string
 }

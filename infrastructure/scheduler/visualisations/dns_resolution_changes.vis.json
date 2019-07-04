@@ -1,0 +1,11 @@
+{
+  "attributes": {
+    "title": "${entity_resolved} ${resolution_change}",
+    "visState": "{\"title\":\"${entity_resolved} ${resolution_change}\",\"type\":\"table\",\"params\":{\"perPage\":${per_page},\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"top_hits\",\"schema\":\"metric\",\"params\":{\"field\":\"${entity_resolved}_${resolution_change}\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"DnsIngestTime\",\"sortOrder\":\"desc\",\"customLabel\":\"${entity_resolved} ${resolution_change}\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"Address\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"size\":1000,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"top_hits\",\"schema\":\"metric\",\"params\":{\"field\":\"${entity_resolved}\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"DnsIngestTime\",\"sortOrder\":\"desc\",\"customLabel\":\"Resolved ${entity_resolved}\"}}]}",
+    "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"${index}\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    }
+  }
+}
