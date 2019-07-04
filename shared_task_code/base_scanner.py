@@ -12,11 +12,6 @@ class BaseScanner(ScanningLambda):
     async def scan(self, scan_request_id, scan_request):
         pass
 
-    # Overriding this method allows subclasses to initialise clients
-    @abstractmethod
-    def initialise(self):
-        pass
-
     async def invoke_impl(self, event, context):
         await super().invoke_impl(event, context)
         await gather(*[

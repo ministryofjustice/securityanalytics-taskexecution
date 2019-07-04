@@ -24,6 +24,7 @@ class ResultsParser(ScanningLambda):
         super().__init__(ssm_params_to_load)
 
     def initialise(self):
+        super().initialise()
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 
@@ -43,7 +44,8 @@ class ResultsParser(ScanningLambda):
         )
 
     # Process all the results, N.B. assumes processing of each record is independent.
-    async def invoke_impl(self, event, _):
+    async def invoke_impl(self, event, context):
+        await super().invoke_impl(event, context)
         return await gather(*[self._load_results(record) for record in event["Records"]])
 
     async def _load_results(self, record):
@@ -60,7 +62,7 @@ class ResultsParser(ScanningLambda):
         tar = tarfile.open(mode="r:gz", fileobj=io.BytesIO(content), format=tarfile.PAX_FORMAT)
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
         results_doc = tar.extractfile(result_file_name).read()
-        
+
         await self.parse_results(results_doc, meta_data)
 
     @staticmethod

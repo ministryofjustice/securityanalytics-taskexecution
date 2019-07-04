@@ -34,6 +34,7 @@ class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
         pass
 
     def invoke(self, event, context):
+        super().invoke(event, context)
         for record in event["Records"]:
             print(record)
             await self.handle_incoming_sns_event(record["Sns"])
