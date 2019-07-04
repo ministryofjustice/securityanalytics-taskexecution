@@ -27,4 +27,3 @@ class BaseScanner(ScanningLambda):
     # Doesn't do anything here, but it is a useful extension point for other subclasses
     async def process_event(self, scan_request_id, scan_request):
         return await self.scan(scan_request_id, scan_request)
-
