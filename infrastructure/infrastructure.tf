@@ -76,15 +76,15 @@ module "ecs_cluster" {
   app_name = var.app_name
 }
 
-//module "scheduler" {
-//  source           = "./scheduler"
-//  aws_region       = var.aws_region
-//  account_id       = var.account_id
-//  app_name         = var.app_name
-//  ssm_source_stage = local.ssm_source_stage
-//  route53_role     = var.route53_role
-//  use_xray         = var.use_xray
-//}
+module "scheduler" {
+  source           = "./scheduler"
+  aws_region       = var.aws_region
+  account_id       = var.account_id
+  app_name         = var.app_name
+  ssm_source_stage = local.ssm_source_stage
+  route53_role     = var.route53_role
+  use_xray         = var.use_xray
+}
 
 data "external" "shared_task_code_zip" {
   program = [
