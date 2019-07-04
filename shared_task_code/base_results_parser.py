@@ -27,7 +27,7 @@ class ResultsParser(ScanningLambda):
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 
     @abstractmethod
-    async def parse_results(self, results_doc, meta_data):
+    async def parse_results(self, results_file_name, results_doc, meta_data):
         pass
 
     def create_results_context(self, non_temporal_key, scan_id, start_time, end_time):
@@ -61,7 +61,7 @@ class ResultsParser(ScanningLambda):
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
         results_doc = tar.extractfile(result_file_name).read()
 
-        await self.parse_results(results_doc, meta_data)
+        await self.parse_results(result_file_name, results_doc, meta_data)
 
     @staticmethod
     def _extract_meta_data(obj):
