@@ -55,11 +55,9 @@ class ResultsParser(ScanningLambda):
         # and remove the suffix added to the keys by boto3
         meta_data = self._extract_meta_data(obj)
         # extract the results from the tar file
-        content = obj["Body"].read()
+        content = await obj["Body"].read()
 
-        content_bytes = io.BytesIO(content)
-        print(f"content {content_bytes}")
-        tar = tarfile.open(mode="r:gz", fileobj=content_bytes, format=tarfile.PAX_FORMAT)
+        tar = tarfile.open(mode="r:gz", fileobj=(io.BytesIO(content)), format=tarfile.PAX_FORMAT)
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
         results_doc = tar.extractfile(result_file_name).read()
 
@@ -70,7 +68,7 @@ class ResultsParser(ScanningLambda):
         metadata = obj["Metadata"]
         msgdata = {'records': []}
         for metakey in metadata:
-            # strip out the header that AWS adds
+            # strip out the prefix that AWS adds
             msgdata[metakey.replace('x-amz-meta-', '')] = metadata[metakey]
         return msgdata
 
