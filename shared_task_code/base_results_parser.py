@@ -59,7 +59,7 @@ class ResultsParser(ScanningLambda):
 
         tar = tarfile.open(mode="r:gz", fileobj=(io.BytesIO(content)), format=tarfile.PAX_FORMAT)
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
-        results_doc = tar.extractfile(result_file_name).read()
+        results_doc = tar.extractfile(result_file_name)
 
         await self.parse_results(result_file_name, results_doc, meta_data)
 
