@@ -15,7 +15,7 @@ class ScanningLambda(LazyInitLambda):
         if self.results_bucket_param not in ssm_params_to_load:
             ssm_params_to_load.append(self.results_bucket_param)
 
-        super(LazyInitLambda, self).__init__(ssm_params_to_load)
+        super().__init__(ssm_params_to_load)
 
     # The scans can get access to the s3 bucket using this method
     def results_bucket(self):

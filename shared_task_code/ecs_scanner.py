@@ -24,7 +24,7 @@ class EcsScanner(BaseScanner):
             self._security_group_param,
             self._image_id_param
         ]
-        super(BaseScanner, self).__init__(ssm_params_to_load)
+        super().__init__(ssm_params_to_load)
 
     def initialise(self):
         self.ecs_client = aioboto3.client("ecs", region_name=self.region)

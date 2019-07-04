@@ -5,7 +5,7 @@ from asyncio import gather
 
 class BaseScanner(ScanningLambda):
     def __init__(self, ssm_params_to_load):
-        super(ScanningLambda, self).__init__(ssm_params_to_load)
+        super().__init__(ssm_params_to_load)
 
     # Implementing this method implements a scan
     @abstractmethod

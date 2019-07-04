@@ -14,10 +14,10 @@ class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
         self.sqs_targets = None
         self.sns_client = None
 
-        super(LazyInitLambda, self).__init__(ssm_params_to_load)
+        super().__init__(ssm_params_to_load)
 
     def initialise(self):
-        super(LazyInitLambda, self).initialise()
+        super().initialise()
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 
     async def forward_message(self, json_data, msg_attributes=None):
