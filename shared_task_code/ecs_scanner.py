@@ -37,6 +37,7 @@ class EcsScanner(BaseScanner):
 
     async def scan(self, scan_request_id, scan_request):
         await super().scan(scan_request_id, scan_request)
+        print(f"Scanning {scan_request_id} - {scan_request}")
         task_environment = await self.create_environment_from_request(scan_request_id, scan_request)
 
         ssm_params = self.event["ssm_params"]
