@@ -14,6 +14,8 @@ from utils.scan_results import ResultsContext
 class ResultsParser(ScanningLambda):
     def __init__(self, ssm_params_to_load):
         task_name = os.environ["TASK_NAME"]
+        self.ecs_client = None
+        self.sns_client = None
 
         # Add the SNS topic to the params to retreive
         self._sns_topic_param = f"/tasks/{task_name}/results/arn"
@@ -41,7 +43,7 @@ class ResultsParser(ScanningLambda):
         )
 
     # Process all the results, N.B. assumes processing of each record is independent
-    async def invoke(self, event, _):
+    async def invoke_impl(self, event, _):
         return await gather(*[self._load_results(record) for record in event["Records"]])
 
     async def _load_results(self, record):

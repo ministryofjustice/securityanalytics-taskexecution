@@ -25,6 +25,6 @@ class ScanningLambda(LazyInitLambda):
         self.s3_client = aioboto3.resource("s3", region_name=self.region)
 
     @abstractmethod
-    async def invoke(self, event, context):
+    async def invoke_impl(self, event, context):
         pass
 
