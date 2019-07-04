@@ -49,7 +49,6 @@ class ResultsParser(ScanningLambda):
     async def _load_results(self, record):
         s3_object = objectify(record["s3"])
         key = unquote_plus(s3_object.object.key)
-        print(f"Banananan {self.s3_client}")
         obj = await self.s3_client.get_object(Bucket=self.results_bucket(), Key=key)
 
         # extract the message data from the S3 Metadata,
@@ -58,7 +57,9 @@ class ResultsParser(ScanningLambda):
         # extract the results from the tar file
         content = obj["Body"].read()
 
-        tar = tarfile.open(mode="r:gz", fileobj=io.BytesIO(content), format=tarfile.PAX_FORMAT)
+        content_bytes = io.BytesIO(content)
+        print(f"content {content_bytes}")
+        tar = tarfile.open(mode="r:gz", fileobj=content_bytes, format=tarfile.PAX_FORMAT)
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
         results_doc = tar.extractfile(result_file_name).read()
 
