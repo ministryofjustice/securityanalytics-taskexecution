@@ -40,7 +40,7 @@ class EcsScanner(BaseScanner):
         task_environment = await self.create_environment_from_request(scan_request_id, scan_request)
 
         ssm_params = self.event["ssm_params"]
-        private_subnet = "true" == self.get_ssm_params(self._private_subnets_param)
+        private_subnet = "true" == self.get_ssm_param(self._private_subnets_param)
         network_configuration = {
             "awsvpcConfiguration": {
                 "subnets": ssm_params[self._subnets_param].split(","),
