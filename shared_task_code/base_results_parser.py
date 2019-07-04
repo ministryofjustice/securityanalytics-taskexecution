@@ -14,7 +14,6 @@ from utils.scan_results import ResultsContext
 class ResultsParser(ScanningLambda):
     def __init__(self, ssm_params_to_load):
         task_name = os.environ["TASK_NAME"]
-        self.ecs_client = None
         self.sns_client = None
 
         # Add the SNS topic to the params to retrieve
@@ -25,7 +24,6 @@ class ResultsParser(ScanningLambda):
 
     def initialise(self):
         super().initialise()
-        self.ecs_client = aioboto3.client("ecs", region_name=self.region)
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 
     @abstractmethod
@@ -51,6 +49,7 @@ class ResultsParser(ScanningLambda):
     async def _load_results(self, record):
         s3_object = objectify(record["s3"])
         key = unquote_plus(s3_object.object.key)
+        print(f"Banananan {self.s3_client}")
         obj = await self.s3_client.get_object(Bucket=self.results_bucket(), Key=key)
 
         # extract the message data from the S3 Metadata,
