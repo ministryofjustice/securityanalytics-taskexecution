@@ -16,7 +16,7 @@ class LambdaScanner(ScanningLambda):
         scan_start_time = iso_date_string_from_timestamp(datetime.now())
         
         # call super
-        results, result_meta = await self._scan(scan_request_id, scan_request)
+        results, result_meta = await self.scan(scan_request_id, scan_request)
 
         scan_end_time = iso_date_string_from_timestamp(datetime.now())
 

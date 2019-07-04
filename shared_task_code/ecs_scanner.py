@@ -34,7 +34,7 @@ class EcsScanner(BaseScanner):
         pass
 
     async def scan(self, scan_request_id, scan_request):
-        task_environment = await self._create_environment_from_request(scan_request_id, scan_request)
+        task_environment = await self.create_environment_from_request(scan_request_id, scan_request)
 
         ssm_params = self.event["ssm_params"]
         private_subnet = "true" == self.get_ssm_params(self._private_subnets_param)

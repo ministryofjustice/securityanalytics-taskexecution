@@ -56,7 +56,7 @@ class ResultsParser(ScanningLambda):
         tar = tarfile.open(mode="r:gz", fileobj=io.BytesIO(content), format=tarfile.PAX_FORMAT)
         result_file_name = re.sub(r"\.tar.gz$", "", key.split("/", -1)[-1])
         results_doc = tar.extractfile(result_file_name).read()
-        await self._parse_results(results_doc, meta_data)
+        await self.parse_results(results_doc, meta_data)
 
     @staticmethod
     def _extract_meta_data(obj):

@@ -2,36 +2,38 @@ import os
 from utils.json_serialisation import dumps
 from lambda_templates.lazy_initialising_lambda import LazyInitLambda
 from abc import ABC, abstractmethod
+import aioboto3
 
 
-class FilteringAndTransformingSnsToSqsGlue(LazyInitLambda):
+class FilteringAndTransformingSnsToSnsGlue(ABC, LazyInitLambda):
     def __init__(self, ssm_params_to_load):
         glue_name = os.environ["GLUE_NAME"]
-        self._sqs_targets_param = f"/glue/{glue_name}/targets"
-        if self._sqs_targets_param not in ssm_params_to_load:
-            ssm_params_to_load.append(self._sqs_targets_param)
+        self._sns_target_topic = f"/glue/{glue_name}/sns_target"
+        if self._sns_target_topic not in ssm_params_to_load:
+            ssm_params_to_load.append(self._sns_target_topic)
         self.sqs_targets = None
+        self.sns_client = None
 
         LazyInitLambda.__init__(self, ssm_params_to_load)
 
-    def initialise(self):
+    async def initialise(self):
         await LazyInitLambda.initialise(self)
-        self.sqs_targets = list(self.get_ssm_param(self._sqs_targets_param))
+        self.sns_client = aioboto3.client("sns", region_name=self.region)
 
     async def forward_message(self, json_data, msg_attributes=None):
         print(json_data)
-        for sqs_target in self.sqs_targets:
-            return await self.sqs_client.send_message(
-                QueueUrl=sqs_target,
-                MessageBody=dumps(json_data),
-                MessageAttributes=msg_attributes
-            )
+        return await self.sns_client.send_message(
+            TopicArn=self.get_ssm_param(self._sns_target_topic),
+            Subject="ports-detected",
+            Message=dumps(json_data),
+            MessageAttributes=msg_attributes
+        )
 
     @abstractmethod
     async def handle_incoming_sns_event(self, sns_message):
         pass
 
-    def invoke(self, event, context):
+    def _invoke(self, event, context):
         for record in event["Records"]:
             print(record)
             await self.handle_incoming_sns_event(record["Sns"])
