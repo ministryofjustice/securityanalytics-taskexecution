@@ -14,37 +14,48 @@ class LambdaScanner(BaseScanner):
     async def process_event(self, scan_request_id, scan_request):
         await super().process_event(scan_request_id, scan_request)
         # Use this format to have uniformly named files in S3
-        scan_start_time = iso_date_string_from_timestamp(datetime.now())
-        
-        # call super
-        results, result_meta = await self.scan(scan_request_id, scan_request)
+        scan_start_time = iso_date_string_from_timestamp(datetime.now().timestamp())
 
-        scan_end_time = iso_date_string_from_timestamp(datetime.now())
+        # call super
+        results, extension, result_meta = await self.scan(scan_request_id, scan_request)
+        if results != None:
+            scan_end_time = iso_date_string_from_timestamp(datetime.now().timestamp())
+            await self.write_file(scan_request_id, scan_request, results, result_meta, scan_start_time, scan_end_time)
+
+    async def write_file(self, scan_request_id, scan_request, results, extension, result_meta, scan_start_time, scan_end_time):
 
         # Add in standard fields
         result_meta["scan_start_time"] = scan_start_time
         result_meta["scan_end_time"] = scan_end_time
         result_meta["TemporalKey"] = scan_end_time
+        result_meta["scan_id"] = scan_request_id
 
         # results file name
-        results_filename = f"{scan_request_id}-{scan_start_time}-{self.task_name}.json"
+        results_filename = f"{scan_request_id}-{scan_start_time}-{self.task_name}.{extension}"
 
         # create archive
         results_archive_bytes = io.BytesIO()
         with tarfile.open(mode="w:gz", fileobj=results_archive_bytes, format=tarfile.PAX_FORMAT) as tar:
-            tar.add(tarfile.TarInfo(results_filename), io.BytesIO(results))
+            t = tarfile.TarInfo(results_filename)
+            t.size = results.getbuffer().nbytes
+            tar.addfile(t, results)
         results_archive_bytes.seek(0)
-
         # do the upload
-        await self.s3_client.upload_file(
-            f"/tmp/{results_filename}.tar.gz",
-            self.results_bucket(),
+        print(result_meta)
+        for key in result_meta:
+            if result_meta[key] == None:
+                result_meta[key] = ""
+        await self.s3_client.upload_fileobj(
             results_archive_bytes,
-            MetaData=result_meta
+            self.results_bucket(),
+            f"{results_filename}.tar.gz",
+            ExtraArgs={"Metadata": result_meta}
         )
 
-    # Implementing this method implements a lambda scan, it should return a pair json objects, one to be serialised
-    # with timestamps as the data, and the other a dictionary used to setup meta-data
+    # Implementing this method implements a lambda scan, it should return a triple:
+    # - json object to be serialised with timestamps as the data
+    # - file extension for the results file
+    # - a dictionary used to setup meta-data
     @abstractmethod
     def scan(self, scan_request_id, scan_request):
         pass  # e.g. return ({"body":"text"},{"meta_key":"meta_value"})
