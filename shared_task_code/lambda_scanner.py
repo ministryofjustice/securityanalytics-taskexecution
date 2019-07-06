@@ -20,7 +20,7 @@ class LambdaScanner(BaseScanner):
         results, extension, result_meta = await self.scan(scan_request_id, scan_request)
         if results != None:
             scan_end_time = iso_date_string_from_timestamp(datetime.now().timestamp())
-            await self.write_file(scan_request_id, scan_request, results, result_meta, scan_start_time, scan_end_time)
+            await self.write_file(scan_request_id, scan_request, results, extension, result_meta, scan_start_time, scan_end_time)
 
     async def write_file(self, scan_request_id, scan_request, results, extension, result_meta, scan_start_time, scan_end_time):
 

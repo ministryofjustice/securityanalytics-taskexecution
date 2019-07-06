@@ -38,9 +38,12 @@ class EcsScanner(BaseScanner):
 
     async def scan(self, scan_request_id, scan_request):
         await super().scan(scan_request_id, scan_request)
-        print(f"Scanning {scan_request_id} - {scan_request}")
+        # print(f"Scanning {scan_request_id} - {scan_request}")
         task_environment = await self.create_environment_from_request(scan_request_id, scan_request)
-
+        # Since deciding to scan or not is part of the scanner, if False is returned from task_environment
+        # then don't schedule anything
+        if task_environment == False:
+            return
         private_subnet = "true" == self.get_ssm_param(self._private_subnets_param)
         network_configuration = {
             "awsvpcConfiguration": {
