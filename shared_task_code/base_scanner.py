@@ -13,6 +13,7 @@ class BaseScanner(ScanningLambda):
         pass
 
     async def invoke_impl(self, event, context):
+        print(event)
         await super().invoke_impl(event, context)
         await gather(*[
             self.process_event(record["messageId"], record["body"])

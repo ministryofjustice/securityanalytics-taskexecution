@@ -79,7 +79,16 @@ class DnsZoneIngestor:
         print(f"Ingested zone: {name}, {self.record_count[zone_id]} records")
 
     async def _ingest_page_of_records(self, zone_id, record_consumer, pagination_params):
-        record_page = await self.route53_client.list_resource_record_sets(HostedZoneId=zone_id, **pagination_params)
+        got_set = False
+        # We have no control over Route 53, so if we hit the global rate limit then wait 5 seconds and try again
+        while not got_set:
+            try:
+                record_page = await self.route53_client.list_resource_record_sets(HostedZoneId=zone_id, **pagination_params)
+                got_set = True
+            except:
+                print("throttled")
+                await sleep(5)
+
         record_sets = record_page["ResourceRecordSets"]
 
         # update records processed with length of record set
@@ -94,5 +103,5 @@ class DnsZoneIngestor:
         # Since route53 api is rate limited to 5 calls a second
         # we add another task to our gather operation so we are not done until it elapsed too
         # Have added a 30% error margin to ensure it will complete
-        await sleep(1.3 / 5.0)
+        await sleep(2.5 / 5.0)
         return record_page

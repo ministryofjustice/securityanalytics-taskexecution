@@ -3,6 +3,7 @@ from utils.json_serialisation import dumps
 from lambda_templates.lazy_initialising_lambda import LazyInitLambda
 from abc import abstractmethod
 import aioboto3
+from asyncio import gather
 
 
 class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
@@ -22,19 +23,31 @@ class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
 
     async def forward_message(self, json_data, msg_attributes=None):
         print(json_data)
-        return await self.sns_client.send_message(
+        sns_attributes = {}
+        for attr in msg_attributes:
+            if msg_attributes[attr] != None and msg_attributes[attr] != "":
+                sns_attributes[attr] = {"DataType": "String", "StringValue": msg_attributes[attr]}
+        print(sns_attributes)
+        return await self.sns_client.publish(
             TopicArn=self.get_ssm_param(self._sns_target_topic),
             Subject="ports-detected",
             Message=dumps(json_data),
-            MessageAttributes=msg_attributes
+            MessageAttributes=sns_attributes
         )
 
     @abstractmethod
     async def handle_incoming_sns_event(self, sns_message):
         pass
 
-    def invoke(self, event, context):
-        super().invoke(event, context)
-        for record in event["Records"]:
-            print(record)
-            await self.handle_incoming_sns_event(record["Sns"])
+    async def invoke_impl(self, event, context):
+        await super().invoke_impl(event, context)
+        await gather(*[
+            self.handle_incoming_sns_event(record["Sns"])
+            for record in event["Records"]
+        ])
+
+    # def invoke(self, event, context):
+    #     super().invoke(event, context)
+    #     for record in event["Records"]:
+    #         print(record)
+    #         await self.handle_incoming_sns_event(record["Sns"])
