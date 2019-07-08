@@ -87,7 +87,8 @@ class EcsScanner(BaseScanner):
         task_response = await self.ecs_client.run_task(**ecs_params)
         print(f"Submitted scanning task: {dumps(task_response)}")
 
-        failures = task_response["failures"]
-        if len(failures) != 0:
-            raise RuntimeError(
-                f"ECS task failed to start {dumps(failures)}")
+        if "failures" in task_response:
+            failures = task_response["failures"]
+            if len(failures) != 0:
+                raise RuntimeError(
+                    f"ECS task failed to start {dumps(failures)}")
