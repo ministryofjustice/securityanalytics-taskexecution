@@ -65,7 +65,7 @@ class ResultsParser(ScanningLambda):
 
     @staticmethod
     def _extract_meta_data(obj):
-        metadata = obj["Metadata"]
+        metadata = obj["Metadata"] if "Metadata" in obj else {}
         msgdata = {'records': []}
         for metakey in metadata:
             # strip out the prefix that AWS adds
