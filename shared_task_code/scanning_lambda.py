@@ -11,7 +11,7 @@ class ScanningLambda(LazyInitLambda):
         self.s3_client = None
 
         # Make sure we always request the results bucket param
-        self.results_bucket_param = f"/tasks/{self.task_name}/s3/results/id"
+        self.results_bucket_param = f"{self.ssm_stage_prefix}/tasks/{self.task_name}/s3/results/id"
         if self.results_bucket_param not in ssm_params_to_load:
             ssm_params_to_load.append(self.results_bucket_param)
 
@@ -19,7 +19,7 @@ class ScanningLambda(LazyInitLambda):
 
     # The scans can get access to the s3 bucket using this method
     def results_bucket(self):
-        return self.get_ssm_param(self.results_bucket_param, use_source_stage=False)
+        return self.get_ssm_param(self.results_bucket_param)
 
     def initialise(self):
         super().initialise()

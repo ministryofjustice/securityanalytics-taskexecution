@@ -17,7 +17,7 @@ class ResultsParser(ScanningLambda):
         self.sns_client = None
 
         # Add the SNS topic to the params to retrieve
-        self._sns_topic_param = f"/tasks/{task_name}/results/arn"
+        self._sns_topic_param = f"{self.ssm_stage_prefix}/tasks/{task_name}/results/arn"
         ssm_params_to_load.append(self._sns_topic_param)
 
         super().__init__(ssm_params_to_load)
@@ -32,7 +32,7 @@ class ResultsParser(ScanningLambda):
 
     def create_results_context(self, non_temporal_key, scan_id, start_time, end_time):
         return ResultsContext(
-            self.get_ssm_param(self._sns_topic_param, use_source_stage=False),
+            self.get_ssm_param(self._sns_topic_param),
             non_temporal_key,
             scan_id,
             start_time,

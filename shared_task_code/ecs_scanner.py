@@ -9,13 +9,13 @@ class EcsScanner(BaseScanner):
 
     def __init__(self, ssm_params_to_load):
         self.ecs_client = None
-
-        self._private_subnets_param = "/vpc/using_private_subnets"
-        self._subnets_param = "/vpc/subnets/instance"
-        self._cluster_param = "/ecs/cluster"
         task_name = os.environ["TASK_NAME"]
-        self._security_group_param = f"/tasks/{task_name}/security_group/id"
-        self._image_id_param = f"/tasks/{task_name}/image/id"
+
+        self._private_subnets_param = f"{self.ssm_source_stage_prefix}/vpc/using_private_subnets"
+        self._subnets_param = f"{self.ssm_source_stage_prefix}/vpc/subnets/instance"
+        self._cluster_param = f"{self.ssm_source_stage_prefix}/ecs/cluster"
+        self._security_group_param = f"{self.ssm_source_stage_prefix}/tasks/{task_name}/security_group/id"
+        self._image_id_param = f"{self.ssm_stage_prefix}/tasks/{task_name}/image/id"
 
         ssm_params_to_load += [
             self._private_subnets_param,
@@ -44,11 +44,11 @@ class EcsScanner(BaseScanner):
         # then don't schedule anything
         if task_environment == False:
             return
-        private_subnet = "true" == self.get_ssm_param(self._private_subnets_param, use_source_stage=True)
+        private_subnet = "true" == self.get_ssm_param(self._private_subnets_param)
         network_configuration = {
             "awsvpcConfiguration": {
-                "subnets": self.get_ssm_param(self._subnets_param, use_source_stage=True).split(","),
-                "securityGroups": [self.get_ssm_param(self._security_group_param, use_source_stage=True)],
+                "subnets": self.get_ssm_param(self._subnets_param).split(","),
+                "securityGroups": [self.get_ssm_param(self._security_group_param)],
                 "assignPublicIp": "DISABLED" if private_subnet else "ENABLED"
             }
         }
@@ -72,9 +72,9 @@ class EcsScanner(BaseScanner):
             }]
 
         ecs_params = {
-            "cluster": self.get_ssm_param(self._cluster_param, use_source_stage=True),
+            "cluster": self.get_ssm_param(self._cluster_param),
             "networkConfiguration": network_configuration,
-            "taskDefinition": self.get_ssm_param(self._image_id_param, use_source_stage=False),
+            "taskDefinition": self.get_ssm_param(self._image_id_param),
             "launchType": "FARGATE",
             "overrides": {
                 "containerOverrides": [{

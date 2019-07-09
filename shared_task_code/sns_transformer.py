@@ -9,7 +9,7 @@ from asyncio import gather
 class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
     def __init__(self, ssm_params_to_load):
         glue_name = os.environ["GLUE_NAME"]
-        self._sns_target_topic = f"/glue/{glue_name}/sns_target"
+        self._sns_target_topic = f"{self.ssm_stage_prefix}/glue/{glue_name}/sns_target"
         if self._sns_target_topic not in ssm_params_to_load:
             ssm_params_to_load.append(self._sns_target_topic)
         self.sqs_targets = None
@@ -29,7 +29,7 @@ class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
                 sns_attributes[attr] = {"DataType": "String", "StringValue": msg_attributes[attr]}
         print(sns_attributes)
         return await self.sns_client.publish(
-            TopicArn=self.get_ssm_param(self._sns_target_topic, use_source_stage=True),
+            TopicArn=self.get_ssm_param(self._sns_target_topic),
             Subject="ports-detected",
             Message=dumps(json_data),
             MessageAttributes=sns_attributes
