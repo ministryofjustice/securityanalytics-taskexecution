@@ -48,11 +48,12 @@ resource "aws_lambda_function" "scan_lambda" {
 
   environment {
     variables = {
-      REGION    = var.aws_region
-      STAGE     = terraform.workspace
-      APP_NAME  = var.app_name
-      TASK_NAME = var.task_name
-      USE_XRAY  = var.use_xray
+      REGION           = var.aws_region
+      STAGE            = terraform.workspace
+      SSM_SOURCE_STAGE = var.ssm_source_stage
+      APP_NAME         = var.app_name
+      TASK_NAME        = var.task_name
+      USE_XRAY         = var.use_xray
     }
   }
 
