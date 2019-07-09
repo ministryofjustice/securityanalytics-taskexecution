@@ -1,6 +1,4 @@
 from .base_scanner import BaseScanner
-from datetime import datetime
-from utils.time_utils import iso_date_string_from_timestamp
 import tarfile
 import io
 from abc import abstractmethod
@@ -10,27 +8,19 @@ class LambdaScanner(BaseScanner):
     def __init__(self):
         super().__init__()
 
-    # Overrides the base scan to also handle the results publication for you
+    @abstractmethod
     async def process_event(self, scan_request_id, scan_request):
-        await super().process_event(scan_request_id, scan_request)
-        # Use this format to have uniformly named files in S3
-        scan_start_time = iso_date_string_from_timestamp(datetime.now().timestamp())
+        pass
 
-        # call super
-        results, extension, result_meta = await self.scan(scan_request_id, scan_request)
-        if results:
-            scan_end_time = iso_date_string_from_timestamp(datetime.now().timestamp())
-            await self.write_file(
-                scan_request_id,
-                results,
-                extension,
-                result_meta,
-                scan_start_time,
-                scan_end_time
-            )
-
-    async def write_file(self, scan_request_id, results, extension, result_meta, scan_start_time, scan_end_time):
-
+    async def write_results_set(
+        self,
+        scan_request_id,
+        results,
+        extension,
+        result_meta,
+        scan_start_time,
+        scan_end_time
+    ):
         # Add in standard fields
         result_meta["scan_start_time"] = scan_start_time
         result_meta["scan_end_time"] = scan_end_time
@@ -58,11 +48,3 @@ class LambdaScanner(BaseScanner):
             f"{results_filename}.tar.gz",
             ExtraArgs={"Metadata": result_meta}
         )
-
-    # Implementing this method implements a lambda scan, it should return a triple:
-    # - json object to be serialised with timestamps as the data
-    # - file extension for the results file
-    # - a dictionary used to setup meta-data
-    @abstractmethod
-    def scan(self, scan_request_id, scan_request):
-        pass  # e.g. return ({"body":"text"},{"meta_key":"meta_value"})
