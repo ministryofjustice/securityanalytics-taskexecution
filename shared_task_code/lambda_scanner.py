@@ -9,7 +9,7 @@ class LambdaScanner(BaseScanner):
         super().__init__()
 
     @abstractmethod
-    async def process_event(self, scan_request_id, scan_request):
+    async def scan(self, scan_request_id, scan_request):
         pass
 
     async def write_results_set(
