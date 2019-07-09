@@ -61,6 +61,7 @@ data "aws_iam_policy_document" "results_parse_policy" {
 
     resources = [
       "arn:aws:ssm:${var.aws_region}:${var.account_id}:parameter/${var.app_name}/${terraform.workspace}/*",
+      "arn:aws:ssm:${var.aws_region}:${var.account_id}:parameter/${var.app_name}/${var.ssm_source_stage}/*",
     ]
   }
 
