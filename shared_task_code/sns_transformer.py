@@ -7,15 +7,17 @@ from asyncio import gather
 
 
 class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
-    def __init__(self, ssm_params_to_load):
+    def __init__(self):
+        super().__init__()
         glue_name = os.environ["GLUE_NAME"]
         self._sns_target_topic = f"{self.ssm_stage_prefix}/glue/{glue_name}/sns_target"
-        if self._sns_target_topic not in ssm_params_to_load:
-            ssm_params_to_load.append(self._sns_target_topic)
         self.sqs_targets = None
         self.sns_client = None
 
-        super().__init__(ssm_params_to_load)
+    def ssm_parameters_to_load(self):
+        return super().ssm_parameters_to_load() + [
+            self._sns_target_topic
+        ]
 
     def initialise(self):
         super().initialise()

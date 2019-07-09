@@ -7,8 +7,8 @@ from abc import abstractmethod
 
 
 class LambdaScanner(BaseScanner):
-    def __init__(self, ssm_params_to_load):
-        super().__init__(ssm_params_to_load)
+    def __init__(self):
+        super().__init__()
 
     # Overrides the base scan to also handle the results publication for you
     async def process_event(self, scan_request_id, scan_request):
