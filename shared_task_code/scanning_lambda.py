@@ -15,7 +15,7 @@ class ScanningLambda(LazyInitLambda):
         self.results_bucket_param = f"{self.ssm_stage_prefix}/tasks/{self.task_name}/s3/results/id"
 
     def ssm_parameters_to_load(self):
-        return super().ssm_parameters_to_load() + [
+        return [
             self.results_bucket_param
         ]
 

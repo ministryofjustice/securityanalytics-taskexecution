@@ -15,7 +15,7 @@ class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
         self.sns_client = None
 
     def ssm_parameters_to_load(self):
-        return super().ssm_parameters_to_load() + [
+        return [
             self._sns_target_topic
         ]
 
