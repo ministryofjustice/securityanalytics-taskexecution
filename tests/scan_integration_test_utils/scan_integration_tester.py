@@ -40,6 +40,8 @@ class ScanIntegrationTester(ABC):
         self.sqs_input_queue_url = params[self.sqs_input_queue]
         self.sns_output_notifier_arn = params[self.sns_output_notifier]
 
+        print(f"Testing scan from queue {self.sqs_input_queue_url} to topic {self.sns_output_notifier_arn}")
+
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
