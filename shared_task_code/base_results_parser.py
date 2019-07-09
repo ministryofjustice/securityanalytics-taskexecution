@@ -32,7 +32,7 @@ class ResultsParser(ScanningLambda):
 
     def create_results_context(self, non_temporal_key, scan_id, start_time, end_time):
         return ResultsContext(
-            self.get_ssm_param(self._sns_topic_param),
+            self.get_ssm_param(self._sns_topic_param, use_source_stage=False),
             non_temporal_key,
             scan_id,
             start_time,

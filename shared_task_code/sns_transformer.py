@@ -25,11 +25,11 @@ class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
         print(json_data)
         sns_attributes = {}
         for attr in msg_attributes:
-            if msg_attributes[attr] != None and msg_attributes[attr] != "":
+            if msg_attributes[attr] and msg_attributes[attr] != "":
                 sns_attributes[attr] = {"DataType": "String", "StringValue": msg_attributes[attr]}
         print(sns_attributes)
         return await self.sns_client.publish(
-            TopicArn=self.get_ssm_param(self._sns_target_topic),
+            TopicArn=self.get_ssm_param(self._sns_target_topic, use_source_stage=True),
             Subject="ports-detected",
             Message=dumps(json_data),
             MessageAttributes=sns_attributes
@@ -45,9 +45,3 @@ class FilteringAndTransformingSnsToSnsGlue(LazyInitLambda):
             self.handle_incoming_sns_event(record["Sns"])
             for record in event["Records"]
         ])
-
-    # def invoke(self, event, context):
-    #     super().invoke(event, context)
-    #     for record in event["Records"]:
-    #         print(record)
-    #         await self.handle_incoming_sns_event(record["Sns"])

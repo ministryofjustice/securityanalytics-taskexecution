@@ -44,11 +44,11 @@ class EcsScanner(BaseScanner):
         # then don't schedule anything
         if task_environment == False:
             return
-        private_subnet = "true" == self.get_ssm_param(self._private_subnets_param)
+        private_subnet = "true" == self.get_ssm_param(self._private_subnets_param, use_source_stage=True)
         network_configuration = {
             "awsvpcConfiguration": {
-                "subnets": self.get_ssm_param(self._subnets_param).split(","),
-                "securityGroups": [self.get_ssm_param(self._security_group_param)],
+                "subnets": self.get_ssm_param(self._subnets_param, use_source_stage=True).split(","),
+                "securityGroups": [self.get_ssm_param(self._security_group_param, use_source_stage=True)],
                 "assignPublicIp": "DISABLED" if private_subnet else "ENABLED"
             }
         }
@@ -72,9 +72,9 @@ class EcsScanner(BaseScanner):
             }]
 
         ecs_params = {
-            "cluster": self.get_ssm_param(self._cluster_param),
+            "cluster": self.get_ssm_param(self._cluster_param, use_source_stage=True),
             "networkConfiguration": network_configuration,
-            "taskDefinition": self.get_ssm_param(self._image_id_param),
+            "taskDefinition": self.get_ssm_param(self._image_id_param, use_source_stage=False),
             "launchType": "FARGATE",
             "overrides": {
                 "containerOverrides": [{

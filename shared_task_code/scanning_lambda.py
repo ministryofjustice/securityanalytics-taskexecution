@@ -19,7 +19,7 @@ class ScanningLambda(LazyInitLambda):
 
     # The scans can get access to the s3 bucket using this method
     def results_bucket(self):
-        return self.get_ssm_param(self.results_bucket_param)
+        return self.get_ssm_param(self.results_bucket_param, use_source_stage=False)
 
     def initialise(self):
         super().initialise()
