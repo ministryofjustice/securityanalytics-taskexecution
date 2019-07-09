@@ -2,29 +2,27 @@ import aioboto3
 from utils.json_serialisation import dumps
 from abc import abstractmethod
 from .base_scanner import BaseScanner
-import os
 
 
 class EcsScanner(BaseScanner):
-
-    def __init__(self, ssm_params_to_load):
+    def __init__(self):
+        super().__init__()
         self.ecs_client = None
 
-        self._private_subnets_param = "/vpc/using_private_subnets"
-        self._subnets_param = "/vpc/subnets/instance"
-        self._cluster_param = "/ecs/cluster"
-        task_name = os.environ["TASK_NAME"]
-        self._security_group_param = f"/tasks/{task_name}/security_group/id"
-        self._image_id_param = f"/tasks/{task_name}/image/id"
+        self._private_subnets_param = f"{self.ssm_source_stage_prefix}/vpc/using_private_subnets"
+        self._subnets_param = f"{self.ssm_source_stage_prefix}/vpc/subnets/instance"
+        self._cluster_param = f"{self.ssm_source_stage_prefix}/ecs/cluster"
+        self._security_group_param = f"{self.ssm_source_stage_prefix}/tasks/{self.task_name}/security_group/id"
+        self._image_id_param = f"{self.ssm_stage_prefix}/tasks/{self.task_name}/image/id"
 
-        ssm_params_to_load += [
+    def ssm_parameters_to_load(self):
+        return super().ssm_parameters_to_load() + [
             self._private_subnets_param,
             self._subnets_param,
             self._cluster_param,
             self._security_group_param,
             self._image_id_param
         ]
-        super().__init__(ssm_params_to_load)
 
     def initialise(self):
         super().initialise()

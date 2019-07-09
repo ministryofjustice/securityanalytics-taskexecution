@@ -6,21 +6,20 @@ import aioboto3
 import tarfile
 import re
 import io
-import os
 from asyncio import gather
 from utils.scan_results import ResultsContext
 
 
 class ResultsParser(ScanningLambda):
-    def __init__(self, ssm_params_to_load):
-        task_name = os.environ["TASK_NAME"]
+    def __init__(self):
+        super().__init__()
         self.sns_client = None
 
         # Add the SNS topic to the params to retrieve
-        self._sns_topic_param = f"/tasks/{task_name}/results/arn"
-        ssm_params_to_load.append(self._sns_topic_param)
+        self._sns_topic_param = f"{self.ssm_stage_prefix}/tasks/{self.task_name}/results/arn"
 
-        super().__init__(ssm_params_to_load)
+    def ssm_parameters_to_load(self):
+        return super().ssm_parameters_to_load() + [self._sns_topic_param]
 
     def initialise(self):
         super().initialise()
