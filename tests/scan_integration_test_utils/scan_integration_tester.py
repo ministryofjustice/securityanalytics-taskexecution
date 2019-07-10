@@ -8,6 +8,7 @@ from concurrent.futures import CancelledError
 
 class ScanIntegrationTester(ABC):
     def __init__(self, timeout_seconds=120):
+        self.ssm_params = None
         self.ssm_client = None
         self.sqs_client = None
         self.sns_client = None
@@ -18,10 +19,13 @@ class ScanIntegrationTester(ABC):
         self.stage = os.environ["STAGE"]
         self.app_name = os.environ["APP_NAME"]
         self.task_name = os.environ["TASK_NAME"]
-        self.ssm_prefix = f"/{self.app_name}/{self.stage}"
+        self.ssm_source_stage = \
+            os.environ["SSM_SOURCE_STAGE"] if "SSM_SOURCE_STAGE" in os.environ else self.stage
+        self.ssm_stage_prefix = f"/{self.app_name}/{self.stage}"
+        self.ssm_source_stage_prefix = f"/{self.app_name}/{self.ssm_source_stage}"
 
-        self.sqs_input_queue = f"{self.ssm_prefix}/tasks/{self.task_name}/task_queue/url"
-        self.sns_output_notifier = f"{self.ssm_prefix}/tasks/{self.task_name}/results/arn"
+        self.sqs_input_queue = f"{self.ssm_stage_prefix}/tasks/{self.task_name}/task_queue/url"
+        self.sns_output_notifier = f"{self.ssm_stage_prefix}/tasks/{self.task_name}/results/arn"
 
         self.timeout = timeout_seconds
         self.incomplete = True
@@ -33,9 +37,10 @@ class ScanIntegrationTester(ABC):
 
         params = await self.ssm_client.get_parameters(Names=[
             self.sqs_input_queue,
-            self.sns_output_notifier
+            self.sns_output_notifier,
+            *self.ssm_parameters_to_load()
         ])
-        params = {p["Name"]: p["Value"] for p in params["Parameters"]}
+        self.ssm_params = {p["Name"]: p["Value"] for p in params["Parameters"]}
 
         self.sqs_input_queue_url = params[self.sqs_input_queue]
         self.sns_output_notifier_arn = params[self.sns_output_notifier]
@@ -50,6 +55,12 @@ class ScanIntegrationTester(ABC):
             self.sns_client.close(),
             self.sqs_client.close()
         )
+
+    def ssm_parameters_to_load(self):
+        pass
+
+    def get_ssm_param(self, full_name):
+        return self.ssm_params[full_name]
 
     @abstractmethod
     async def send_request(self):
