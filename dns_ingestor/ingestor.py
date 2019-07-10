@@ -81,6 +81,8 @@ class DnsZoneIngestor:
     async def _ingest_page_of_records(self, zone_id, record_consumer, pagination_params):
         got_set = False
         # We have no control over Route 53, so if we hit the global rate limit then wait 5 seconds and try again
+        # boto has retry logic built in, but it doesn't seem to come.
+        # TODO remove this code when we have implemented https://dsdmoj.atlassian.net/browse/SA-123
         while not got_set:
             try:
                 record_page = await self.route53_client.list_resource_record_sets(HostedZoneId=zone_id, **pagination_params)

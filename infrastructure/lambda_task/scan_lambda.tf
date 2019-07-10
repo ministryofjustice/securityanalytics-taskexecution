@@ -37,6 +37,8 @@ resource "aws_lambda_function" "scan_lambda" {
   filename         = var.lambda_zip
   source_code_hash = var.lambda_hash
 
+  timeout = 60
+
   layers = [
     data.aws_ssm_parameter.utils_layer.value,
     data.aws_ssm_parameter.tasks_layer.value
