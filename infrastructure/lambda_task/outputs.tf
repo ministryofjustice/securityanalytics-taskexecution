@@ -42,3 +42,6 @@ output "results_dead_letter_queue" {
   value = module.results_parser_dead_letters.arn
 }
 
+output "results_notifier_arn" {
+  value = aws_sns_topic.task_results.arn
+}
