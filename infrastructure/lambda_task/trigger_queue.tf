@@ -33,6 +33,8 @@ resource "aws_sqs_queue_policy" "trigger_queue_policy" {
 resource "aws_sqs_queue" "trigger_queue" {
   name = "${terraform.workspace}-${var.app_name}-${var.task_name}-task-queue"
 
+  visibility_timeout_seconds = var.scan_timeout + 1
+
   # TODO set settings for kms master key
 
   redrive_policy = jsonencode({

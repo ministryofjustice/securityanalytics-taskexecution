@@ -72,3 +72,9 @@ variable "cpu" {
 variable "memory" {
   type = string
 }
+
+variable "scan_timeout" {
+  type = number
+  # Really should never need that long, but 3 seconds is too short now we have doc collections
+  default = 2 * 60
+}
