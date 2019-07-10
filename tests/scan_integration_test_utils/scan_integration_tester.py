@@ -36,8 +36,6 @@ class ScanIntegrationTester(ABC):
         self.sns_client = aioboto3.client("sns", region_name=self.region)
 
         params = await self.ssm_client.get_parameters(Names=[
-            self.sqs_input_queue,
-            self.sns_output_notifier,
             *self.ssm_parameters_to_load()
         ])
         self.ssm_params = {p["Name"]: p["Value"] for p in params["Parameters"]}
@@ -57,7 +55,10 @@ class ScanIntegrationTester(ABC):
         )
 
     def ssm_parameters_to_load(self):
-        pass
+        return [
+            self.sqs_input_queue,
+            self.sns_output_notifier
+        ]
 
     def get_ssm_param(self, full_name):
         return self.ssm_params[full_name]
