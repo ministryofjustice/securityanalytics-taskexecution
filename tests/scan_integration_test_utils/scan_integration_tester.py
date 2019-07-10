@@ -42,8 +42,8 @@ class ScanIntegrationTester(ABC):
         ])
         self.ssm_params = {p["Name"]: p["Value"] for p in params["Parameters"]}
 
-        self.sqs_input_queue_url = params[self.sqs_input_queue]
-        self.sns_output_notifier_arn = params[self.sns_output_notifier]
+        self.sqs_input_queue_url = self.ssm_params[self.sqs_input_queue]
+        self.sns_output_notifier_arn = self.ssm_params[self.sns_output_notifier]
 
         print(f"Testing scan from queue {self.sqs_input_queue_url} to topic {self.sns_output_notifier_arn}")
 
