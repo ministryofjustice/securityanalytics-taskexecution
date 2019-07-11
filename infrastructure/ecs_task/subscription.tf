@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "notify_topic_policy_2" {
 
     principals {
       type        = "AWS"
-      identifiers = ["*"]
+      identifiers = ["arn:aws:iam::${var.account_id}:root"]
     }
 
     resources = [
