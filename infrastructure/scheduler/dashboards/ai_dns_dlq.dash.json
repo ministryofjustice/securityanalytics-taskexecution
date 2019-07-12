@@ -1,0 +1,12 @@
+{
+    "attributes": {
+        "title": "${object_title}",
+        "description": "Actionable items: DNS changes and DLQs",
+        "panelsJSON": "[{\"panelIndex\":\"11\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"11\"},\"version\":\"6.3.1\",\"type\":\"visualization\",\"id\":\"${dead_letters}\",\"embeddableConfig\":{}},{\"panelIndex\":\"12\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"12\"},\"version\":\"6.3.1\",\"type\":\"visualization\",\"id\":\"${changed_hosts}\",\"embeddableConfig\":{}},{\"panelIndex\":\"13\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"13\"},\"version\":\"6.3.1\",\"type\":\"visualization\",\"id\":\"${changed_addresses}\",\"embeddableConfig\":{}}]",
+        "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+        }
+    }
+}
