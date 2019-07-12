@@ -16,6 +16,10 @@ class BaseScanner(ScanningLambda):
         print(event)
         await super().invoke_impl(event, context)
         await gather(*[
-            self.scan(record["messageId"], record["body"])
+            self._logging_scan(record["messageId"], record["body"])
             for record in event["Records"]
         ])
+
+    async def _logging_scan(self, scan_request_id, scan_request):
+        print(f"Scanning request {scan_request_id} {scan_request}")
+        return await self.scan(scan_request_id,scan_request)
