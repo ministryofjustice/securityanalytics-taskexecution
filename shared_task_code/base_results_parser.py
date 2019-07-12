@@ -48,7 +48,9 @@ class ResultsParser(ScanningLambda):
     async def _load_results(self, record):
         s3_object = objectify(record["s3"])
         key = unquote_plus(s3_object.object.key)
-        obj = await self.s3_client.get_object(Bucket=self.results_bucket(), Key=key)
+        bucket = self.results_bucket()
+        print(f"Reading new file: {(bucket, key)}")
+        obj = await self.s3_client.get_object(Bucket=bucket, Key=key)
 
         # extract the message data from the S3 Metadata,
         # and remove the suffix added to the keys by boto3
