@@ -1,6 +1,5 @@
 data "aws_iam_policy_document" "notify_topic_policy_2" {
   statement {
-    sid = var.lambda_hash
     actions = [
       "sqs:SendMessage",
     ]
@@ -8,17 +7,14 @@ data "aws_iam_policy_document" "notify_topic_policy_2" {
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-
-      values = [
-        data.aws_ssm_parameter.scan_initiation_topic.value,
-      ]
+      values   = ["arn:aws:sns:${var.aws_region}:${var.account_id}:*"]
     }
 
     effect = "Allow"
 
     principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.account_id}:root"]
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
     }
 
     resources = [
